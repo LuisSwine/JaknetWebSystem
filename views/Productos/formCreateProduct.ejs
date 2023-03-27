@@ -1,0 +1,101 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'Registrar Nuevo Producto'}) %> 
+<%- include('../partials/linksNav.ejs')%> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>Bienvenido <%= user.nombres%></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/adminproductos">Lista</a></li>
+                                <li class="breadcrumb-item active">Crear Producto</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>CREAR NUEVO PRODUCTO</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="basic-elements">
+                                <form action="/createProduct" method="post">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>SKU</label>
+                                                <input type="text" class="form-control" placeholder="SKU o Numero de Parte" id="sku" name="sku" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>CATEGORIA</label>
+                                                <select class="form-control" name="categoria" id="categoria">
+                                                    <% categorias.forEach((categoria)=>{ %>
+                                                    <option value="<%= categoria.folio %>"><%= categoria.nombre %></option>
+                                                    <% }) %> 
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>MARCA</label>
+                                                <select class="form-control" name="marca" id="marca">
+                                                    <% marcas.forEach((marca)=>{ %>
+                                                    <option value="<%= marca.folio %>"><%= marca.nombre %></option>
+                                                    <% }) %> 
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>PRECIO</label>
+                                                <input type="number" step="any" class="form-control" placeholder="$ PRECIO . 00" id="precio" name="precio" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary m-b-10">CREAR PRODUCTO</button>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>DESCRIPCION DEL PRODUCTO</label>
+                                                <textarea class="form-control" rows="3" placeholder="Descripcion del producto" required name="descripcion" id="descripcion"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>TIPO</label>
+                                                <select class="form-control" name="tipo" id="tipo">
+                                                    <% tipos.forEach((tipo)=>{ %>
+                                                    <option value="<%= tipo.folio %>"><%= tipo.nombre %></option>
+                                                    <% }) %> 
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>LINK DE COMPRA</label>
+                                                <input class="form-control" type="url" placeholder="Enlace de Compra" name="enlace" id="enlace" required>
+                                                <span class="help-block">
+                                                    <small>En caso de no contar con link de compra, colocar cualquier link de posible proveedor. Revise los proveedores <a href="/adminproveedores" target="_blank">aquí</a></small>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </section>
+            
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

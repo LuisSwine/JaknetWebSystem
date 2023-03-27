@@ -1,0 +1,78 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'Mover Inventario'}) %> 
+<%- include('../partials/linksNav.ejs')%> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>Bienvenido <%= user.nombres%></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/admininventario">Lista</a></li>
+                                <li class="breadcrumb-item active">Mover Inventario</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>MOVER INVENTARIO</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="basic-elements">
+                                <form action="/moverInventario" method="post">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>PRODUCTO</label>
+                                                <select class="form-control" name="producto" id="producto">
+                                                    <% productos.forEach((producto)=>{ %>
+                                                    <option value="<%= producto.folio %>"><%= producto.folio %> - <%= producto.descripcion %></option>
+                                                    <% }) %> 
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>UNIDADES</label>
+                                                <select class="form-control" name="unidades" id="unidades">
+                                                    <% unidades.forEach((unidad)=>{ %>
+                                                    <option value="<%= unidad.folio %>"><%= unidad.nombre %> (<%= unidad.abreviatura %>)</option>
+                                                    <% }) %> 
+                                                </select>
+                                            </div>
+                                            <input type="number" class="form-control" value="<%= user.folio %>" id="usuario" name="usuario" hidden>
+                                            <button type="submit" class="btn btn-primary m-b-10">MOVER INVENTARIO</button>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>CANTIDAD</label>
+                                                <input type="number" step="any" class="form-control" placeholder="Cantidad" id="cantidad" name="cantidad" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </section>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

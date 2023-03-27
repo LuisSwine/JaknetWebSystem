@@ -1,0 +1,462 @@
+<%- include('../../partials/head.ejs', {tituloPagina: 'COTIZACION'}) %> 
+<%- include('../../partials/linksNav.ejs') %> 
+<%- include('../../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>COTIZACION <%= cotizacion[0].folio %> de <%= cotizacion[0].proyecto %></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <% if(flag == 0){%>
+                                <li class="breadcrumb-item"><a href="/profileProyect?proyecto=<%= proyecto %>&flag=<%= flag %>">Proyecto</a></li>
+                                <%}else if(flag == 1){%>
+                                <li class="breadcrumb-item"><a href="/profileProyect?proyecto=<%= proyecto %>&cliente=<%= cliente %>&flag=<%= flag %>">Proyecto</a></li>
+                                <%}else if(flag == 2 || flag == 3){%>
+                                <li class="breadcrumb-item"><a href="/profileProyect?proyecto=<%= proyecto %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>">Proyecto</a></li>
+                                <%}else if(flag == 4){%>
+                                <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&flag=0">Ubicacion</a></li>
+                                <%}else if(flag == 5){%>
+                                <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=1">Ubicacion</a></li>
+                                <%}else if(flag == 6){%>
+                                <li class="breadcrumb-item"><a href="/perfilCliente?cliente=<%= cliente %>">Cliente</a></li>
+                                <%}else if(flag == 7){ %>
+                                <li class="breadcrumb-item"><a href="/profileProyect?proyecto=<%= proyecto %>&flag=4&permisos=<%= permisos %>">Mis Proyectos</a></li>
+                                <% } %>  
+                                <li class="breadcrumb-item active">Cotizacion</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib">
+                                    <i class="ti-money color-primary border-primary"></i>
+                                </div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">SUBTOTAL (SOLO PRODUCTOS)</div>
+                                    <div class="stat-digit">$<%= subtotal.toFixed(2) %> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib">
+                                    <i class="ti-money color-success border-success"></i>
+                                </div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">TOTAL</div>
+                                    <div class="stat-digit">$<%= total.toFixed(2) %> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="card p-0">
+                            <div class="stat-widget-three">
+                                <div class="stat-icon bg-primary">
+                                    <i class="ti-money"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-digit">$<%= subtotal_productos.toFixed(2) %></div>
+                                    <div class="stat-text">Subtotal Productos</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card p-0">
+                            <div class="stat-widget-three">
+                                <div class="stat-icon bg-primary">
+                                    <i class="ti-money"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-digit">$<%= subtotal_servicios.toFixed(2) %></div>
+                                    <div class="stat-text">Subtotal Servicios</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card p-0">
+                            <div class="stat-widget-three">
+                                <div class="stat-icon bg-primary">
+                                    <i class="ti-money"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-digit">$<%= costoPersonal.toFixed(2) %></div>
+                                    <div class="stat-text">Costo de Personal</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="card" <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %> onclick="defineTasa('<%= cotizacion[0].folio%>', '<%= proyecto %>', '<%= cliente %>', '<%= ubicacion %>', '<%= flag %>', '<%= permisos %>')" <% } %>>
+                            <div class="stat-widget-four">
+                                <div class="stat-icon">
+                                    <i class="ti-stats-up"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="text-left dib">
+                                        <div class="stat-heading">Tasa de Rendimiento</div>
+                                        <div class="stat-text"><%= cotizacion[0].rendimiento %>%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card" <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %> onclick="defineTecnico('<%= cotizacion[0].folio%>', '<%= proyecto %>', '<%= cliente %>', '<%= ubicacion %>', '<%= flag %>', '<%= permisos %>')" <% } %>>
+                            <div class="stat-widget-four">
+                                <div class="stat-icon">
+                                    <i class="ti-hand-open"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="text-left dib">
+                                        <div class="stat-heading">Costo Tecnico</div>
+                                        <div class="stat-text">$<%= cotizacion[0].costo_tecnico %></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card" <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %> onclick="defineSupervisor('<%= cotizacion[0].folio%>', '<%= proyecto %>', '<%= cliente %>', '<%= ubicacion %>', '<%= flag %>', '<%= permisos %>')" <% } %>>
+                            <div class="stat-widget-four">
+                                <div class="stat-icon">
+                                    <i class="ti-hand-open"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="text-left dib">
+                                        <div class="stat-heading">Costo Supervisor</div>
+                                        <div class="stat-text">$<%= cotizacion[0].costo_supervisor %></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card" <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %> onclick="defineIntereses('<%= cotizacion[0].folio%>', '<%= proyecto %>', '<%= cliente %>', '<%= ubicacion %>', '<%= flag %>', '<%= permisos %>')" <% } %>>
+                            <div class="stat-widget-four">
+                                <div class="stat-icon">
+                                    <i class="ti-stamp"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="text-left dib">
+                                        <div class="stat-heading">Intereses</div>
+                                        <div class="stat-text"><%= cotizacion[0].intereses %>%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body p-b-0">
+                                <h4 class="card-title">Elementos de la cotizacion <%= cotizacion[0].folio %> </h4>
+                            <!-- Nav tabs -->
+                            <ul class="nav nav-tabs customtab" role="tablist">
+                                <% if(clienteSelected[0].folio_servicio == 1 ||clienteSelected[0].folio_servicio == 3){%>
+                                    <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#productos" role="tab"><span class="hidden-sm-up"><i class="ti-stats-up"></i></span> <span class="hidden-xs-down">Productos</span></a> </li>
+                                <%}%> 
+                                <% if(clienteSelected[0].folio_servicio == 2 ||clienteSelected[0].folio_servicio == 3){%>
+                                    <li class="nav-item"> <a class="nav-link <% if(clienteSelected[0].folio_servicio == 2){%>active<%}%>" data-toggle="tab" href="#servicios" role="tab"><span class="hidden-sm-up"><i class="ti-id-badge"></i></span> <span class="hidden-xs-down">Servicios</span></a> </li>
+                                <%}%>
+                            </ul>
+                            <!-- Tab panes -->
+                            <div class="tab-content">
+                                <% if(clienteSelected[0].folio_servicio == 1 ||clienteSelected[0].folio_servicio == 3){%>
+                                <div class="tab-pane active" id="productos" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <div class="card-title">
+                                                <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %>
+                                                <a href="/formaddproduct?cotizacion=<%= cotizacion[0].folio %>&proyecto=<%= proyecto %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Añadir Producto</a>     
+                                                <% } %> 
+                                            </div>
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>SKU</th>
+                                                                <th>Costo Unitario</th>
+                                                                <th>Cantidad</th>
+                                                                <th>Costo Base</th>
+                                                                <th>Tecnicos</th>
+                                                                <th>Supervisores</th>
+                                                                <th>Dias</th>
+                                                                <th>Costo de Personal</th>
+                                                                <th>Subtotal</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% productos.forEach((producto)=>{ %>
+                                                            <tr>
+                                                                <td><%= producto.folio %></td>
+                                                                <td onclick="showDesc('<%= producto.producto %>')"><%= producto.sku %></td>
+                                                                <td>$<%= producto.costo_unitario %></td>
+                                                                <td><%= producto.cantidad %></td>
+                                                                <td>$<%= producto.costo_base.toFixed(2) %></td>
+                                                                <td><%= producto.tecnicos %></td>
+                                                                <td><%= producto.supervisores %></td>
+                                                                <td><%= producto.dias %></td>
+                                                                <td>$<%= producto.subtotal_tecnicos + producto.subtotal_supervisores %></td>
+                                                                <td>$<%= (producto.subtotal_tecnicos + producto.subtotal_supervisores + producto.costo_base).toFixed(2) %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <button class="btn btn-info btn-sm" onclick="showDesc('<%= producto.producto %>')" title="Descripcion de Producto"><i class="ti-info"></i></button>
+                                                                            <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %>
+                                                                            <a class="btn btn-primary btn-sm" href="/editarProductoCotizacion?producto=<%= producto.folio %>&cotizacion=<%= cotizacion[0].folio %>&proyecto=<%= proyecto %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>&permisos=<%= permisos %>"><i class="ti-pencil"></i></a>
+                                                                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteProduct('<%= cotizacion[0].folio %>','<%= producto.folio %>', '<%= proyecto %>', '<%= cliente %>', '<%= ubicacion %>', '<%= flag %>', '<%= permisos %>')"><i class="ti-trash"></i></button>
+                                                                            <% } %> 
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <% }) %> 
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>SKU</th>
+                                                                <th>Costo Unitario</th>
+                                                                <th>Cantidad</th>
+                                                                <th>Costo Base</th>
+                                                                <th>Tecnicos</th>
+                                                                <th>Supervisores</th>
+                                                                <th>Dias</th>
+                                                                <th>Costo de Personal</th>
+                                                                <th>Subtotal</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <%}%> 
+                                <% if(clienteSelected[0].folio_servicio == 2 ||clienteSelected[0].folio_servicio == 3){%>
+                                <div class="tab-pane <% if(clienteSelected[0].folio_servicio == 2){%>active<%}else{%>p-20<%}%>" id="servicios" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <div class="card-title">
+                                                <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %>
+                                                <a href="/formaddservice?cotizacion=<%= cotizacion[0].folio %>&proyecto=<%= proyecto %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Añadir Servicio</a>     
+                                                <% } %> 
+                                            </div>
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select2" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Servicio</th>
+                                                                <th>Costo Servicio</th>
+                                                                <th>Tecnicos</th>
+                                                                <th>Supervisores</th>
+                                                                <th>Dias</th>
+                                                                <th>Costo de Personal</th>
+                                                                <th>Subtotal</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% servicios.forEach((servicio)=>{ %>
+                                                            <tr>
+                                                                <td><%= servicio.folio %></td>
+                                                                <td onclick="showDesc('<%= servicio.servicio %>')"><%= servicio.folio_servicio %></td>
+                                                                <td>$<%= servicio.costo_servicio.toFixed(2) %></td>
+                                                                <td><%= servicio.tecnicos %></td>
+                                                                <td><%= servicio.supervisores %></td>
+                                                                <td><%= servicio.dias %></td>
+                                                                <td>$<%= servicio.subtotal_tecnicos + servicio.subtotal_supervisores %></td>
+                                                                <td>$<%= (servicio.subtotal_tecnicos + servicio.subtotal_supervisores + servicio.costo_servicio).toFixed(2) %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <button class="btn btn-info btn-sm" onclick="showDesc('<%= servicio.servicio %>')" title="Descripcion del Servicio"><i class="ti-info"></i></button>
+                                                                            <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %>
+                                                                            <a class="btn btn-primary btn-sm" href="/editarServicioCotizacion?servicio=<%= servicio.folio %>&cotizacion=<%= cotizacion[0].folio %>&proyecto=<%= proyecto %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>&permisos=<%= permisos %>"><i class="ti-pencil"></i></a>
+                                                                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteService('<%= cotizacion[0].folio %>','<%= servicio.folio %>', '<%= proyecto %>', '<%= cliente %>', '<%= ubicacion %>', '<%= flag %>', '<%= permisos %>')"><i class="ti-trash"></i></button>
+                                                                            <% } %> 
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <% }) %> 
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Servicio</th>
+                                                                <th>Costo Servicio</th>
+                                                                <th>Tecnicos</th>
+                                                                <th>Supervisores</th>
+                                                                <th>Dias</th>
+                                                                <th>Costo de Personal</th>
+                                                                <th>Subtotal</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <%}%>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function showDesc(descripcion){
+        Swal.fire({
+            icon: 'info',
+            title: 'Descripcion',
+            text: `${descripcion}`,
+        })
+    }
+    
+    function confirmDeleteProduct(cotizacion, folio, proyecto, cliente, ubicacion, flag, permisos){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará el producto ${folio} de la cotizacion ${cotizacion} (recuerda que puedes modificar el registro)`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteProductCot?cotizacion=${cotizacion}&folio=${folio}&proyecto=${proyecto}&cliente=${cliente}&ubicacion=${ubicacion}&flag=${flag}&permisos=${permisos}`
+                window.location = ruta
+            }
+        })
+    }
+    function confirmDeleteService(cotizacion, folio, proyecto, cliente, ubicacion, flag, permisos){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará el servicio ${folio} de la cotizacion ${cotizacion} (recuerda que puedes modificar el registro)`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteServiceCot?cotizacion=${cotizacion}&folio=${folio}&proyecto=${proyecto}&cliente=${cliente}&ubicacion=${ubicacion}&flag=${flag}&permisos=${permisos}`
+                window.location = ruta
+            }
+        })
+    }
+    
+    function defineTasa(folio, proyecto, cliente, ubicacion, flag, permisos){
+        Swal.fire({
+            title: 'DEFINIR PORCENTAJE DE RENDIMIENTO',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'Establecer porcentaje (este porcentaje no se mostrará al cliente al enviar la cotizacion)',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/definirTasa?cotizacion=${folio}&tasa=${value}&proyecto=${proyecto}&cliente=${cliente}&ubicacion=${ubicacion}&flag=${flag}&permisos=${permisos}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+    function defineTecnico(folio, proyecto, cliente, ubicacion, flag, permisos){
+        Swal.fire({
+            title: 'DEFINIR COSTO POR DIA PARA TECNICO',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'Establecer costo (este costo no se mostrará al cliente al enviar la cotizacion)',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/definirTecnico?cotizacion=${folio}&costo=${value}&proyecto=${proyecto}&cliente=${cliente}&ubicacion=${ubicacion}&flag=${flag}&permisos=${permisos}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+    function defineSupervisor(folio, proyecto, cliente, ubicacion, flag, permisos){
+        Swal.fire({
+            title: 'DEFINIR COSTO POR DIA PARA SUPERVISOR',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'Establecer costo (este costo no se mostrará al cliente al enviar la cotizacion)',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/definirSupervisor?cotizacion=${folio}&costo=${value}&proyecto=${proyecto}&cliente=${cliente}&ubicacion=${ubicacion}&flag=${flag}&permisos=${permisos}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+    function defineIntereses(folio, proyecto, cliente, ubicacion, flag, permisos){
+        Swal.fire({
+            title: 'DEFINIR PORCENTAJE DE INTERESES',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'Establecer porcentaje (este porcentaje debe considerar IVA y de más intereses o impuestos a aplicar)',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/definirIntereses?cotizacion=${folio}&valor=${value}&proyecto=${proyecto}&cliente=${cliente}&ubicacion=${ubicacion}&flag=${flag}&permisos=${permisos}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+</script>
+
+<%- include('../../partials/scriptsNav.ejs') %> 
+<%- include('../../partials/dataTableJS.ejs') %> 
+<%- include('../../partials/footer.ejs') %> 

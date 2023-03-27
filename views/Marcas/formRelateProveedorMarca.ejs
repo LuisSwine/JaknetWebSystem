@@ -1,0 +1,66 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'RELACION MARCA - PROVEEDOR'}) %> 
+<%- include('../partials/linksNav.ejs')%> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>Bienvenido <%= user.nombres%></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/perfilMarca?marca=<%= marca %>">Marca</a></li>
+                                <li class="breadcrumb-item active">Actual</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>SELECCIONE UN PROVEEDOR PARA AÑADIRLO A LA MARCA</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="basic-elements">
+                                <form action="/relacionarProveedorMarca" method="post">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="form-group">
+                                                <label>PROVEEDOR</label>
+                                                <select class="form-control" name="proveedor" id="proveedor">
+                                                    <option selected disabled>--Seleccione--</option>
+                                                    <% proveedores.forEach((proveedor)=>{ %>
+                                                    <option value="<%= proveedor.folio %>"><%= proveedor.nombre %></option>
+                                                    <% }) %> 
+                                                </select>
+                                            </div>
+                                            <input type="number" class="form-control" value="<%= marca %>" id="marca" name="marca" hidden>
+                                            <button type="submit" class="btn btn-primary m-b-10">ASIGNAR PROVEEDOR A LA MARCA</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </section>
+            
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

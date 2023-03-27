@@ -1,0 +1,178 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'Mis Tareas'}) %> 
+<%- include('../partials/linksNav.ejs') %> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h4>LISTA DE MIS TAREAS Y PENDIENTES</h4>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
+                                <li class="breadcrumb-item active">Mis Tareas</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-title">
+                                <h4>Mis Tareas</h4>     
+                            </div>
+                            <div class="bootstrap-data-table-panel">
+                                <div class="table-responsive">
+                                    <table id="row-select" class="display table table-borderd table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Acciones</th>
+                                                <th>Estatus</th>
+                                                <th>Fecha</th>
+                                                <th>Descripcion</th>
+                                                <th>Etapa</th>
+                                                <th>Proyecto</th>
+                                                <th>Ubicacion</th>
+                                                <th>Cliente</th>
+                                                <th>Tipo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% tareas.forEach((tarea)=>{ %>
+                                            <tr>
+                                                <% 
+                                                let bandage = ''
+                                                switch(parseInt(tarea.folio_estatus)){
+                                                    case 1: bandage = 'primary'; break;
+                                                    case 2: bandage = 'success'; break;
+                                                    case 3: bandage = 'warning'; break;
+                                                    case 4: bandage = 'info'; break;
+                                                    case 5: bandage = 'dark'; break;
+                                                    case 6: bandage = 'danger'; break;
+                                                    case 7: bandage = 'default'; break;
+                                                } 
+                                                %>
+                                                <td>
+                                                    <div class="button-list">
+                                                        <div class="btn-group btn-group-justified">
+                                                            <%if(tarea.folio_tipo == 1){%>
+                                                            <button class="btn btn-success btn-sm" onclick="subirReporte('<%= tarea.folio_tarea %>', '<%= user.folio %>')" title="Subir reporte"><i class="ti-files"></i></button>
+                                                            <%}else if(tarea.folio_tipo == 2){%>
+                                                            <button class="btn btn-success btn-sm" onclick="marcarEntrega('<%= tarea.folio_tarea %>', '<%= user.folio %>')" title="Marcar como completada"><i class="ti-check"></i></button>
+                                                            <%}%>
+                                                            <% if(tarea.folio_estatus == 2 && tarea.folio_tipo != 2){ %>
+                                                            <button class="btn btn-primary btn-sm" onclick="verReporte('<%= tarea.folio_tarea %>', '<%= encodeURIComponent(JSON.stringify(reportes)) %>')" title="Ver reporte"><i class="ti-eye"></i></button>
+                                                            <%}%> 
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td><span class="badge badge-<%= bandage %>"><%= tarea.estatus %></span></td>
+                                                <td><%= tarea.fecha.toLocaleDateString('en-GB') %></td>
+                                                <td><%= tarea.descripcion %></td>
+                                                <td><%= tarea.etapa %></td>
+                                                <td><%= tarea.proyecto %></td>
+                                                <td><%= tarea.ubicacion %></td>
+                                                <td><%= tarea.cliente %></td>
+                                                <td><%= tarea.tipo %></td>
+                                            </tr>
+                                            <% }) %>    
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th>Acciones</th>
+                                                <th>Estatus</th>
+                                                <th>Fecha</th>
+                                                <th>Descripcion</th>
+                                                <th>Etapa</th>
+                                                <th>Proyecto</th>
+                                                <th>Ubicacion</th>
+                                                <th>Cliente</th>
+                                                <th>Tipo</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmDelete(folio){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará el cliente ${folio}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteClient/${folio}`
+                window.location = ruta
+            }
+        })
+    }
+    function subirReporte(tarea, usuario){
+        Swal.fire({
+            input: 'url',
+            inputLabel: 'Ingrese la URL con el reporte',
+            inputPlaceHolder: 'Ingrese una url valida',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    let ruta = `/subirReporteTarea?tarea=${tarea}&usuario=${usuario}&url=${value}&flag=1`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+    function marcarEntrega(tarea, usuario){
+        Swal.fire({
+            title: '¿SEGURO?',
+            text: `Se marcará como completada la tarea`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Entregar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/entregarTarea?tarea=${tarea}&usuario=${usuario}&flag=1`
+                window.location = ruta
+            }
+        })
+    }
+    function verReporte(tarea, objeto){
+        let reportes = JSON.parse(decodeURIComponent(objeto))
+
+        reportes.forEach((reporte)=>{
+            if(reporte.tarea == tarea){
+                window.open(reporte.enlace, '_blank')
+            }
+        })
+    }
+</script>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/dataTableJS.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

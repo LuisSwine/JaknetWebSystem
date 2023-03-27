@@ -1,0 +1,410 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'PERFIL DE PROYECTO'}) %> 
+<%- include('../partials/linksNav.ejs') %> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1><%= proyecto[0].nombre %>  <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %><i onclick="cambiarNombre('<%= proyecto[0].nombre %>','<%= proyecto[0].folio %>', '<%= ubicacion %>','<%= flag %>','<%= cliente %>')" style="cursor: pointer" class="ti-pencil"></i><% } %> </h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <% if(flag == 1){%>
+                                    <li class="breadcrumb-item"><a href="/perfilCliente?cliente=<%= cliente %>">Cliente</a></li>
+                                <%}else if(flag == 2){%>
+                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=1">Ubicacion</a></li>
+                                <%}else if(flag == 3){%>
+                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&flag=0">Ubicacion</a></li>
+                                <%}else if(flag == 0){%>
+                                    <li class="breadcrumb-item"><a href="/adminproyectos">Proyectos</a></li>
+                                <%}else if(flag == 4){%>
+                                    <li class="breadcrumb-item"><a href="/misProyectos?folio=<%= user.folio %>">Proyectos</a></li>
+                                <%} %>
+                                <li class="breadcrumb-item active">Perfil de Proyecto</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-user color-success border-success"></i>
+                                </div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Cliente</div>
+                                    <div class="stat-digit"><%= proyecto[0].cliente %> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-location-pin color-primary border-primary"></i>
+                                </div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Ubicacion</div>
+                                    <div class="stat-digit"><%= proyecto[0].ubicacion %> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-clipboard color-danger border-danger"></i>
+                                </div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Estatus</div>
+                                    <div class="stat-digit"><%= proyecto[0].estatus %> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body p-b-0">
+                                <h4 class="card-title">Configuracion del proyecto <%= proyecto[0].nombre %> </h4>
+                            <!-- Nav tabs -->
+                            <ul class="nav nav-tabs customtab" role="tablist">
+                                <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#etapas" role="tab"><span class="hidden-sm-up"><i class="ti-stats-up"></i></span> <span class="hidden-xs-down">Etapas</span></a></li>
+                                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#roles" role="tab"><span class="hidden-sm-up"><i class="ti-id-badge"></i></span> <span class="hidden-xs-down">Roles</span></a> </li>
+                                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#contacts" role="tab"><span class="hidden-sm-up"><i class="ti-mobile"></i></span><span class="hidden-xs-down">Contactos</span></a></li>
+                                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#cotizaciones" role="tab"><span class="hidden-sm-up"><i class="ti-clipboard"></i></span> <span class="hidden-xs-down">Cotizaciones</span></a></li>
+                            </ul>
+                            <!-- Tab panes -->
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="etapas" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <div class="card-title">
+                                                <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %>
+                                                <a href="/formaddetapa?proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Añadir Etapa</a>     
+                                                <% } %> 
+                                            </div>
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Area</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% etapas.forEach((etapa)=>{ %>
+                                                            <tr>
+                                                                <td><%= etapa.folio %></td>
+                                                                <td><%= etapa.nombre %></td>
+                                                                <td><%= etapa.area %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <% if(user.tipo_usuario != 2 || permisos != 3){ %>  
+                                                                            <a class="btn btn-pink btn-sm" href="/tareasetapa?etapa=<%= etapa.folio %>&proyecto=<%= proyecto[0].folio %>&cliente=<%= proyecto[0].folio_cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>&permisos=<%= permisos %>" title="TAREAS"><i class="ti-view-list-alt"></i></a>
+                                                                            <% } %> 
+                                                                            <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %>    
+                                                                            <a class="btn btn-primary btn-sm" href="/editarEtapa?etapa=<%= etapa.folio %>&proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>&permisos=<%= permisos %>"><i class="ti-pencil"></i></a>
+                                                                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteEtapa('<%= etapa.folio %>','<%= proyecto[0].folio %>', '<%= ubicacion %>','<%= cliente %>', '<%= flag %>', '<%= permisos %>')"><i class="ti-trash"></i></button>
+                                                                            <% } %> 
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <% }) %>  
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Area</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane p-20" id="roles" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <div class="card-title">
+                                                <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %>
+                                                <a href="/formasignroles?proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Asignar Roles</a>     
+                                                <% } %> 
+                                            </div>
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select2" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Telefono</th>
+                                                                <th>Email</th>
+                                                                <th>Rol</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% roles.forEach((rol)=>{ %>
+                                                            <tr>
+                                                                <td><%= rol.folio %></td>
+                                                                <td><%= rol.nombres %> <%= rol.apellidos %></td>
+                                                                <td><%= rol.telefono %></td>
+                                                                <td><%= rol.email %></td>
+                                                                <td><%= rol.rol %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <button class="btn btn-info btn-sm" onclick="showDesc('<%= rol.descripcion %>')" title="INFORMACION DE ROL"><i class="ti-info"></i></button>
+                                                                            <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %>
+                                                                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteRol('<%= rol.folio%>', '<%= rol.folio_usuario %>','<%= proyecto[0].folio %>', '<%= ubicacion %>','<%= cliente %>', '<%= flag %>','<%= permisos %>')"><i class="ti-trash"></i></button>
+                                                                            <% } %> 
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <% }) %>  
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Telefono</th>
+                                                                <th>Email</th>
+                                                                <th>Rol</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane p-20" id="contacts" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <div class="card-title">
+                                                <h4>Se muestran los contactos de la planta o ubicacion</h4>    
+                                            </div>
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select3" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Email</th>
+                                                                <th>Telefono</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% contactos.forEach((contacto)=>{ %>
+                                                            <tr>
+                                                                <td><%= contacto.folio %></td>
+                                                                <td><%= contacto.contacto%></td>
+                                                                <td><%= contacto.email %></td>
+                                                                <td><%= contacto.telefono %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <button class="btn btn-info btn-sm" onclick="showDesc('<%= contacto.descripcion %>')" title="INFORMACION"><i class="ti-info"></i></button>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr> 
+                                                            <% }) %> 
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Email</th>
+                                                                <th>Telefono</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane p-20" id="cotizaciones" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <div class="card-title">
+                                                <% 
+                                                    let newFlag = flag;
+                                                    if(flag == 4){ newFlag = 7} 
+                                                %> 
+                                                <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %>
+                                                <a href="/createcotizacionProyecto?proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= proyecto[0].folio_cliente %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear Cotizacion</a>     
+                                                <% } %> 
+                                            </div>
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select4" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Rendimiento</th>
+                                                                <th>Costo Tecnico</th>
+                                                                <th>Costo Supervisor</th>
+                                                                <th>Intereses</th>
+                                                                <th>Contacto</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% cotizaciones.forEach((cotizacion)=>{ %>
+                                                            <tr>
+                                                                <td><%= cotizacion.folio %></td>
+                                                                <td><%= cotizacion.rendimiento %></td>
+                                                                <td>$<%= cotizacion.costo_tecnico %></td>
+                                                                <td>$<%= cotizacion.costo_supervisor %></td>
+                                                                <td><%= cotizacion.intereses %></td>
+                                                                <td><%= cotizacion.contacto %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <a class="btn btn-info btn-sm" href="/cotizacionMain?cotizacion=<%= cotizacion.folio %>&proyecto=<%= proyecto[0].folio %>&cliente=<%= proyecto[0].folio_cliente %>&ubicacion=<%= ubicacion %>&flag=<%= newFlag %>&permisos=<%= permisos %>" title="INFORMACION"><i class="ti-settings"></i></a>
+                                                                            <a href="/cotizacionPDF?cotizacion=<%= cotizacion.folio %>" class="btn btn-danger btn-sm" target="_blank" title="Configurar"><i class="ti-file"></i></a>
+                                                                            <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %>
+                                                                            <button class="btn btn-warning btn-sm" onclick="confirmDeleteCoti('<%= proyecto[0].folio %>','<%= cotizacion.folio %>', '<%= ubicacion %>','<%= cliente %>', '<%= flag %>', '<%= permisos %>')" title="ELIMINAR COTIZACION"><i class="ti-trash"></i></button>
+                                                                            <% } %> 
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr> 
+                                                            <% }) %> 
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Rendimiento</th>
+                                                                <th>Costo Tecnico</th>
+                                                                <th>Costo Supervisor</th>
+                                                                <th>Intereses</th>
+                                                                <th>Contacto</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function showDesc(descripcion){
+        Swal.fire({
+            icon: 'info',
+            title: 'Descripcion',
+            text: `${descripcion}`,
+        })
+    }
+    function confirmDeleteEtapa(folio, proyecto, ubicacion, cliente, flag, permisos){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará la etapa ${folio} (si la etapa tiene tareas creadas no se podrá eliminar, primero elimine las tareas)`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteEtapa?etapa=${folio}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}&permisos=${permisos}`
+                window.location = ruta
+            }
+        })
+    }
+    function confirmDeleteRol(folio, usuario, proyecto, ubicacion, cliente, flag, permisos){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará el rol ${folio}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteRol?rol=${folio}&usuario=${usuario}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}&permisos=${permisos}`
+                window.location = ruta
+            }
+        })
+    }
+    function confirmDeleteCoti(proyecto, folio, ubicacion, cliente, flag, permisos){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará la cotizacion ${folio} (la cotizacion debe estar vacia para ser eliminada, es decir, sin productos ni servicios)`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteCotiProy?folio=${folio}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}&permisos=${permisos}`
+                window.location = ruta
+            }
+        })
+    }
+    function cambiarNombre(actual, folio, ubicacion, flag, cliente){
+        Swal.fire({
+            title: 'CAMBIAR NOMBRE DEL PROYECTO',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'Al cambiar el nombre del proyecto se cambiará en todas las partes del sistema',
+            inputValue: actual,
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/cambiarNombreProyecto?proyecto=${folio}&ubicacion=${ubicacion}&flag=${flag}&cliente=${cliente}&nombre=${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+</script>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/dataTableJS.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

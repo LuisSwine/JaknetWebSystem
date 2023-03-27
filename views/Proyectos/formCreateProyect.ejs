@@ -1,0 +1,102 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'Crear un Nuevo Proyecto'}) %> 
+<%- include('../partials/linksNav.ejs')%> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>Bienvenido <%= user.nombres%></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <% if(flag == 1){%>
+                                    <li class="breadcrumb-item"><a href="/perfilCliente?cliente=<%= cliente[0].folio %>">Cliente</a></li>
+                                <%}else if(flag == 2){%>
+                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&cliente=<%= cliente[0].folio %>&flag=<%= flag %>">Ubicacion</a></li>
+                                <%}else if(flag == 0){%>
+                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&flag=<%= flag %>">Ubicacion</a></li>
+                                <%} %> 
+                                <li class="breadcrumb-item active">Crear Proyecto</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>CREAR NUEVO PROYECTO PARA <%= cliente[0].nombre %></h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="basic-elements">
+                                <form action="/createProject" method="post">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>NOMBRE DEL PROYECTO</label>
+                                                <input type="text" class="form-control" placeholder="Defina el nombre del proyecto" id="nombre" name="nombre" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>UBICACION</label>
+                                            <% if(flag == 2 || flag == 0){%>
+                                                <input type="number" class="form-control" value="<%= ubicacion %>" id="ubicacion" name="ubicacion" readonly>
+                                            <%}else{%>
+                                                <select class="form-control" name="ubicacion" id="ubicacion">
+                                                    <option disabled selected>--Seleccione--</option>
+                                                    <% ubicaciones.forEach((ubicacion)=>{ %>
+                                                    <option value="<%= ubicacion.folio %>"><%= ubicacion.nombre %></option>
+                                                    <% }) %> 
+                                                </select>
+                                            <%}%>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>LINK DE DOCUMENTACION</label>
+                                                <input class="form-control" type="url" placeholder="Enlace a los Documentos del proyecto" name="documentacion" id="documentacion" required>
+                                                <span class="help-block">
+                                                    <small>Puede generar la carpeta y link de proyecto <a href="https://drive.google.com/drive/folders/19g34ssIJlP_uY1sZEU8WzDb4F_Ktdos_?usp=sharing" target="_blank">aquí</a></small>
+                                                </span>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary m-b-10">CREAR PROYECTO</button>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>CLIENTE</label>
+                                                <input class="form-control" value="<%= cliente[0].folio %>" name="cliente" id="cliente" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>LINK DE GALERIA</label>
+                                                <input class="form-control" type="url" placeholder="Enlace a la Galeria del proyecto" name="galeria" id="galeria" required>
+                                                <span class="help-block">
+                                                    <small>Puede generar el album y link de proyecto <a href="https://drive.google.com/drive/folders/19g34ssIJlP_uY1sZEU8WzDb4F_Ktdos_?usp=sharing" target="_blank">aquí</a></small>
+                                                </span>
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="number" class="form-control" value="1" id="estatus" name="estatus" hidden>
+                                                <input type="number" class="form-control" value="<%= flag %>" id="flag" name="flag" hidden>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </section>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

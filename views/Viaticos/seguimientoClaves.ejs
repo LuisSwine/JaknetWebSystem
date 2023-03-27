@@ -1,0 +1,225 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'CLAVES DE SEGUIMIENTO'}) %> 
+<%- include('../partials/linksNav.ejs') %> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>Claves de <%= user.nombres %></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
+                                <li class="breadcrumb-item active">Claves de Seguimiento</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-title">
+                                <h4>SELECCIONA CLAVE DE SEGUIMIENTO</h4>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted m-b-15">Selecciona una clave de seguimiento para realizar el seguimiento de gastos</p>
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Claves de Seguimiento
+                                        <span class="caret"></span></button>
+                                    <ul class="dropdown-menu">
+                                        <% claves.forEach((clave)=>{%>
+                                            <li><a href="/seguimientoClaves?usuario=<%= user.folio %>&clave=<%= clave.folio %>"><%= clave.clave %></a></li>
+                                            <%}) %>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% if(isClave !== undefined){%>
+                <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="stat-widget-one">
+                                    <div class="stat-icon dib">
+                                        <i class="ti-key color-primary border-primary"></i>
+                                    </div>
+                                    <div class="stat-content dib">
+                                        <div class="stat-text">CLAVE DE SEGUIMIENTO</div>
+                                        <div class="stat-digit"><%= claveSelected[0].clave %> </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="stat-widget-one">
+                                    <div class="stat-icon dib">
+                                        <i class="ti-clipboard color-success border-success"></i>
+                                    </div>
+                                    <div class="stat-content dib">
+                                        <div class="stat-text">PROYECTO</div>
+                                        <div class="stat-digit"><%= claveSelected[0].proyecto %></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="card p-0">
+                            <div class="stat-widget-three">
+                                <div class="stat-icon bg-primary">
+                                    <i class="ti-money"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-digit">$<%= claveSelected[0].monto.toFixed(2) %></div>
+                                    <div class="stat-text">Monto</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card p-0">
+                            <div class="stat-widget-three">
+                                <div class="stat-icon bg-primary">
+                                    <i class="ti-calendar"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-digit"><%= claveSelected[0].fecha.toLocaleDateString('en-GB') %></div>
+                                    <div class="stat-text">Fecha de Deposito</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card p-0">
+                            <div class="stat-widget-three">
+                                <div class="stat-icon bg-primary">
+                                    <i class="ti-info"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-digit"><%= claveSelected[0].uso %></div>
+                                    <div class="stat-text">Uso de Deposito</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card p-0">
+                            <div class="stat-widget-three">
+                                <div class="stat-icon bg-primary">
+                                    <i class="ti-money"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-digit">$<%= (0+rendido[0].rendido).toFixed(2) %></div>
+                                    <div class="stat-text">Rendido</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-title">
+                                <a href="/formLoadTicket?usuario=<%= user.folio %>&clave=<%= claveSelected[0].folio %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Subir Comprobante</a>
+                                <a href="/exportDataClaves?data=comprobantes&clave=<%= claveSelected[0].folio %>&usuario=<%= user.folio %>" class="btn btn-success btn-flat btn-addon"><i class="ti-new-window"></i>Exportar Datos</a>
+                            </div>
+                            <div class="bootstrap-data-table-panel">
+                                <div class="table-responsive">
+                                    <table id="row-select" class="display table table-borderd table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Folio</th>
+                                                <th>Beneficiario</th>
+                                                <th>Concepto</th>
+                                                <th>Uso</th>
+                                                <th>Proyecto</th>
+                                                <th>Fecha</th>
+                                                <th>Monto</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% comprobaciones.forEach((comprobacion)=>{%>
+                                                <tr>
+                                                    <td><%= comprobacion.folio %></td>
+                                                    <td><%= comprobacion.beneficiario %></td>
+                                                    <td><%= comprobacion.concepto %></td>
+                                                    <td><%= comprobacion.uso %></td>
+                                                    <td><%= comprobacion.nombre_proyecto %></td>
+                                                    <td><%= comprobacion.fecha.toLocaleDateString('en-GB') %></td>
+                                                    <td>$<%= comprobacion.monto.toFixed(2) %></td>
+                                                    <td>
+                                                        <div class="button-list">
+                                                            <div class="btn-group btn-group-justified">
+                                                                <a class="btn btn-warning btn-sm" href="<%= comprobacion.enlace %>" target="_blank" title="DOCUMENTACION DEL PROYECTO"><i class="ti-files"></i></a>
+                                                                <button class="btn btn-danger btn-sm" onclick="confirmDeleteComprobacion('<%= user.folio %>','<%=claveSelected[0].folio%>','<%= user.saldo %>','<%= comprobacion.folio %>','<%= comprobacion.monto %>')"><i class="ti-trash"></i></button>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <% }) %>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th>Folio</th>
+                                                <th>Beneficiario</th>
+                                                <th>Concepto</th>
+                                                <th>Uso</th>
+                                                <th>Proyecto</th>
+                                                <th>Fecha</th>
+                                                <th>Monto</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <%} %> 
+            </section>
+        </div>
+    </div>
+</div>
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmDeleteComprobacion(user, clave, saldo, folio, monto){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Esta seguro de que desea eliminar el movimiento ${folio}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteComprobanteClavePer?usuario=${user}&clave=${clave}&saldo=${saldo}&folio=${folio}&monto=${monto}`
+                window.location = ruta
+            }
+        })
+    }
+</script>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/dataTableJS.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

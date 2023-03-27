@@ -1,0 +1,118 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'Añadir una nueva tarea'}) %> 
+<%- include('../partials/linksNav.ejs')%> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>Bienvenido <%= user.nombres%></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/admintareas">Tareas</a></li>
+                                <li class="breadcrumb-item active">Crear Tarea</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>CREAR NUEVA TAREA</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="basic-elements">
+                                <form action="/createTareaAdmin" method="post">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="form-group">
+                                                <label>SELECCIONAR PROYECTO</label>
+                                                <select class="form-control" name="proyecto" id="proyecto" onchange="filtrarEtapas('<%= encodeURIComponent(JSON.stringify(etapas)) %>')">
+                                                    <option disabled selected>--Seleccione--</option>
+                                                    <% proyectos.forEach((proyecto)=>{ %>
+                                                    <option value="<%= proyecto.folio %>"><%= proyecto.cliente %>-<%= proyecto.ubicacion %>-<%= proyecto.nombre %></option>
+                                                    <% }) %> 
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>Seleccionar Etapa</label>
+                                                <select class="form-control" name="etapa" id="etapa">
+                                                    <option disabled selected>--Seleccione--</option>
+                                                    <% etapas.forEach((etapa)=>{ %>
+                                                    <option value="<%= etapa.folio %>"><%= etapa.nombre %> </option>
+                                                    <% }) %> 
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>DESCRIPCION DE LA TAREA</label>
+                                                <textarea class="form-control" rows="3" placeholder="Describa brevemente la tarea" required name="descripcion" id="descripcion"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="number" class="form-control" value="7" id="estatus" name="estatus" hidden>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>FECHA DE ENTREGA</label>
+                                                <input type="date" class="form-control" id="fecha_entrega" name="fecha_entrega" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>TIPO DE TAREA</label>
+                                                <select class="form-control" name="tipo" id="tipo">
+                                                    <option disabled selected>--Seleccione--</option>
+                                                    <% tipos.forEach((tipo)=>{ %>
+                                                    <option value="<%= tipo.folio %>"><%= tipo.tipo %> </option>
+                                                    <% }) %> 
+                                                </select>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary m-b-10">CREAR TAREA</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </section>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    function filtrarEtapas(objeto){
+        let valor = JSON.parse(decodeURIComponent(objeto))
+        let selected = document.getElementById('proyecto').value
+
+        const etapas = document.getElementById('etapa')
+        etapas.innerHTML = '<option disabled selected>--Seleccione Etapa--</option>'
+
+        valor.forEach((v)=>{
+            if(v.folio_proyecto == selected){
+                const newNode = document.createElement('option')
+                newNode.setAttribute('value', v.folio)
+                const textNode = document.createTextNode(v.nombre)
+                newNode.appendChild(textNode)
+                etapas.appendChild(newNode)
+            }
+        })
+    }
+</script>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

@@ -1,0 +1,152 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'Inventario del Proyecto'}) %> 
+<%- include('../partials/linksNav.ejs') %> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h4>INVENTARIO EN <%= proyecto[0].nombre %></h4> 
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
+                                <% if(flag == 1){%>
+                                    <li class="breadcrumb-item"><a href="/perfilCliente?cliente=<%= cliente %>">Cliente</a></li>
+                                <%}else if(flag == 2){%>
+                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=1">Ubicacion</a></li>
+                                <%}else if(flag == 3){%>
+                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&flag=0">Ubicacion</a></li>
+                                <%}else if(flag == 0){%>
+                                    <li class="breadcrumb-item"><a href="/adminproyectos">Proyectos</a></li>
+                                <%}else if(flag == 4){%>
+                                    <li class="breadcrumb-item"><a href="/misProyectos?folio=<%= user.folio %>">Proyectos</a></li>
+                                <%} %>
+                                <li class="breadcrumb-item active"><%= proyecto[0].nombre %></li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-title">
+                                <div class="button-list">
+                                    <a class="btn btn-primary btn-flat btn-addon" href="/moverInventProy?proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>"><i class="ti-plus"></i>Añadir Elementos</a>
+                                </div>     
+                            </div>
+                            <div class="bootstrap-data-table-panel">
+                                <div class="table-responsive">
+                                    <table id="row-select" class="display table table-borderd table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Acciones</th>
+                                                <th>Cantidad</th>
+                                                <th>SKU</th>
+                                                <th>Producto</th>
+                                                <th>Categoria</th>
+                                                <th>Tipo</th>
+                                                <th>Marca</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% inventario.forEach((producto)=>{ %>
+                                            <tr>
+                                                <td>
+                                                    <div class="button-list">
+                                                        <div class="btn-group btn-group-justified">
+                                                            <button onclick="eliminarRegistro('<%= producto.folio %>', '<%= producto.folio_producto %>', '<%= producto.cantidad %>', '<%= producto.folio_unidades %>', '<%= flag %>', '<%= proyecto[0].folio %>', '<%= ubicacion %>', '<%= cliente %>', '<%= permisos %>','<%= user.folio %>')" class="btn btn-danger btn-sm"><i class="ti-trash"></i></button>
+                                                            <button onclick="editarRegistro('<%= producto.folio %>', '<%= producto.folio_producto %>', '<%= producto.cantidad %>', '<%= producto.folio_unidades %>','<%= flag %>', '<%= proyecto[0].folio %>', '<%= ubicacion %>', '<%= cliente %>', '<%= permisos %>','<%= user.folio %>')" class="btn btn-primary btn-sm"><i class="ti-pencil"></i></button>
+                                                        </div>
+                                                    </div>
+                                                </td> 
+                                                <td><%= producto.cantidad %> <%= producto.abreviatura %></td>  
+                                                <td><%= producto.sku %></td>
+                                                <td><%= producto.descripcion %></td>
+                                                <td><%= producto.categoria %></td>
+                                                <td><%= producto.tipo %></td>
+                                                <td><%= producto.marca %></td>
+                                            </tr>
+                                            <% }) %> 
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th>Acciones</th>
+                                                <th>Cantidad</th>
+                                                <th>SKU</th>
+                                                <th>Producto</th>
+                                                <th>Categoria</th>
+                                                <th>Tipo</th>
+                                                <th>Marca</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function eliminarRegistro(registro, producto, cantidad, unidades, flag, proyecto, ubicacion, cliente, permisos, usuario){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se devolveran las existencias al inventario`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/returnAll2InventProy?registro=${registro}&producto=${producto}&cantidad=${cantidad}&unidades=${unidades}&proyecto=${proyecto}&flag=${flag}&cliente=${cliente}&ubicacion=${ubicacion}&permisos=${permisos}&usuario=${usuario}`
+                window.location = ruta
+            }
+        })
+    }
+    function editarRegistro(registro, producto, cantidad, unidades, flag, proyecto, ubicacion, cliente, permisos, usuario){
+        Swal.fire({
+            title: 'Modificar Cantidad del producto en posesion',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'La modificacion de cantidad se hará en base al inventario, si agrega se tomarán las existencias de el inventario y si retira se devolveran al inventario',
+            showCancelButton: true,
+            inputValue: cantidad,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else if(parseInt(value) < 0){
+                    return 'No puede haber existencias negativas'
+                }else{
+                    if(parseInt(value) === 0){
+                        const ruta = `/returnAll2InventProy?registro=${registro}&producto=${producto}&cantidad=${cantidad}&unidades=${unidades}&proyecto=${proyecto}&flag=${flag}&cliente=${cliente}&ubicacion=${ubicacion}&permisos=${permisos}&usuario=${usuario}`
+                        window.location = ruta
+                    }else{
+                        const ruta = `/modificarProyectInvent?registro=${registro}&producto=${producto}&cantidadActual=${cantidad}&nuevaCantidad=${value}&unidades=${unidades}&proyecto=${proyecto}&flag=${flag}&cliente=${cliente}&ubicacion=${ubicacion}&permisos=${permisos}&usuario=${usuario}`
+                        window.location = ruta
+                    }
+                }
+            }
+        })
+    }
+</script>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/dataTableJS.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

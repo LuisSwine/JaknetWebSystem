@@ -1,0 +1,86 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'Nueva Etapa'}) %> 
+<%- include('../partials/linksNav.ejs')%> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>Bienvenido <%= user.nombres%></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <% if(flag == 1){%>
+                                    <li class="breadcrumb-item"><a href="/profileProyect?proyecto=<%= proyecto[0].folio %>&cliente=<%= cliente %>&flag=<%= flag %>"><%= proyecto[0].nombre %></a></li>
+                                <%}else if(flag == 3 || flag == 2){%>
+                                    <li class="breadcrumb-item"><a href="/profileProyect?proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>"><%= proyecto[0].nombre %></a></li>
+                                <%}else if(flag == 0){%>
+                                    <li class="breadcrumb-item"><a href="/profileProyect?proyecto=<%= proyecto[0].folio %>&flag=<%= flag %>"><%= proyecto[0].nombre %></a></li>
+                                <%}else if(flag == 4){%>
+                                    <li class="breadcrumb-item"><a href="/profileProyect?proyecto=<%= proyecto[0].folio %>&flag=<%= flag %>&permisos=<%= permisos %>"><%= proyecto[0].nombre %></a></li>
+                                <%} %>
+                                <li class="breadcrumb-item active">Crear Etapa</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>AÑADIR UNA NUEVA ETAPA</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="basic-elements">
+                                <form action="/addEtapa" method="post">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>NOMBRE</label>
+                                                <input type="text" class="form-control" placeholder="Nombre de la etapa" id="nombre" name="nombre" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="number" class="form-control" value="<%= proyecto[0].folio %>" id="proyecto" name="proyecto" hidden>
+                                                <input type="number" class="form-control" value="<%= cliente %>" id="cliente" name="cliente" hidden>
+                                                <input type="number" class="form-control" value="<%= ubicacion %>" id="ubicacion" name="ubicacion" hidden>
+                                                <input type="number" class="form-control" value="<%= flag %>" id="flag" name="flag" hidden>
+                                                <input type="number" class="form-control" value="<%= permisos %>" id="permisos" name="permisos" hidden>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary m-b-10">CREAR ETAPA</button>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>AREA</label>
+                                                <select class="form-control" name="area" id="area">
+                                                    <option selected disabled>--Seleccione--</option>
+                                                    <% areas.forEach((area)=>{ %>
+                                                    <option value="<%= area.folio %>"><%= area.nombre %></option>
+                                                    <% }) %> 
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </section>
+            
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

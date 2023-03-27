@@ -1,0 +1,467 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'PERFIL DE LA UBICACION'}) %> 
+<%- include('../partials/linksNav.ejs') %> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1><%= ubicacion[0].nombre %> </h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
+                                <% if(user.tipo_usuario != 2){%>
+                                    <% if(flag == 1){%>
+                                        <li class="breadcrumb-item"><a href="/perfilCliente?cliente=<%= clienteSelected %>">Cliente</a></li>
+                                    <%}else if(flag == 0){%>
+                                        <li class="breadcrumb-item"><a href="/adminubicaciones">Ubicaciones</a></li>
+                                    <%} %>
+                                <%} %> 
+                                <li class="breadcrumb-item active"><%= ubicacion[0].nombre %></li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            
+            <section id="main-content">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-location-pin color-warning border-warning"></i>
+                                </div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Ubicacion    <% if(user.tipo_usuario != 2){%><i onclick="cambiarNombre('<%= ubicacion[0].nombre %>','<%= ubicacion[0].folio %>', '<%= flag %>','<%= clienteSelected %>')" style="cursor: pointer" class="ti-pencil"></i><% } %></div>
+                                    <div class="stat-digit"><%= ubicacion[0].nombre %> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-medall color-success border-success"></i>
+                                </div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Cliente</div>
+                                    <div class="stat-digit"><%= ubicacion[0].cliente %> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <% let localizar = `https://www.google.com.mx/maps/search/${ubicacion[0].direccion}`%> 
+                        <div class="card" >
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-map-alt color-primary border-primary"></i>
+                                </div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Direccion   <% if(user.tipo_usuario != 2){%><i class="ti-pencil" style="cursor: pointer;" onclick="cambiarDireccion('<%= ubicacion[0].direccion %>', '<%= ubicacion[0].folio %>', '<%= flag %>', '<%= clienteSelected %>')"></i><% } %></div>
+                                    <div class="stat-digit"><%= ubicacion[0].direccion %>  <i class="ti-map-alt" onclick="window.open('<%= localizar %>', '_blank')" style="cursor: pointer;"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body p-b-0">
+                                <h4 class="card-title">Informacion de <%= ubicacion[0].nombre %></h4>
+                            <!-- Nav tabs -->
+                            <ul class="nav nav-tabs customtab" role="tablist">
+                                <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#areas" role="tab"><span class="hidden-sm-up"><i class="ti-stats-up"></i></span> <span class="hidden-xs-down">Areas</span></a></li>
+                                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#contactos" role="tab"><span class="hidden-sm-up"><i class="ti-id-badge"></i></span> <span class="hidden-xs-down">Contactos</span></a> </li>
+                                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#proyectos" role="tab"><span class="hidden-sm-up"><i class="ti-mobile"></i></span><span class="hidden-xs-down">Proyectos</span></a></li>
+                                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#cotizaciones" role="tab"><span class="hidden-sm-up"><i class="ti-clipboard"></i></span> <span class="hidden-xs-down">Cotizaciones</span></a></li>
+                            </ul>
+                            <!-- Tab panes -->
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="areas" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <% if(user.tipo_usuario != 2){%>
+                                            <div class="card-title">
+                                                <% 
+                                                let rutaCreateArea = `/formcreatearea?ubicacion=${ubicacion[0].folio}&flag=${flag}`
+                                                if(flag == 1){rutaCreateArea = rutaCreateArea + `&cliente=${clienteSelected}`} 
+                                                %> 
+                                                <a href="<%= rutaCreateArea %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Añadir Area</a>     
+                                            </div>
+                                            <% } %> 
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% areas.forEach((area)=>{ %>
+                                                            <tr>
+                                                                <td><%= area.folio %></td>
+                                                                <td><%= area.nombre %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <a class="btn btn-pink btn-sm" target="_blank" href="<%= area.documentacion %>" title="DOCUMENTACION"><i class="ti-link"></i></a>
+                                                                            <% if(user.tipo_usuario != 2){%>
+                                                                            <a class="btn btn-primary btn-sm" href="/editarArea?area=<%= area.folio %>&ubicacion=<%= ubicacion[0].folio %>&cliente=<%= clienteSelected %>&flag=<%= flag %>" title="EDITAR AREA"><i class="ti-pencil"></i></a>
+                                                                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteArea('<%= area.folio %>', '<%= ubicacion[0].folio %>', '<%= clienteSelected %>', '<%= flag %>')"><i class="ti-trash"></i></button>
+                                                                            <% } %> 
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <% }) %>    
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane p-20" id="contactos" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <% if(user.tipo_usuario != 2){%>
+                                            <div class="card-title">
+                                                <% if(flag == 1){%>
+                                                    <a href="/relacionConUbi?ubicacion=<%= ubicacion[0].folio %>&cliente=<%= clienteSelected %>&flag=<%= flag %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Asignar Contacto a la Ubicacion</a> 
+                                                <%}else if(flag==0){%>
+                                                    <a href="/relacionConUbi?ubicacion=<%= ubicacion[0].folio %>&cliente=<%= ubicacion[0].folio_cliente %>&flag=<%= flag %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Asignar Contacto a la Ubicacion</a> 
+                                                <%}%>     
+                                            </div>
+                                            <% } %> 
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select2" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Contacto</th>
+                                                                <th>Email</th>
+                                                                <th>Telefono</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% contactos.forEach((contacto)=>{ %>
+                                                            <tr>
+                                                                <td><%= contacto.folio %></td>
+                                                                <td><%= contacto.contacto %></td>
+                                                                <td><%= contacto.email %></td>
+                                                                <td><%= contacto.telefono %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <button class="btn btn-pink btn-sm" onclick="showDesc('<%= contacto.descripcion %>')" title="INFORMACION"><i class="ti-info"></i></button>
+                                                                            <% if(user.tipo_usuario != 2){%><button class="btn btn-danger btn-sm" onclick="confirmDeleteContact('<%= contacto.folio %>', '<%= ubicacion[0].folio %>', '<%= clienteSelected %>', '<%= flag %>')"><i class="ti-trash"></i></button><% } %> 
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <% }) %>    
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Contacto</th>
+                                                                <th>Email</th>
+                                                                <th>Telefono</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane p-20" id="proyectos" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <% if(user.tipo_usuario != 2){%>
+                                            <div class="card-title">
+                                                <% if(flag == 1){%>
+                                                    <a href="/formcreateproyect?ubicacion=<%= ubicacion[0].folio %>&cliente=<%= clienteSelected %>&flag=2" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear un Nuevo Proyecto</a>  
+                                                <%}else if(flag==0){%>
+                                                    <a href="/formcreateproyect?ubicacion=<%= ubicacion[0].folio %>&cliente=<%= ubicacion[0].folio_cliente %>&flag=0" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear un Nuevo Proyecto</a>  
+                                                <%}%> 
+                                            </div>
+                                            <% } %> 
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select3" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Estatus</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% proyectos.forEach((proyecto)=>{ %>
+                                                            <tr>
+                                                                <td><%= proyecto.folio %></td>
+                                                                <td><%= proyecto.nombre %></td>
+                                                                <td><%= proyecto.estatus %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <% if(user.tipo_usuario != 2){%>
+                                                                            <% let rutaProyecto = ''
+                                                                            let rutaViaticos = ''
+                                                                            let rutaInventario = '' 
+                                                                            if(flag == 1){
+                                                                                rutaProyecto = `/profileProyect?proyecto=${proyecto.folio}&ubicacion=${ubicacion[0].folio}&cliente=${clienteSelected}&flag=2`;
+                                                                                rutaViaticos = `/proyectViaticos?proyecto=${proyecto.folio}&ubicacion=${ubicacion[0].folio}&cliente=${clienteSelected}&flag=2`;
+                                                                                rutaInventario = `/proyectosInvent?proyecto=${proyecto.folio}&ubicacion=${ubicacion[0].folio}&cliente=${clienteSelected}&flag=2`
+                                                                            }else if(flag==0){
+                                                                                rutaProyecto = `/profileProyect?proyecto=${proyecto.folio}&ubicacion=${ubicacion[0].folio}&cliente=${ubicacion[0].folio_cliente}&flag=3`;
+                                                                                rutaViaticos = `/proyectViaticos?proyecto=${proyecto.folio}&ubicacion=${ubicacion[0].folio}&cliente=${ubicacion[0].folio_cliente}&flag=3`;
+                                                                                rutaInventario = `/proyectosInvent?proyecto=${proyecto.folio}&ubicacion=${ubicacion[0].folio}&cliente=${ubicacion[0].folio_cliente}&flag=3`
+                                                                            }%> 
+                                                                            <a class="btn btn-info btn-sm" href="<%= rutaProyecto %>" title="CONFIGURACION DEL PROYECTO"><i class="ti-settings"></i></a>
+                                                                            <a class="btn btn-pink btn-sm" href="<%= rutaInventario %>" title="INVENTARIO EN EL PROYECTO"><i class="ti-truck"></i></a>
+                                                                            <a class="btn btn-success btn-sm" href="<%= rutaViaticos %>" title="VIATICOS DEL PROYECTO"><i class="ti-money"></i></a>
+                                                                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteProyect('<%= proyecto.folio %>', '<%= ubicacion[0].folio %>', '<%= clienteSelected %>', '<%= flag %>')"><i class="ti-trash"></i></button>
+                                                                            <% } %>
+                                                                            <a class="btn btn-primary btn-sm" href="<%= proyecto.galeria %>" target="_blank" title="GALERIA DEL PROYECTO"><i class="ti-image"></i></a>
+                                                                            <a class="btn btn-warning btn-sm" href="<%= proyecto.documentacion %>" target="_blank" title="DOCUMENTACION DEL PROYECTO"><i class="ti-files"></i></a>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>   
+                                                            </tr>
+                                                            <% }) %> 
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Estatus</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane p-20" id="cotizaciones" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <% if(user.tipo_usuario!=2){ %> 
+                                            <div class="card-title">
+                                                <% if(flag == 1){%>
+                                                    <a href="/formCotUbi?ubicacion=<%= ubicacion[0].folio %>&cliente=<%= clienteSelected %>&flag=2" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear un Nueva Cotizacion</a>  
+                                                <%}else if(flag==0){%>
+                                                    <a href="/formCotUbi?ubicacion=<%= ubicacion[0].folio %>&cliente=<%= ubicacion[0].folio_cliente %>&flag=0" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear un Nueva Cotizacion</a>  
+                                                <%}%>   
+                                            </div>
+                                            <% } %> 
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select4" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Proyecto</th>
+                                                                <th>Rendimiento</th>
+                                                                <th>Costo Tecnico</th>
+                                                                <th>Costo Supervisor</th>
+                                                                <th>Intereses</th>
+                                                                <th>Contacto</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% cotizaciones.forEach((cotizacion)=>{ %>
+                                                            <tr>
+                                                                <td><%= cotizacion.folio %></td>
+                                                                <td><%= cotizacion.proyecto %></td>
+                                                                <td><%= cotizacion.rendimiento %></td>
+                                                                <td>$<%= cotizacion.costo_tecnico %></td>
+                                                                <td>$<%= cotizacion.costo_supervisor %></td>
+                                                                <td><%= cotizacion.intereses %></td>
+                                                                <td><%= cotizacion.contacto %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <% let bandera; if(flag == 0)bandera = 4; else if(flag == 1) bandera = 5; %> 
+                                                                            <a class="btn btn-info btn-sm" href="/cotizacionMain?cotizacion=<%= cotizacion.folio %>&cliente=<%= ubicacion[0].folio_cliente %>&ubicacion=<%= ubicacion[0].folio %>&flag=<%= bandera %>" title="INFORMACION"><i class="ti-settings"></i></a>
+                                                                            <a href="/cotizacionPDF?cotizacion=<%= cotizacion.folio %>" class="btn btn-warning btn-sm" target="_blank" title="Configurar"><i class="ti-file"></i></a>
+                                                                            <% if(user.tipo_usuario!=2){ %> <button class="btn btn-danger btn-sm" onclick="confirmDeleteCoti('<%= cotizacion.folio %>', '<%= ubicacion[0].folio %>','<%= ubicacion[0].folio_cliente %>', '<%= flag %>')" title="ELIMINAR COTIZACION"><i class="ti-trash"></i></button><% } %> 
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr> 
+                                                            <% }) %> 
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Proyecto</th>
+                                                                <th>Rendimiento</th>
+                                                                <th>Costo Tecnico</th>
+                                                                <th>Costo Supervisor</th>
+                                                                <th>Intereses</th>
+                                                                <th>Contacto</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function showDesc(descripcion){
+        Swal.fire({
+            icon: 'info',
+            title: 'Descripcion',
+            text: `${descripcion}`,
+        })
+    }
+    function confirmDeleteArea(area, ubicacion, cliente, flag){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará el area ${area} (Si dicha area esta involucrada en alguna etapa de algun proyecto, no podrá eliminarse)`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteArea?area=${area}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`
+                window.location = ruta
+            }
+        })
+    }
+    function confirmDeleteProyect(proyecto, ubicacion, cliente, flag){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará el proyecto ${proyecto} (Si dicho proyecto ya esta en proceso no podra eliminarse)`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteProyectoUbi?proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`
+                window.location = ruta
+            }
+        })
+    }
+    function confirmDeleteContact(folio, ubicacion, cliente, flag){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará al contacto ${folio} de la ubicacion ${ubicacion}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteContOfUbi?contacto=${folio}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`
+                window.location = ruta
+            }
+        })
+    }
+    function confirmDeleteCoti(folio, ubicacion, cliente, flag){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará la cotizacion ${folio} (la cotizacion debe estar vacia para ser eliminada, es decir, sin productos ni servicios)`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteCotiUbi?folio=${folio}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`
+                window.location = ruta
+            }
+        })
+    }
+    function cambiarNombre(actual, folio, flag, cliente){
+        Swal.fire({
+            title: 'CAMBIAR NOMBRE DE LA UBICACION',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'Al cambiar el nombre de la ubicacion se cambiará en todas las partes del sistema',
+            inputValue: actual,
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/cambiarNombreUbi?ubicacion=${folio}&flag=${flag}&cliente=${cliente}&nombre=${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+    function cambiarDireccion(actual, folio, flag, cliente){
+        Swal.fire({
+            title: 'CAMBIAR DIRECCION DE LA UBICACION',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'Al cambiar la direccion de la ubicacion se cambiará en todas las partes del sistema',
+            inputValue: actual,
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/cambiarDireccionUbi?ubicacion=${folio}&flag=${flag}&cliente=${cliente}&direccion=${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+</script>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/dataTableJS.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

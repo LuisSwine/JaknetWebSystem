@@ -1,0 +1,88 @@
+<%- include('../../partials/head.ejs', {tituloPagina: 'Cambiar Asignacion'}) %> 
+<%- include('../../partials/linksNav.ejs')%> 
+<%- include('../../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>Bienvenido <%= user.nombres%></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <% if(flag == 0){%>
+                                <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%= asignacion[0].etapa %>&proyecto=<%= proyecto %>&flag=<%= flag %>">Tareas</a></li>
+                                <%}else if(flag == 1){%>
+                                <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%= asignacion[0].etapa %>&proyecto=<%= proyecto %>&cliente=<%= cliente %>&flag=<%= flag %>">Tareas</a></li>
+                                <%}else if(flag == 2 || flag == 3){%>
+                                <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%= asignacion[0].etapa %>&proyecto=<%= proyecto %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>">Tareas</a></li>
+                                <%}else if(flag == 4){%>
+                                    <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%= asignacion[0].etapa %>&proyecto=<%= proyecto %>&flag=<%= flag %>&permisos=<%= permisos %>">Tareas</a></li>
+                                    <!-- <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%//= etapa[0].folio %>&ubicacion=<%//= ubicacion %>&flag=4">Tareas</a></li>
+                                    <%//}else if(flag == 5){%>
+                                    <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%//= etapa[0].folio %>&ubicacion=<%//= ubicacion %>&cliente=<%//= cliente %>&flag=5">Tareas</a></li>                                    
+                                    <%//}else if(flag == 6){%>
+                                    <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%//= etapa[0].folio %>&cliente=<%//= cliente %>&flag=<%//= flag %>">Tareas</a></li> -->
+                                    <%} %>
+                                <li class="breadcrumb-item active">Reasignar Tarea</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>REASIGNAR TAREA</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="basic-elements">
+                                <form action="/reasignTask" method="post">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="form-group">
+                                                <label>USUARIO</label>
+                                                <select class="form-control" name="usuario" id="usuario">
+                                                    <option value="0">Sin Asignar</option>
+                                                    <% usuarios.forEach((usuario)=>{ %>
+                                                    <option value="<%= usuario.folio_usuario %>" <% if(usuario.folio_usuario == asignacion[0].folio_usuario){%>selected<%}%> ><%= usuario.folio_usuario %> - <%= usuario.nombres %> <%= usuario.apellidos %></option>
+                                                    <% }) %> 
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="number" class="form-control" value="<%= asignacion[0].folio_tarea %>"id="tarea" name="tarea" hidden>
+                                                <input type="number" class="form-control" value="<%= asignacion[0].folio %>" id="asignacion" name="asignacion" hidden>
+                                                <input type="number" class="form-control" value="<%= asignacion[0].etapa %>" id="etapa" name="etapa" hidden>
+                                                <input type="number" class="form-control" value="<%= proyecto %>" id="proyecto" name="proyecto" hidden>
+                                                <input type="number" class="form-control" value="<%= ubicacion %>" id="ubicacion" name="ubicacion" hidden>
+                                                <input type="number" class="form-control" value="<%= cliente %>" id="cliente" name="cliente" hidden>
+                                                <input type="number" class="form-control" value="<%= flag %>" id="flag" name="flag" hidden>
+                                                <input type="number" class="form-control" value="<%= permisos %>" id="permisos" name="permisos" hidden>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary m-b-10">ASIGNAR TAREA</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </section>
+            
+        </div>
+    </div>
+</div>
+
+<%- include('../../partials/scriptsNav.ejs') %> 
+<%- include('../../partials/footer.ejs') %> 

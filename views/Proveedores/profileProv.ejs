@@ -1,0 +1,183 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'PERFIL DE PROVEEDOR'}) %> 
+<%- include('../partials/linksNav.ejs') %> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1><%= proveedor[0].nombre %></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/adminproveedores">Proveedores</a></li>
+                                <li class="breadcrumb-item active"><%= proveedor[0].nombre %></li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body p-b-0">
+                                <h4 class="card-title">INFORMACION GENERAL DEL PROVEEDOR</h4>
+                            <!-- Nav tabs -->
+                            <ul class="nav nav-tabs customtab" role="tablist">
+                                <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#marcas" role="tab"><span class="hidden-sm-up"><i class="ti-medall"></i></span> <span class="hidden-xs-down">Marcas</span></a></li>
+                                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#productos" role="tab"><span class="hidden-sm-up"><i class="ti-shopping-cart"></i></span> <span class="hidden-xs-down">Productos</span></a> </li>
+                            </ul>
+                            <!-- Tab panes -->
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="marcas" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <div class="card-title">
+                                                <a href="/relateMarcaProveedor?proveedor=<%= proveedor[0].folio %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Añadir Marca A Proveedor</a>     
+                                            </div>
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <% marcas.forEach((marca)=>{%>
+                                                            <tr>
+                                                                <td><%= marca.folio %></td>
+                                                                <td><%= marca.marca %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <a class="btn btn-info btn-sm" href="/perfilMarca?marca=<%= marca.folio_marca %>"><i class="ti-settings"></i></a>
+                                                                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteMarca('<%= marca.folio_marca %>', '<%= proveedor[0].folio %>')"><i class="ti-trash"></i></button>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        <%}) %> 
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane p-20" id="productos" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <div class="card-title">
+                                                <h4>PRODUCTOS DISPONIBLES CON PROVEEDOR</h4>     
+                                            </div>
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select2" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>SKU</th>
+                                                                <th>Categoria</th>
+                                                                <th>Tipo</th>
+                                                                <th>Precio</th>
+                                                                <th>Marca</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <% productos.forEach((producto)=>{%>
+                                                            <tr>
+                                                                <td><%= producto.folio %></td>
+                                                                <td><%= producto.sku %></td>
+                                                                <td><%= producto.categoria %></td>
+                                                                <td><%= producto.tipo %></td>
+                                                                <td>$<%= producto.precio.toFixed(2) %></td>
+                                                                <td><%= producto.marca %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <button class="btn btn-info btn-sm" onclick="showDesc('<%= producto.descripcion %>')"><i class="ti-info"></i></button>
+                                                                            <a href="<%= producto.enlace %>" target="_blank" class="btn btn-warning btn-sm"><i class="ti-link"></i></a>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        <%}) %>  
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>SKU</th>
+                                                                <th>Categoria</th>
+                                                                <th>Tipo</th>
+                                                                <th>Precio</th>
+                                                                <th>Marca</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function showDesc(descripcion){
+        Swal.fire({
+            icon: 'info',
+            title: 'Descripcion',
+            text: `${descripcion}`,
+        })
+    }
+    function confirmDeleteMarca(registro, proveedor){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará la relacion de la marca con el proveedor, esto no eliminará ni la marca, ni al proveedor`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteMarcaProveedor?registro=${registro}&proveedor=${proveedor}`
+                window.location = ruta
+            }
+        })
+    }
+</script>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/dataTableJS.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

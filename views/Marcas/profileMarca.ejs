@@ -1,0 +1,200 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'PERFIL DE MARCA'}) %> 
+<%- include('../partials/linksNav.ejs') %> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1><%= marca[0].nombre %>   <i class="ti-pencil" onclick="cambiarNombre('<%= marca[0].folio %>')"></i></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/adminmarcas">Marcas</a></li>
+                                <li class="breadcrumb-item active"><%= marca[0].nombre %></li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body p-b-0">
+                                <h4 class="card-title">INFORMACION GENERAL DE LA MARCA</h4>
+                            <!-- Nav tabs -->
+                            <ul class="nav nav-tabs customtab" role="tablist">
+                                <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#proveedores" role="tab"><span class="hidden-sm-up"><i class="ti-truck"></i></span> <span class="hidden-xs-down">Proveedores</span></a></li>
+                                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#productos" role="tab"><span class="hidden-sm-up"><i class="ti-shopping-cart"></i></span> <span class="hidden-xs-down">Productos</span></a> </li>
+                            </ul>
+                            <!-- Tab panes -->
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="proveedores" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <div class="card-title">
+                                                <a href="/relateProveedorMarca?marca=<%= marca[0].folio %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Añadir Proveedor de Marca</a>     
+                                            </div>
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <% proveedores.forEach((proveedor)=>{%>
+                                                            <tr>
+                                                                <td><%= proveedor.folio %></td>
+                                                                <td onclick="window.open('<%= proveedor.web_proveedor%>', '_blank')"><%= proveedor.proveedor %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <a class="btn btn-info btn-sm" href="/perfilProveedor?proveedor=<%= proveedor.folio_proveedor %>"><i class="ti-settings"></i></a>
+                                                                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteProveedor('<%= proveedor.folio_proveedor %>', '<%= marca[0].folio %>')"><i class="ti-trash"></i></button>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        <%}) %> 
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane p-20" id="productos" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <div class="card-title">
+                                                <h4>PRODUCTOS DE ESTA MARCA</h4>     
+                                            </div>
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select2" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>SKU</th>
+                                                                <th>Categoria</th>
+                                                                <th>Tipo</th>
+                                                                <th>Precio</th>
+                                                                <th>Marca</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <% productos.forEach((producto)=>{%>
+                                                            <tr>
+                                                                <td><%= producto.folio %></td>
+                                                                <td><%= producto.sku %></td>
+                                                                <td><%= producto.categoria %></td>
+                                                                <td><%= producto.tipo %></td>
+                                                                <td>$<%= producto.precio.toFixed(2) %></td>
+                                                                <td><%= producto.marca %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <button class="btn btn-info btn-sm" onclick="showDesc('<%= producto.descripcion %>')"><i class="ti-info"></i></button>
+                                                                            <a href="<%= producto.enlace %>" target="_blank" class="btn btn-warning btn-sm"><i class="ti-link"></i></a>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        <%}) %>  
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>SKU</th>
+                                                                <th>Categoria</th>
+                                                                <th>Tipo</th>
+                                                                <th>Precio</th>
+                                                                <th>Marca</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function showDesc(descripcion){
+        Swal.fire({
+            icon: 'info',
+            title: 'Descripcion',
+            text: `${descripcion}`,
+        })
+    }
+    function confirmDeleteProveedor(registro, marca){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará la relacion el proveedor de la marca, esto no eliminará ni la marca, ni al proveedor`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteProveedorMarca?registro=${registro}&marca=${marca}`
+                window.location = ruta
+            }
+        })
+    }
+    function cambiarNombre(folio){
+        Swal.fire({
+            title: 'CAMBIAR NOMBRE DE LA MARCA',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'Al cambiar el nombre de la marca se cambiaria en todas las partes del sistema',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/cambiarNombreMarca?marca=${folio}&nombre=${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+</script>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/dataTableJS.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

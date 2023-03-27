@@ -1,0 +1,335 @@
+<%- include('../../partials/head.ejs', {tituloPagina: 'COTIZACION'}) %> 
+<%- include('../../partials/linksNav.ejs') %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <section id="main-content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="button-list">
+                            <a type="button" class="btn btn-danger btn-block m-b-10" href="descargarPDF?cotizacion=<%= cotizacion[0].cotizacion %>">DESCARGAR PDF</a>
+                        </div>
+                    </div>
+                    <div class="col-lg-12"> <!-- Nuestra hoja -->
+                        <div class="card">
+                            <div class="row">
+                                <div class="col-lg-12"><!-- Encabezado -->
+                                    <div class="row"> <!-- Fila de encabezado -->
+                                        <div class="col-lg-2"> <!-- Logo de la cotizacion -->
+                                            <%
+                                                let logo
+                                                if(cotizacion[0].emite == 1){
+                                                    logo = 'img/barafuste_logo.png'
+                                                }else if(cotizacion[0].emite == 2){
+                                                    logo = 'img/logo.png'
+                                                } 
+                                            %> 
+                                            <div class="user-photo m-b-30">
+                                                <img class="img-fluid" src="<%= logo %>" alt="logo" onclick="cambiarlogo('<%= cotizacion[0].cotizacion %>')" style="cursor: pointer;" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-10"> <!-- Datos de Fecha y # de Cotizacion -->
+                                            <h4 class="text-right" style="cursor: pointer;" onclick="definirNumero('<%= cotizacion[0].cotizacion %>')"><%= cotizacion[0].numero %></h4>
+                                            <% 
+                                                let fecha = new Date(cotizacion[0].fecha)
+
+                                                let dia = fecha.getDate()
+                                                let mes = fecha.getMonth() + 1
+                                                let month;
+                                                switch (mes) {
+                                                    case 1: month = 'enero'; break;
+                                                    case 2: month = 'febrero'; break;
+                                                    case 3: month = 'marzo'; break;
+                                                    case 4: month = 'abril'; break;
+                                                    case 5: month = 'mayo'; break;
+                                                    case 6: month = 'junio'; break;
+                                                    case 7: month = 'julio'; break;
+                                                    case 8: month = 'agosto'; break;
+                                                    case 9: month = 'septiembre'; break;
+                                                    case 10: month = 'octubre'; break;
+                                                    case 11: month = 'noviembre'; break;
+                                                    case 12: month = 'diciembre'; break;
+                                                }
+                                                let year = fecha.getFullYear();
+                                            %> 
+                                            <p class="text-right">Ciudad de México, a <%= dia %> de <%= month %> del <%= year %></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12"><!-- Destinatario -->
+                                    <div class="user-profile-name" style="cursor: pointer;" onclick="definirDestinatario('<%= cotizacion[0].cotizacion %>')"><%= cotizacion[0].destinatario%></div>
+                                    <div class="user-job-title" style="cursor: pointer;" onclick="definirPuestoDestinatario('<%= cotizacion[0].cotizacion %>')"><%= cotizacion[0].puesto_destinatario %></div>
+                                    <div class="user-job-title" style="cursor: pointer;" onclick="definirCliente('<%= cotizacion[0].cotizacion %>')"><h6><%= cotizacion[0].cliente%></h6></div>
+                                </div>
+                                <div class="col-lg-12"><!-- Cuerpo del Mensaje -->
+                                    <div class="card">
+                                        <div class="card-tittle"> <!-- Estimado ... -->
+                                            <h6>Estimado <%= cotizacion[0].destinatario %>:</h6>
+                                        </div>
+                                        <div class="card-body"> <!-- Tabla -->
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered">
+                                                      <thead>
+                                                          <tr>
+                                                              <th>#</th>
+                                                              <th>Descripcion</th>
+                                                              <th>Cantidad</th>
+                                                              <th>Unidad</th>
+                                                              <th>Precio Unitario</th>
+                                                              <th>Subtotal</th>
+                                                          </tr>
+                                                      </thead>
+                                                      <tbody>
+                                                            <% let i = 1 %>
+                                                            <% let total = 0 %>  
+                                                            <% productos.forEach((producto)=>{%>
+                                                                <tr>
+                                                                    <% 
+                                                                    let p_unitario =  producto.costo_unitario + (producto.costo_unitario * (cotizacion[0].rendimiento / 100)) + (producto.costo_unitario * (cotizacion[0].intereses / 100));
+                                                                    let p_subtotal = p_unitario * producto.cantidad;   
+                                                                    %> 
+                                                                    <th scope="row"><%= i %></th>
+                                                                    <td><%= producto.producto %></td>
+                                                                    <td><%= producto.cantidad %></td>
+                                                                    <td>Pza.</td>
+                                                                    <td>$<%= p_unitario.toFixed(2) %></td>
+                                                                    <td>$<%= p_subtotal.toFixed(2) %></td>
+                                                                    <% total += p_subtotal %> 
+                                                                </tr>
+                                                                <% i++; %> 
+                                                            <% })%>
+                                                            
+                                                            <% servicios.forEach((servicio)=>{%>
+                                                                <tr>
+                                                                    <% 
+                                                                    let p_servicio = servicio.costo_servicio + (servicio.costo_servicio * (cotizacion[0].rendimiento / 100)) + (servicio.costo_servicio * (cotizacion[0].intereses / 100));
+                                                                    %> 
+                                                                    <th scope="row"><%= i %></th>
+                                                                    <td><%= servicio.servicio %></td>
+                                                                    <td>1</td>
+                                                                    <td>Servicio</td>
+                                                                    <td>$<%= p_servicio.toFixed(2) %></td>
+                                                                    <td>$<%= p_servicio.toFixed(2) %></td>
+                                                                    <% total += p_servicio %> 
+                                                                </tr>
+                                                                <% i++; %> 
+                                                            <% })%>  
+                                                      </tbody>
+                                                </table>
+                                            </div>
+                                            <hr>
+                                            <h6>Total.- $<%= total.toFixed(2) %></h6>
+                                            <h6 style="cursor: pointer;" onclick="definirMoneda('<%= cotizacion[0].cotizacion %>')">Moneda.- <%= cotizacion[0].moneda %></h6>
+                                            <h6>A este precio se le agregará el I.V.A.</h6>
+                                            <br>
+                                            <p style="cursor: pointer;" onclick="definirUbicacion('<%= cotizacion[0].cotizacion %>')"><span class="font-weight-bold">Ubicación: </span> <%= cotizacion[0].ubicacion %> </p>
+                                            <br>
+                                            <p style="cursor: pointer;" onclick="definirQuienSolicita('<%= cotizacion[0].cotizacion %>')"><span class="font-weight-bold">Solicita: </span> <%= cotizacion[0].solicita %> </p>
+                                            <br>
+                                            <p><span class="font-weight-bold">Notas: </span></p>
+                                            <p style="cursor: pointer;" onclick="definirNotas('<%= cotizacion[0].cotizacion %>')" class="text-justify"><%= cotizacion[0].notas %> </p>
+                                        </div>
+                                        <div class="card-content"><!-- Firma de Alberto -->
+                                            <div class="col-lg-2">
+                                                <img class="img-fluid" src="img/firma_alberto.png" alt="firma" onclick="cambiarlogo()" style="cursor: pointer;" />
+                                            </div>
+                                            <div class="col-lg-2"> 
+                                                <h6>Alberto Soria G.</h6>
+                                                <h6>Director General</h6>
+                                            </div>  
+                                        </div>
+                                    </div>
+                                </div>
+                                <footer class="col-lg-12 text-center">
+                                  <hr>
+                                  <% if(cotizacion[0].emite == 1){%>
+                                    <h6>Barafuste, S.A. de C.V.</h6>
+                                    <p>Av. Ceylan 599</p>
+                                    <p>Col.Industrial Vallejo, C.P. 02300, Azcapotzalco</p>
+                                    <p>Ciudad de México</p>
+                                  <%}else{%>
+                                    <h6>Jaknet, S.A. de C.V.</h6>
+                                    <p>Av. Ceylan 599</p>
+                                    <p>Col.Industrial Vallejo, C.P. 02300, Azcapotzalco</p>
+                                    <p>Ciudad de México</p>
+                                  <%} %>
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function definirNumero(cotizacion){
+        Swal.fire({
+            title: 'DEFINIR NUMERO DE COTIZACION',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'Escriba el numero de la cotizacion',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/definirNumeroPDFCotizacion?cotizacion=${cotizacion}&numero=${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+    function definirDestinatario(cotizacion){
+        Swal.fire({
+            title: 'DEFINIR DESTINATARIO',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'Escriba el nombre del destinatario',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/definirDestinatarioPDFCotizacion?cotizacion=${cotizacion}&destinatario=${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+    function definirPuestoDestinatario(cotizacion){
+        Swal.fire({
+            title: 'DEFINIR PUESTO DESTINATARIO',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'Escriba el puesto del destinatario',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/definirPuestoDestinatarioPDFCotizacion?cotizacion=${cotizacion}&puesto=${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+    function definirCliente(cotizacion){
+        Swal.fire({
+            title: 'DEFINIR CLIENTE',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'Escriba el nombre del cliente',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/definirClientePDFCotizacion?cotizacion=${cotizacion}&cliente=${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+    function definirMoneda(cotizacion){
+        Swal.fire({
+            title: 'DEFINIR MONEDA O TIPO DE CAMBIO',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'Escriba la abreviatura de la moneda',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/definirMonedaPDFCotizacion?cotizacion=${cotizacion}&moneda=${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+    function definirUbicacion(cotizacion){
+        Swal.fire({
+            title: 'DEFINIR UBICACION',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'Escriba la ubicacion',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/definirUbicacionPDFCotizacion?cotizacion=${cotizacion}&ubicacion=${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+    function definirQuienSolicita(cotizacion){
+        Swal.fire({
+            title: 'DEFINIR QUIEN SOLICITA',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'Escriba quien(es) solicita(n)',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/definirQuienSolicitaPDFCotizacion?cotizacion=${cotizacion}&solicita=${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+    function definirNotas(cotizacion){
+        Swal.fire({
+            title: 'NOTAS',
+            input: 'textarea',
+            icon: 'info',
+            inputLabel: 'Escriba algun comentario o aclaracion',
+            inputAttibutes:{
+                'aria-label': 'Type your message here'
+            },
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/definirNotasPDFCotizacion?cotizacion=${cotizacion}&notas=${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+    function cambiarlogo(cotizacion){
+        Swal.fire({
+            title: 'EMPRESA QUE EMITE',
+            input: 'select',
+            icon: 'info',
+            inputLabel: 'Seleccione que empresa emite (esto cambiará el logo y pie de página)',
+            inputOptions:{
+                'Empresa emisora':{
+                    1: 'Barafuste',
+                    2: 'Jaknet'
+                }
+            },
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/definirEmisorPDFCotizacion?cotizacion=${cotizacion}&emisor=${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+</script>
+
+<%- include('../../partials/scriptsNav.ejs') %> 
+<%- include('../../partials/dataTableJS.ejs') %> 
+<%- include('../../partials/footer.ejs') %> 

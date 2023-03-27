@@ -1,0 +1,307 @@
+<%- include('../../partials/head.ejs', {tituloPagina: 'VIATICOS DEL PROYECTO'}) %> 
+<%- include('../../partials/linksNav.ejs') %> 
+<%- include('../../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>VIATICOS <%= proyecto[0].nombre %></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <% if(flag == 1){%>
+                                    <li class="breadcrumb-item"><a href="/perfilCliente?cliente=<%= cliente %>">Cliente</a></li>
+                                <%}else if(flag == 2){%>
+                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=1">Ubicacion</a></li>
+                                <%}else if(flag == 3){%>
+                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&flag=0">Ubicacion</a></li>
+                                <%}else if(flag == 0){%>
+                                    <li class="breadcrumb-item"><a href="/adminproyectos">Proyectos</a></li>
+                                <%}else if(flag == 4){%>
+                                    <li class="breadcrumb-item"><a href="/misProyectos?folio=<%= user.folio %>">Proyectos</a></li>
+                                <%} %>
+                                <li class="breadcrumb-item active">Viaticos</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="card" onclick="definePresupuesto('<%= proyecto[0].folio %>', '<%= cliente %>', '<%= ubicacion %>', '<%= flag %>','<%= permisos %>')">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib">
+                                    <i class="ti-money color-primary border-primary"></i>
+                                </div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">PRESUPUESTO</div>
+                                    <div class="stat-digit">$<%= proyecto[0].presupuesto.toFixed(2) %></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib">
+                                    <i class="ti-money color-success border-success"></i>
+                                </div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">GASTADO</div>
+                                    <div class="stat-digit">$<%= datos.gastado.toFixed(2) %></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib">
+                                    <i class="ti-money color-danger border-danger"></i>
+                                </div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">SOBRANTE</div>
+                                    <div class="stat-digit">$<%= (proyecto[0].presupuesto - datos.gastado).toFixed(2) %></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib">
+                                    <i class="ti-money color-warning border-warning"></i>
+                                </div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">COMPROBADO</div>
+                                    <div class="stat-digit">$<%= datos.comprobado.toFixed(2) %></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body p-b-0">
+                                <h4 class="card-title">REGISTRO DE MOVIMIENTOS</h4>
+                            <!-- Nav tabs -->
+                            <ul class="nav nav-tabs customtab" role="tablist">
+                                <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#viaticos" role="tab"><span class="hidden-sm-up"><i class="ti-money"></i></span> <span class="hidden-xs-down">Viaticos</span></a> </li>
+                                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#comprobaciones" role="tab"><span class="hidden-sm-up"><i class="ti-money"></i></span> <span class="hidden-xs-down">Comprobaciones</span></a> </li>
+                            </ul>
+                            <!-- Tab panes -->
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="viaticos" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <div class="card-title">
+                                                <a href="/formassignViatics?proyecto=<%= proyecto[0].folio %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Asignar Viaticos</a>
+                                                <a href="/exportDataProyecto?data=depositos&proyecto=<%= proyecto[0].folio %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-success btn-flat btn-addon"><i class="ti-new-window"></i>Exportar Datos</a>      
+                                            </div>
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Beneficiario</th>
+                                                                <th>Emisor</th>
+                                                                <th>Concepto</th>
+                                                                <th>Uso</th>
+                                                                <th>Clave</th>
+                                                                <th>Fecha</th>
+                                                                <th>Monto</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% depositos.forEach((deposito)=>{%>
+                                                            <tr>
+                                                                <td><%= deposito.folio %></td>
+                                                                <td><%= deposito.beneficiario %></td>
+                                                                <td><%= deposito.nombre_emisor %> <%= deposito.apellido_emisor %></td>
+                                                                <td><%= deposito.concepto %></td>
+                                                                <td><%= deposito.uso %></td>
+                                                                <td><%= deposito.clave %></td>
+                                                                <td><%= deposito.fecha.toLocaleDateString('en-GB') %></td>
+                                                                <td>$<%= deposito.monto.toFixed(2) %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <a href="<%= deposito.enlace %>" class="btn btn-warning btn-sm" target="_blank"><i class="ti-link"></i></a>
+                                                                            <% if(deposito.folio_emisor == user.folio){%> 
+                                                                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteDeposito('<%= deposito.folio%>', '<%= deposito.folio_clave %>', '<%= deposito.id_bene %>', '<%= deposito.monto %>','<%= proyecto[0].folio %>', '<%= ubicacion %>','<%= cliente %>', '<%= flag %>', '<%= permisos %>')"><i class="ti-trash"></i></button>
+                                                                            <%}%> 
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <% }) %> 
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Beneficiario</th>
+                                                                <th>Emisor</th>
+                                                                <th>Concepto</th>
+                                                                <th>Uso</th>
+                                                                <th>Clave</th>
+                                                                <th>Fecha</th>
+                                                                <th>Monto</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane p-20" id="comprobaciones" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <div class="card-title">
+                                                <a href="/exportDataProyecto?data=comprobantes&proyecto=<%= proyecto[0].folio %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-success btn-flat btn-addon"><i class="ti-new-window"></i>Exportar Datos</a>     
+                                            </div>
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select2" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Beneficiario</th>
+                                                                <th>Emisor</th>
+                                                                <th>Concepto</th>
+                                                                <th>Uso</th>
+                                                                <th>Clave</th>
+                                                                <th>Fecha</th>
+                                                                <th>Monto</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% comprobaciones.forEach((comprobacion)=>{%>
+                                                                <tr>
+                                                                    <td><%= comprobacion.folio %></td>
+                                                                    <td><%= comprobacion.beneficiario %></td>
+                                                                    <td><%= comprobacion.nombre_emisor %> <%= comprobacion.apellido_emisor %></td>
+                                                                    <td><%= comprobacion.concepto %></td>
+                                                                    <td><%= comprobacion.uso %></td>
+                                                                    <td><%= comprobacion.clave %></td>
+                                                                    <td><%= comprobacion.fecha.toLocaleDateString('en-GB') %></td>
+                                                                    <td>$<%= comprobacion.monto.toFixed(2) %></td>
+                                                                    <td>
+                                                                        <div class="button-list">
+                                                                            <div class="btn-group btn-group-justified">
+                                                                                <a href="<%= comprobacion.enlace %>" class="btn btn-warning btn-sm" target="_blank"><i class="ti-link"></i></a>
+                                                                                <button class="btn btn-danger btn-sm" onclick="confirmDeleteComprobacion('<%= comprobacion.folio%>', '<%= comprobacion.folio_emisor %>', '<%= comprobacion.monto %>', '<%= proyecto[0].folio %>', '<%= ubicacion %>','<%= cliente %>', '<%= flag %>', '<%= permisos %>')"><i class="ti-trash"></i></button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                <% }) %> 
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Beneficiario</th>
+                                                                <th>Emisor</th>
+                                                                <th>Concepto</th>
+                                                                <th>Uso</th>
+                                                                <th>Clave</th>
+                                                                <th>Fecha</th>
+                                                                <th>Monto</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function showDesc(descripcion){
+        Swal.fire({
+            icon: 'info',
+            title: 'Descripcion',
+            text: `${descripcion}`,
+        })
+    }
+    function confirmDeleteDeposito(deposito, clave, bene, monto, proyecto, ubicacion, cliente, flag, permisos){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará el deposito ${deposito} (si el deposito ya esta comprobado no se podrá eliminar)`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteDepositoViaticosProyecto?deposito=${deposito}&clave=${clave}&bene=${bene}&monto=${monto}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}&permisos=${permisos}`
+                window.location = ruta
+            }
+        })
+    }
+    function confirmDeleteComprobacion(comprobante, emisor, monto, proyecto, ubicacion, cliente, flag, permisos){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará el comprobante ${comprobante} (El dinero de la comprobacion se le reembolsará al emisor)`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteComprobanteProyecto?comprobante=${comprobante}&emisor=${emisor}&monto=${monto}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}&permisos=${permisos}`
+                window.location = ruta
+            }
+        })
+    }
+    function definePresupuesto(proyecto, cliente, ubicacion, flag, permisos){
+        Swal.fire({
+            title: 'DEFINIR O REDEFINIR PRESUPUESTO DEL PROYECTO',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'Establecer monto efectivo destinado a viaticos durante el proyecto',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/definirPresupuesto?proyecto=${proyecto}&presupuesto=${value}&cliente=${cliente}&ubicacion=${ubicacion}&flag=${flag}&permisos=${permisos}`;
+                    window.location = ruta
+                }
+            }
+        })
+    }
+</script>
+
+<%- include('../../partials/scriptsNav.ejs') %> 
+<%- include('../../partials/dataTableJS.ejs') %> 
+<%- include('../../partials/footer.ejs') %> 

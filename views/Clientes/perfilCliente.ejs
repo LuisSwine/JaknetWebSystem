@@ -1,0 +1,454 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'PERFIL DEL CLIENTE'}) %> 
+<%- include('../partials/linksNav.ejs') %> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1><%= cliente[0].nombre %> <% if(user.tipo_usuario != 2){%><i onclick="cambiarNombre('<%= cliente[0].nombre %>','<%= cliente[0].folio %>')" style="cursor: pointer" class="ti-pencil"></i><%}%></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
+                                <% if(user.tipo_usuario != 2){%><li class="breadcrumb-item"><a href="/adminclients">Clientes</a></li><% } %> 
+                                <li class="breadcrumb-item active"><%= cliente[0].nombre %></li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-info color-primary border-primary"></i>
+                                </div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Servicio Brindado <% if(user.tipo_usuario != 2){%><i onclick="cambiarServicio('<%= cliente[0].folio %>', '<%= encodeURIComponent(JSON.stringify(tiposServicios)) %>')" style="cursor: pointer" class="ti-pencil"></i><%}%></div>
+                                    <div class="stat-digit"><%= cliente[0].servicio %> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-pin color-warning border-warning"></i>
+                                </div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Tipo de Cliente <% if(user.tipo_usuario != 2){%><i onclick="cambiarTipo('<%= cliente[0].folio %>', '<%= encodeURIComponent(JSON.stringify(tiposCliente)) %>')" style="cursor: pointer" class="ti-pencil"></i><%}%></div>
+                                    <div class="stat-digit"><%= cliente[0].tipo %> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body p-b-0">
+                                <h4 class="card-title">Informacion de <%= cliente[0].nombre %> </h4>
+                            <!-- Nav tabs -->
+                            <ul class="nav nav-tabs customtab" role="tablist">
+                                <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#ubicaciones" role="tab"><span class="hidden-sm-up"><i class="ti-stats-up"></i></span> <span class="hidden-xs-down">Ubicaciones</span></a></li>
+                                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#contactos" role="tab"><span class="hidden-sm-up"><i class="ti-id-badge"></i></span> <span class="hidden-xs-down">Contactos</span></a> </li>
+                                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#proyectos" role="tab"><span class="hidden-sm-up"><i class="ti-mobile"></i></span><span class="hidden-xs-down">Proyectos</span></a></li>
+                                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#cotizaciones" role="tab"><span class="hidden-sm-up"><i class="ti-clipboard"></i></span> <span class="hidden-xs-down">Cotizaciones</span></a></li>
+                            </ul>
+                            <!-- Tab panes -->
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="ubicaciones" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <% if(user.tipo_usuario != 2){%>
+                                            <div class="card-title">
+                                                <a href="/formcreateubicacion?cliente=<%= cliente[0].folio %>&flag=1" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Añadir Ubicacion</a>     
+                                            </div>
+                                            <% } %> 
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Direccion</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% ubicaciones.forEach((ubicacion)=>{ %>
+                                                            <tr>
+                                                                <td><%= ubicacion.folio %></td>
+                                                                <td><%= ubicacion.nombre %></td>
+                                                                <td><%= ubicacion.direccion %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <a class="btn btn-info btn-sm" href="/perfilUbicacion?ubicacion=<%= ubicacion.folio %>&cliente=<%= cliente[0].folio%>&flag=1" title="Configuracion"><i class="ti-settings"></i></a>
+                                                                            <a class="btn btn-pink btn-sm" target="_blank" href="https://www.google.com.mx/maps/search/<%= ubicacion.direccion %>" title="LOCALIZAR"><i class="ti-map-alt"></i></a>
+                                                                            <% if(user.tipo_usuario != 2){%><button class="btn btn-danger btn-sm" onclick="confirmDeleteUbi('<%= ubicacion.folio %>', '<%= cliente[0].folio%>')"><i class="ti-trash"></i></button><% } %> 
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <% }) %>    
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Direccion</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane p-20" id="contactos" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <% if(user.tipo_usuario != 2){%>
+                                            <div class="card-title">
+                                                <a href="/formcreatecontact?cliente=<%= cliente[0].folio %>&flag=1" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear Contacto</a>     
+                                            </div>
+                                            <% } %> 
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select2" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Email</th>
+                                                                <th>Telefono</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% contactos.forEach((contacto)=>{ %>
+                                                            <tr>
+                                                                <td><%= contacto.folio %></td>
+                                                                <td><%= contacto.nombre %></td>
+                                                                <td><%= contacto.email %></td>
+                                                                <td><%= contacto.telefono %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <button class="btn btn-pink btn-sm" onclick="showDesc('<%= contacto.descripcion %>')" title="INFORMACION"><i class="ti-info"></i></button>
+                                                                            <% if(user.tipo_usuario != 2){%>
+                                                                            <a class="btn btn-primary btn-sm" href="/editarContacto?contacto=<%= contacto.folio  %>&cliente=<%= cliente[0].folio %>&flag=1"><i class="ti-pencil"></i></a>
+                                                                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteContact('<%= contacto.folio %>', '<%= cliente[0].folio %>')"><i class="ti-trash"></i></button>
+                                                                            <% } %> 
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <% }) %>    
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Email</th>
+                                                                <th>Telefono</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane p-20" id="proyectos" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <% if(user.tipo_usuario != 2){%>
+                                            <div class="card-title">
+                                                <a href="/formcreateproyect?cliente=<%= cliente[0].folio %>&flag=1" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear Proyecto</a>   
+                                            </div>
+                                            <% } %> 
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select3" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Ubicacion</th>
+                                                                <th>Estatus</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% proyectos.forEach((proyecto)=>{ %>
+                                                            <tr>
+                                                                <td><%= proyecto.folio %></td>
+                                                                <td><%= proyecto.nombre %></td>
+                                                                <td><%= proyecto.ubicacion %></td>
+                                                                <td><%= proyecto.estatus %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <% if(user.tipo_usuario != 2){%>
+                                                                            <a class="btn btn-info btn-sm" href="/profileProyect?proyecto=<%= proyecto.folio %>&cliente=<%= cliente[0].folio %>&flag=1" title="CONFIGURACION DEL PROYECTO"><i class="ti-settings"></i></a>
+                                                                            <a class="btn btn-pink btn-sm" href="/proyectosInvent?proyecto=<%= proyecto.folio %>&cliente=<%= cliente[0].folio %>&flag=1" title="INVENTARIO EN EL PROYECTO"><i class="ti-truck"></i></a>
+                                                                            <a class="btn btn-success btn-sm" href="/proyectViaticos?proyecto=<%= proyecto.folio %>&cliente=<%= cliente[0].folio %>&flag=1" title="VIATICOS DEL PROYECTO"><i class="ti-money"></i></a>
+                                                                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteProyecto('<%= proyecto.folio %>', '<%= cliente[0].folio %>')"><i class="ti-trash"></i></button>
+                                                                            <% } %> 
+                                                                            <a class="btn btn-primary btn-sm" href="<%= proyecto.galeria %>" target="_blank" title="GALERIA DEL PROYECTO"><i class="ti-image"></i></a>
+                                                                            <a class="btn btn-warning btn-sm" href="<%= proyecto.documentacion %>" target="_blank" title="DOCUMENTACION DEL PROYECTO"><i class="ti-files"></i></a>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>   
+                                                            </tr>
+                                                            <% }) %> 
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Nombre</th>
+                                                                <th>Ubicacion</th>
+                                                                <th>Estatus</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane p-20" id="cotizaciones" role="tabpanel">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <% if(user.tipo_usuario != 2){%>
+                                            <div class="card-title">
+                                                <a href="/formCreateCotClient?cliente=<%= cliente[0].folio %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear Cotizacion</a>     
+                                            </div>
+                                            <% } %> 
+                                            <div class="bootstrap-data-table-panel">
+                                                <div class="table-responsive">
+                                                    <table id="row-select4" class="display table table-borderd table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Ubicacion</th>
+                                                                <th>Proyecto</th>
+                                                                <th>Rendimiento</th>
+                                                                <th>Costo Tecnico</th>
+                                                                <th>Costo Supervisor</th>
+                                                                <th>Intereses</th>
+                                                                <th>Contacto</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% cotizaciones.forEach((cotizacion)=>{ %>
+                                                            <tr>
+                                                                <td><%= cotizacion.folio %></td>
+                                                                <td><%= cotizacion.ubicacion %></td>
+                                                                <td><%= cotizacion.proyecto %></td>
+                                                                <td><%= cotizacion.rendimiento %></td>
+                                                                <td>$<%= cotizacion.costo_tecnico %></td>
+                                                                <td>$<%= cotizacion.costo_supervisor %></td>
+                                                                <td><%= cotizacion.intereses %></td>
+                                                                <td><%= cotizacion.contacto %></td>
+                                                                <td>
+                                                                    <div class="button-list">
+                                                                        <div class="btn-group btn-group-justified">
+                                                                            <a class="btn btn-info btn-sm" href="/cotizacionMain?cotizacion=<%= cotizacion.folio %>&cliente=<%= cliente[0].folio %>&flag=6" title="INFORMACION"><i class="ti-settings"></i></a>
+                                                                            <a href="/cotizacionPDF?cotizacion=<%= cotizacion.folio %>" class="btn btn-warning btn-sm" target="_blank" title="Configurar"><i class="ti-file"></i></a>
+                                                                            <% if(user.tipo_usuario != 2){%><button class="btn btn-danger btn-sm" onclick="confirmDeleteCoti('<%= cotizacion.folio %>', '<%= cliente[0].folio %>')" title="ELIMINAR COTIZACION"><i class="ti-trash"></i></button><% } %> 
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr> 
+                                                            <% }) %> 
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>Folio</th>
+                                                                <th>Ubicacion</th>
+                                                                <th>Proyecto</th>
+                                                                <th>Rendimiento</th>
+                                                                <th>Costo Tecnico</th>
+                                                                <th>Costo Supervisor</th>
+                                                                <th>Intereses</th>
+                                                                <th>Contacto</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function showDesc(descripcion){
+        Swal.fire({
+            icon: 'info',
+            title: 'Descripcion',
+            text: `${descripcion}`,
+        })
+    }
+    function confirmDeleteContact(contacto, cliente){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará al contacto ${contacto}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteContact?contacto=${contacto}&cliente=${cliente}&flag=1`
+                window.location = ruta
+            }
+        })
+    }
+    function confirmDeleteUbi(ubicacion, cliente){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará la ubicacion ${ubicacion}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteUbicacionCliente?ubicacion=${ubicacion}&cliente=${cliente}`
+                window.location = ruta
+            }
+        })
+    }
+    function confirmDeleteProyecto(folio, cliente){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará el proyecto ${folio}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteProyectoCliente?proyecto=${folio}&cliente=${cliente}`
+                window.location = ruta
+            }
+        })
+    }
+    function confirmDeleteCoti(folio, cliente){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará la cotizacion ${folio} (la cotizacion debe estar vacia para ser eliminada, es decir, sin productos ni servicios)`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteCotiCliente?folio=${folio}&cliente=${cliente}`
+                window.location = ruta
+            }
+        })
+    }
+    function cambiarNombre(actual,folio){
+        Swal.fire({
+            title: 'CAMBIAR NOMBRE DEL CLIENTE',
+            input: 'text',
+            icon: 'info',
+            inputValue: actual,
+            inputLabel: 'Al cambiar el nombre del cliente se cambiará en todas las partes del sistema',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/cambiarNombreCliente?cliente=${folio}&nombre=${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+    function cambiarServicio(cliente, objeto){
+        let servicios = JSON.parse(decodeURIComponent(objeto))
+        Swal.fire({
+            title: 'Seleccione el tipo de Servicio',
+            input: 'select',
+            inputOptions: {
+                'Tipos de Servicio': {
+                    1: servicios[0].tipo,
+                    2: servicios[1].tipo,
+                    3: servicios[2].tipo
+                }
+            },
+            inputPlaceholder: 'Seleccione un servicio',
+            showCancelButton: true,
+            inputValidator: (value)=>{
+                if(!value){
+                    return 'Necesitas seleccionar algo'
+                }else{
+                    const ruta = `/editServicioCliente?cliente=${cliente}&servicio=${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+    function cambiarTipo(cliente, objeto){
+        let tipos = JSON.parse(decodeURIComponent(objeto))
+        Swal.fire({
+            title: 'Seleccione el tipo de Cliente',
+            input: 'select',
+            inputOptions: {
+                'Tipos de Servicio': {
+                    1: tipos[0].tipo,
+                    2: tipos[1].tipo
+                }
+            },
+            inputPlaceholder: 'Seleccione un tipo',
+            showCancelButton: true,
+            inputValidator: (value)=>{
+                if(!value){
+                    return 'Necesitas seleccionar algo'
+                }else{
+                    const ruta = `/editTipoCliente?cliente=${cliente}&tipo=${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+</script>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/dataTableJS.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

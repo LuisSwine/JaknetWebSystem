@@ -1,0 +1,119 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'Asignar Viaticos'}) %> 
+<%- include('../partials/linksNav.ejs')%> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>Bienvenido <%= user.nombres%></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/adminViaticosGrl">Viaticos</a></li>
+                                <li class="breadcrumb-item active">Asignar Viaticos</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>ASIGNAR VIATICOS</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="basic-elements">
+                                <form action="/assignViatics" method="post">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>SELECCIONAR USUARIO</label>
+                                                <select class="form-control" name="id_bene" id="id_bene" onchange="cambioValores('<%= encodeURIComponent(JSON.stringify(usuarios)) %>')">
+                                                    <option disabled selected>--Seleccione--</option>
+                                                    <% usuarios.forEach((usuario)=>{ if(usuario.folio != user.folio){ %>
+                                                        <option value="<%= usuario.folio %>"><%= usuario.nombres %> <%= usuario.apellidos %></option>
+                                                    <% }}) %> 
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>USO</label>
+                                                <input type="text" class="form-control" id="uso" name="uso" placeholder="(Hospedaje, Comida, Material, Transporte)" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>MONTO</label>
+                                                <input type="number" step="any" class="form-control" id="monto" name="monto" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="number" value="<%= user.folio %>" class="form-control" id="emisor" name="emisor" hidden>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>ENLACE DE COMPROBANTE</label>
+                                                <input type="url" class="form-control" id="enlace" name="enlace" placeholder="Inserte el enlace del comprobante" required>
+                                                <span class="help-block">
+                                                    <small>Acceda a su carpeta <a href="<%= user.documentacion %>" target="_blank">aquí</a></small>
+                                                </span>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary m-b-10">ASIGNAR SALDO</button>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>BENEFICIARIO</label>
+                                                <input type="text" class="form-control" id="beneficiario" name="beneficiario" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>CONCEPTO</label>
+                                                <input type="text" class="form-control" id="concepto" name="concepto" placeholder="Motivo del deposito" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>FECHA</label>
+                                                <input type="date" class="form-control" id="fecha" name="fecha" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>SELECCIONAR PROYECTO</label>
+                                                <select class="form-control" name="proyecto" id="proyecto">
+                                                    <option disabled selected>--Seleccione--</option>
+                                                    <% proyectos.forEach((proyecto)=>{%>
+                                                        <option value="<%= proyecto.folio %>"><%= proyecto.ubicacion %> - <%= proyecto.nombre %></option>
+                                                    <% }) %> 
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </section>
+        </div>
+    </div>
+</div>
+
+<script>
+    function cambioValores(objeto){
+        let valor = JSON.parse(decodeURIComponent(objeto))
+        let selected = document.getElementById('id_bene').value
+        let nombre = ''
+        valor.forEach((variable)=>{
+            if(variable.folio == selected){
+                nombre = `${variable.nombres} ${variable.apellidos}`
+            }
+        })
+        document.getElementById('beneficiario').value = nombre
+    }
+</script>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

@@ -1,0 +1,77 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'Nuevo Cliente'}) %> 
+<%- include('../partials/linksNav.ejs')%> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>Bienvenido <%= user.nombres%></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/adminclients">Lista</a></li>
+                                <li class="breadcrumb-item active">Crear Cliente</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>REGISTRAR UN NUEVO CLIENTE</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="basic-elements">
+                                <form action="/createClient" method="post">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>NOMBRE</label>
+                                                <input type="text" class="form-control" placeholder="Nombre del cliente" id="nombre" name="nombre" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>TIPO DE CLIENTE</label>
+                                                <select class="form-control" name="tipo_cliente" id="tipo_cliente">
+                                                    <option value="1" selected>1 - FISICO</option>
+                                                    <option value="2">2 - MORAL</option>
+                                                </select>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary m-b-10">CREAR CLIENTE</button>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>TIPO DE SERVICIO</label>
+                                                <select class="form-control" name="tipo_servicio" id="tipo_servicio">
+                                                    <% servicios.forEach((servicio)=>{ %>
+                                                    <option value="<%= servicio.folio %>"><%= servicio.tipo %></option>
+                                                    <% }) %> 
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </section>
+            
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

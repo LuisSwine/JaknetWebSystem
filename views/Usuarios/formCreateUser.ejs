@@ -1,0 +1,98 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'Registrar Nuevo Usuario'}) %> 
+<%- include('../partials/linksNav.ejs')%> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>Bienvenido <%= user.nombres%></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/adminusers">Lista</a></li>
+                                <li class="breadcrumb-item active">Crear Usuario</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>CREAR NUEVO USUARIO</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="basic-elements">
+                                <form action="/createUser" method="post">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>NOMBRES</label>
+                                                <input type="text" class="form-control" placeholder="Nombres" id="nombres" name="nombres" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>USUARIO</label>
+                                                <input type="text" class="form-control" placeholder="Usuario" id="usuario" name="usuario" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>E-MAIL</label>
+                                                <input id="email" name="email" class="form-control" type="email" placeholder="Email" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>LINK DE DOCUMENTACION</label>
+                                                <input class="form-control" type="url" placeholder="Enlace de Documentacion" name="linkDoc" id="linkDoc" required>
+                                                <span class="help-block">
+                                                    <small>Crear enlace de documentacion <a href="https://drive.google.com/drive/folders/1tIfm0dnk6IgrReTNadrglEqp4wEChzAG?usp=sharing" target="_blank">aquí</a></small>
+                                                </span>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary m-b-10">CREAR USUARIO</button>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>APELLIDOS</label>
+                                                <input type="text" class="form-control" placeholder="Apellidos" id="apellidos" name="apellidos" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>CONTRASEÑA</label>
+                                                <input class="form-control" type="password" value="password" id="pass" name="pass" placeholder="Contraseña" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>TELEFONO</label>
+                                                <input type="text" class="form-control" placeholder="Num. Telefono" id="telefono" name="telefono" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>TIPO DE USUARIO</label>
+                                                <select class="form-control" name="tipoUser" id="tipoUser">
+                                                    <option value="2" selected>1 - EMPLEADO</option>
+                                                    <% if(user.tipo_usuario == 0){ %>
+                                                    <option value="1">2 - ADMIN</option>
+                                                    <% } %> 
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </section>
+            
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

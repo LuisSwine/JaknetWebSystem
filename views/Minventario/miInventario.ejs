@@ -1,0 +1,154 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'Mi Inventario'}) %> 
+<%- include('../partials/linksNav.ejs') %> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <% if(flag == 1){%>
+                            <h4>INVENTARIO DE <%= usuario[0].nombres %></h4>
+                            <%}else{%>
+                            <h4>REGISTROS DE MI INVENTARIO</h4>    
+                            <%} %> 
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
+                                <% if(flag == 1){%>
+                                <li class="breadcrumb-item"><a href="/adminusers">Lista</a></li>
+                                <li class="breadcrumb-item active">Inventario de <%= usuario[0].nombres %> </li>
+                                <%}else{%>
+                                <li class="breadcrumb-item active">Mi Inventario</li>
+                                <%} %> 
+                                
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-title">
+                                <div class="button-list">
+                                    <a href="/movimientosInventarioPersonal?usuario=<%= usuario[0].folio %>&flag=<%= flag %>" class="btn btn-success btn-flat btn-addon"><i class="ti-notepad"></i>Reporte de movimientos</a>
+                                    <% if(user.folio == usuario[0].folio){ %> 
+                                        <a class="btn btn-primary btn-flat btn-addon" href="/moverInventUser?usuario=<%= usuario[0].folio %>&flag=<%= flag %>"><i class="ti-plus"></i>Añadir Elementos</a>
+                                    <% } %> 
+                                </div>     
+                            </div>
+                            <div class="bootstrap-data-table-panel">
+                                <div class="table-responsive">
+                                    <table id="row-select" class="display table table-borderd table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Acciones</th>
+                                                <th>Cantidad</th>
+                                                <th>SKU</th>
+                                                <th>Producto</th>
+                                                <th>Categoria</th>
+                                                <th>Tipo</th>
+                                                <th>Marca</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% productos.forEach((producto)=>{ %>
+                                            <tr>
+                                                <td>
+                                                    <div class="button-list">
+                                                        <div class="btn-group btn-group-justified">
+                                                            <button onclick="eliminarRegistro('<%= producto.folio %>', '<%= producto.folio_producto %>', '<%= producto.cantidad %>', '<%= producto.folio_unidades %>','<%= usuario[0].folio %>', '<%= flag %>')" class="btn btn-danger btn-sm"><i class="ti-trash"></i></button>
+                                                            <button onclick="editarRegistro('<%= producto.folio %>', '<%= producto.folio_producto %>', '<%= producto.cantidad %>', '<%= producto.folio_unidades %>','<%= usuario[0].folio %>', '<%= flag %>')" class="btn btn-primary btn-sm"><i class="ti-pencil"></i></button>
+                                                        </div>
+                                                    </div>
+                                                </td> 
+                                                <td><%= producto.cantidad %> <%= producto.abreviatura %></td>  
+                                                <td><%= producto.sku %></td>
+                                                <td><%= producto.descripcion %></td>
+                                                <td><%= producto.categoria %></td>
+                                                <td><%= producto.tipo %></td>
+                                                <td><%= producto.marca %></td>
+                                            </tr>
+                                            <% }) %> 
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th>Acciones</th>
+                                                <th>Cantidad</th>
+                                                <th>SKU</th>
+                                                <th>Producto</th>
+                                                <th>Categoria</th>
+                                                <th>Tipo</th>
+                                                <th>Marca</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function eliminarRegistro(registro, producto, cantidad, unidades, user, flag){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se devolveran las existencias al inventario`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/returnAll2Invent?registro=${registro}&producto=${producto}&cantidad=${cantidad}&unidades=${unidades}&usuario=${user}&flag=${flag}`
+                window.location = ruta
+            }
+        })
+    }
+    function editarRegistro(registro, producto, cantidad, unidades, user, flag){
+        Swal.fire({
+            title: 'Modificar Cantidad del producto en posesion',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'La modificacion de cantidad se hará en base al inventario, si agrega se tomarán las existencias de el inventario y si retira se devolveran al inventario',
+            showCancelButton: true,
+            inputValue: cantidad,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else if(parseInt(value) < 0){
+                    return 'No puede haber existencias negativas'
+                }else{
+                    if(parseInt(value) === 0){
+                        const ruta = `/returnAll2Invent?registro=${registro}&producto=${producto}&cantidad=${cantidad}&unidades=${unidades}&usuario=${user}&flag=${flag}`
+                        window.location = ruta
+                    }else{
+                        const ruta = `/modificarPersonalInvent?registro=${registro}&producto=${producto}&cantidadActual=${cantidad}&nuevaCantidad=${value}&unidades=${unidades}&usuario=${user}&flag=${flag}`
+                        window.location = ruta
+                    }
+                }
+            }
+        })
+    }
+</script>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/dataTableJS.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

@@ -1,0 +1,145 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'PROYECTOS'}) %> 
+<%- include('../partials/linksNav.ejs') %> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <% if(flag){ %>
+                                <h4>CONTROL DE PROYECTOS  <%= cliente[0].nombre %></h4>
+                            <% } else{ %>
+                                <h4>CONTROL DE PROYECTOS</h4>
+                            <% } %> 
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <% if(flag){ %><li class="breadcrumb-item"><a href="/adminclients">Lista</a></li><% }%> 
+                                <li class="breadcrumb-item active">PROYECTOS</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-title">
+                                <% if(flag){ %>
+                                    <a href="/formcreateproyect/<%= cliente[0].folio %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear Nuevo Proyecto</a>
+                                <% }else{ %>
+                                <span>Para crear un Nuevo Proyecto, hacerlo desde los <a href="/adminclients">clientes</a></span>        
+                                <% } %> 
+                            </div>
+                            <div class="bootstrap-data-table-panel">
+                                <div class="table-responsive">
+                                    <table id="row-select" class="display table table-borderd table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Folio</th>
+                                                <th>Nombre</th>
+                                                <th>Cliente</th>
+                                                <th>Ubicacion</th>
+                                                <th>Estatus</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% proyectos.forEach((proyecto)=>{ %>
+                                            <tr>
+                                                <td><%= proyecto.folio %></td>
+                                                <td><%= proyecto.nombre %></td>
+                                                <td><%= proyecto.cliente %></td>
+                                                <td><%= proyecto.ubicacion %></td>
+                                                <td><%= proyecto.estatus %></td>
+                                                <td>
+                                                    <div class="button-list">
+                                                        <div class="btn-group btn-group-justified">
+                                                            <a class="btn btn-info btn-sm" href="/profileProyect?proyecto=<%= proyecto.folio %>&flag=0" title="CONFIGURACION DEL PROYECTO"><i class="ti-settings"></i></a>
+                                                            <a class="btn btn-pink btn-sm" href="/proyectosInvent?proyecto=<%= proyecto.folio %>&flag=0" title="INVENTARIO EN EL PROYECTO"><i class="ti-truck"></i></a>
+                                                            <a class="btn btn-success btn-sm" href="/proyectViaticos?proyecto=<%= proyecto.folio %>&flag=0" title="VIATICOS DEL PROYECTO"><i class="ti-money"></i></a>
+                                                            <a class="btn btn-primary btn-sm" href="<%= proyecto.galeria %>" target="_blank" title="GALERIA DEL PROYECTO"><i class="ti-image"></i></a>
+                                                            <a class="btn btn-warning btn-sm" href="<%= proyecto.documentacion %>" target="_blank" title="DOCUMENTACION DEL PROYECTO"><i class="ti-files"></i></a>
+                                                            <button class="btn btn-danger btn-sm" onclick="confirmDelete('<%= proyecto.folio %>')"><i class="ti-trash"></i></button>
+                                                        </div>
+                                                    </div>
+                                                </td>   
+                                            </tr>
+                                            <% }) %> 
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th>Folio</th>
+                                                <th>Nombre</th>
+                                                <th>Cliente</th>
+                                                <th>Ubicacion</th>
+                                                <th>Estatus</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function crearCategoria(){
+        Swal.fire({
+            title: 'NUEVA CATEGORIA',
+            input: 'text',
+            icon: 'info',
+            inputLabel: 'Nombre de la nueva categoria',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `/createCategoria/${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+    function editServicio(folio){
+        const ruta = `/editarservicio/${folio}`
+        window.location = ruta
+    }
+    function confirmDelete(folio){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará el proyecto ${folio}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteProyectoGrl?proyecto=${folio}`
+                window.location = ruta
+            }
+        })
+    }
+    
+</script>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/dataTableJS.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

@@ -1,0 +1,72 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'RELACION CONTACTO - UBICACION'}) %> 
+<%- include('../partials/linksNav.ejs')%> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>Bienvenido <%= user.nombres%></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <% if(flag == 1){%>
+                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion[0].folio %>&cliente=<%= clienteSelected %>&flag=<%= flag %>">Ubicacion</a></li>
+                                <%}else{%>
+                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion[0].folio %>">Ubicacion</a></li>
+                                <%} %> 
+                                <li class="breadcrumb-item active">Relacionar Contacto & Ubicacion</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>Relacionar de <%= ubicacion[0].cliente %> con <%= ubicacion[0].nombre %> </h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="basic-elements">
+                                <form action="/relacionarContactoUbicacion" method="post">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="form-group">
+                                                <label>CONTACTO</label>
+                                                <select class="form-control" name="contacto" id="contacto" required>
+                                                    <option selected disabled>--Seleccione--</option>
+                                                    <% contactos.forEach((contacto)=>{ %>
+                                                    <option value="<%= contacto.folio %>"><%= contacto.nombre %></option>
+                                                    <% }) %> 
+                                                </select>
+                                            </div>
+                                            <input type="number" class="form-control" value="<%= ubicacion[0].folio %>" id="ubicacion" name="ubicacion" hidden>
+                                            <input type="number" class="form-control" value="<%= clienteSelected %>" id="cliente" name="cliente" hidden>
+                                            <input type="number" class="form-control" value="<%= flag %>" id="flag" name="flag" hidden>
+                                            <button type="submit" class="btn btn-primary m-b-10">ASIGNAR CONTACTO A LA UBICACION</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </section>
+            
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

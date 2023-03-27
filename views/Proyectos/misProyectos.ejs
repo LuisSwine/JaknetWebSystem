@@ -1,0 +1,112 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'MIS PROYECTOS'}) %> 
+<%- include('../partials/linksNav.ejs') %> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h4>MENU DE MIS PROYECTOS</h4>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
+                                <li class="breadcrumb-item active">MIS PROYECTOS</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="bootstrap-data-table-panel">
+                                <div class="table-responsive">
+                                    <table id="row-select" class="display table table-borderd table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Folio</th>
+                                                <th>Mi Rol</th>
+                                                <th>Proyecto</th>
+                                                <th>Cliente</th>
+                                                <th>Ubicacion</th>
+                                                <th>Estatus</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% proyectos.forEach((proyecto)=>{ %>
+                                            <tr>
+                                                <td><%= proyecto.folio %></td>
+                                                <td onclick="showInfo('<%= proyecto.descripcion %>')" style="cursor: pointer;"><%= proyecto.rol %></td>
+                                                <td><%= proyecto.proyecto %></td>
+                                                <td onclick="irCliente('<%= proyecto.folio_cliente %>')" style="cursor: pointer;"><%= proyecto.cliente %></td>
+                                                <td onclick="irUbicacion('<%= proyecto.folio_ubicacion %>')" style="cursor: pointer;"><%= proyecto.ubicacion %></td>
+                                                <td><%= proyecto.estatus %></td>
+                                                <td>
+                                                    <div class="button-list">
+                                                        <div class="btn-group btn-group-justified">
+                                                            <a class="btn btn-info btn-sm" href="/profileProyect?proyecto=<%= proyecto.folio_proyecto %>&flag=4&permisos=<%= proyecto.folio_rol %> " title="CONFIGURACION DEL PROYECTO"><i class="ti-settings"></i></a>
+                                                            <a class="btn btn-pink btn-sm" href="/proyectosInvent?proyecto=<%= proyecto.folio_proyecto %>&flag=4&permisos=<%= proyecto.folio_rol %> " title="INVENTARIO EN EL PROYECTO"><i class="ti-truck"></i></a>
+                                                            <% if(proyecto.folio_rol == 1){%> 
+                                                            <a class="btn btn-success btn-sm" href="/proyectViaticos?proyecto=<%= proyecto.folio_proyecto %>&flag=4&permisos=<%= proyecto.folio_rol %>" title="VIATICOS DEL PROYECTO"><i class="ti-money"></i></a>
+                                                            <% } %> 
+                                                            <a class="btn btn-primary btn-sm" href="<%= proyecto.galeria %>" target="_blank" title="GALERIA DEL PROYECTO"><i class="ti-image"></i></a>
+                                                            <a class="btn btn-warning btn-sm" href="<%= proyecto.documentacion %>" target="_blank" title="DOCUMENTACION DEL PROYECTO"><i class="ti-files"></i></a>
+                                                        </div>
+                                                    </div>
+                                                </td>   
+                                            </tr>
+                                            <% }) %> 
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th>Folio</th>
+                                                <th>Mi Rol</th>
+                                                <th>Proyecto</th>
+                                                <th>Cliente</th>
+                                                <th>Ubicacion</th>
+                                                <th>Estatus</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function showInfo(descripcion){
+        Swal.fire({
+            icon: 'info',
+            title: 'Descripcion del rol',
+            text: `${descripcion}`,
+        })
+    }
+    function irCliente(cliente){
+        window.location = `/perfilCliente?cliente=${cliente}`
+    }
+    function irUbicacion(ubicacion){
+        window.location = `/perfilUbicacion?ubicacion=${ubicacion}&flag=0`
+    }
+</script>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/dataTableJS.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

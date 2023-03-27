@@ -1,0 +1,165 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'Gestion de Usuarios'}) %> 
+<%- include('../partials/linksNav.ejs') %> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h4>Lista de Usuarios del Sistema</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <li class="breadcrumb-item active">Usuarios</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <section id="main-content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-title">
+                                <a href="/formcreateusers" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear</a>
+                                <a href="/generarReporteAsistencia" class="btn btn-success btn-flat btn-addon"><i class="ti-download"></i>Generar Reporte de Asistencia</a>     
+                            </div>
+                            <div class="bootstrap-data-table-panel">
+                                <div class="table-responsive">
+                                    <table id="row-select" class="display table table-borderd table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Folio</th>
+                                                <th>Rol</th>
+                                                <th>Nombre</th>
+                                                <th>Apellidos</th>
+                                                <th>Telefono</th>
+                                                <th>Email</th>
+                                                <th>Saldo</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% usuarios.forEach((usuario)=>{ %>
+                                            <tr>
+                                                <% 
+                                                let rol = ''
+                                                let color = ''
+                                                switch(parseInt(usuario.tipo_usuario)){
+                                                    case 0: 
+                                                        rol = 'SUPERADMINISTRADOR'
+                                                        color = 'primary'
+                                                        break;
+                                                    case 1: 
+                                                        rol = 'ADMINISTRADOR'
+                                                        color = 'warning'
+                                                        break;
+                                                    case 2: 
+                                                        rol = 'EMPLEADO'
+                                                        color = 'success'
+                                                        break;
+                                                }    
+                                                %> 
+                                                <td><%= usuario.folio %></td>
+                                                <td><span class="badge badge-<%= color %>"><%= rol %></span></td>
+                                                <td><%= usuario.nombres %></td>
+                                                <td><%= usuario.apellidos %></td>
+                                                <td><%= usuario.telefono %></td>
+                                                <td><%= usuario.email %></td>
+                                                <td>$<%= usuario.saldo.toFixed(2) %></td>
+                                                <td>
+                                                    <div class="button-list">
+                                                        <div class="btn-group btn-group-justified">
+                                                            <a class="btn btn-success btn-sm" href="/adminViaticosPersonal?usuario=<%= usuario.folio %>"><i class="ti-money"></i></a>
+                                                            <a class="btn btn-warning btn-sm" href="<%= usuario.documentacion %>" target="_blank"><i class="ti-link"></i></a>
+                                                            <a class="btn btn-pink btn-sm" href="/reporteAsistencia?usuario=<%= usuario.folio %>&flag=1" title="Generar reporte de asistencia"><i class="ti-calendar"></i></a>
+                                                            <a class="btn btn-info btn-sm" href="/miInventario?usuario=<%= usuario.folio %>&flag=1" title="Inventario Personal"><i class="ti-briefcase"></i></a>
+                                                            <% if(user.tipo_usuario == 0 || (user.tipo_usuario == 1 && usuario.tipo_usuario == 2)){%>
+                                                            <button class="btn btn-primary btn-sm" onclick="editUser('<%= usuario.folio %>')"><i class="ti-pencil"></i></button>
+                                                            <button class="btn btn-dark btn-sm" onclick="changeContra('<%= usuario.folio %>', '<%= user.folio %>')" title="CAMBIAR CONTRASEÑA"><i class="ti-key"></i></button>
+                                                            <button class="btn btn-danger btn-sm" onclick="confirmDelete('<%= usuario.folio %>')"><i class="ti-trash"></i></button>    
+                                                            <%} %>
+                                                        </div>
+                                                    </div>
+                                                </td>   
+                                            </tr>
+                                            <% }) %> 
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th>Folio</th>
+                                                <th>Rol</th>
+                                                <th>Nombre</th>
+                                                <th>Apellidos</th>
+                                                <th>Telefono</th>
+                                                <th>Email</th>
+                                                <th>Saldo</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function editUser(folio){
+        const ruta = `/editarusuario?usuario=${folio}`
+        window.location = ruta
+    }
+    function confirmDelete(folio){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminará el usuario ${folio}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Elimiar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteUser/${folio}`
+                window.location = ruta
+            }
+        })
+    }
+    function changeContra(folioUser, folioAdmin){
+        Swal.fire({
+                title: 'Cambiar Contraseña',
+                text: 'Ingrese su contraseña de inicio de sesion y la nueva contraseña del usuario',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Cambiar',
+                html:
+                    `<input type="password" id="admin" placeholder="Ingrese su contraseña" class="swal2-input">`+        
+                    `<input type="password" id="nueva" placeholder="Ingrese la nueva del usuario" class="swal2-input">`,
+                focusConfirm: false
+            }).then((result)=>{
+                if(result.isConfirmed){
+                    const passAdm = document.getElementById('admin').value;
+                    const passNue = document.getElementById('nueva').value;
+                    const ruta = `/changeContraUserAdmin?folioUser=${folioUser}&folioAdmin=${folioAdmin}&admin=${passAdm}&nueva=${passNue}`
+                    window.location = ruta
+                }
+            })
+    }
+</script>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/dataTableJS.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

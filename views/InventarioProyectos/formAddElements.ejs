@@ -1,0 +1,118 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'Mover Material del Inventario'}) %> 
+<%- include('../partials/linksNav.ejs')%> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>Bienvenido <%= user.nombres%></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <% if(flag == 1){%>
+                                    <li class="breadcrumb-item"><a href="/proyectosInvent?proyecto=<%= proyecto[0].folio %>&cliente=<%= cliente %>&flag=<%= flag %>"><%= proyecto[0].nombre %></a></li>
+                                <%}else if(flag == 3 || flag == 2){%>
+                                    <li class="breadcrumb-item"><a href="/proyectosInvent?proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>"><%= proyecto[0].nombre %></a></li>
+                                <%}else if(flag == 0){%>
+                                    <li class="breadcrumb-item"><a href="/proyectosInvent?proyecto=<%= proyecto[0].folio %>&flag=<%= flag %>"><%= proyecto[0].nombre %></a></li>
+                                <%}else if(flag == 4){%>
+                                    <li class="breadcrumb-item"><a href="/proyectosInvent?proyecto=<%= proyecto[0].folio %>&flag=<%= flag %>&permisos=<%= permisos %>"><%= proyecto[0].nombre %></a></li>
+                                <%} %>
+                                <li class="breadcrumb-item active">Agregar Elementos</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>AÑADIR NUEVO PRODUCTO</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="basic-elements">
+                                <form action="/addProduct2Proyecto" method="post">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>SELECCIONAR PRODUCTO</label>
+                                                <select class="form-control" name="producto" id="producto" onchange="cambioValores('<%= encodeURIComponent(JSON.stringify(inventario)) %>')">
+                                                    <option disabled selected>--Seleccione--</option>
+                                                    <% inventario.forEach((producto)=>{ %>
+                                                    <option value="<%= producto.folio_producto %>"><%= producto.producto %></option>
+                                                    <% }) %> 
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>SELECCIONAR UNIDADES</label>
+                                                <select class="form-control" name="unidad" id="unidad">
+                                                    <option disabled selected>--Seleccione--</option>
+                                                    <% unidades.forEach((unidad)=>{ %>
+                                                    <option value="<%= unidad.folio %>"><%= unidad.nombre %></option>
+                                                    <% }) %> 
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="number" class="form-control" id="folioInvent" name="folioInvent" hidden>
+                                                <input type="number" value="<%= proyecto[0].folio %>" class="form-control" id="proyecto" name="proyecto" hidden>
+                                                <input type="number" value="<%= user.folio %>" class="form-control" id="usuario" name="usuario" hidden>
+                                                <input type="number" class="form-control" id="cantidad_existente" name="cantidad_existente" hidden>
+                                                <input type="number" class="form-control" value="<%= ubicacion %>" id="ubicacion" name="ubicacion" hidden>
+                                                <input type="number" class="form-control" value="<%= cliente %>" id="cliente" name="cliente" hidden>
+                                                <input type="number" class="form-control" value="<%= flag %>" id="flag" name="flag" hidden>
+                                                <input type="number" class="form-control" value="<%= permisos %>" id="permisos" name="permisos" hidden>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary m-b-10">Mover Inventario</button>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>CANTIDAD</label> 
+                                                <input type="number" step="any" class="form-control" id="cantidad" name="cantidad" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </section>
+        </div>
+    </div>
+</div>
+
+<script>
+    function cambioValores(objeto){
+        let valor = JSON.parse(decodeURIComponent(objeto))
+        let selected = document.getElementById('producto').value
+        let precio = 0
+        let unidad = 0
+        let folioInvent = 0
+        valor.forEach((variable)=>{
+            if(variable.folio_producto == selected){
+                cantidad = variable.cantidad
+                unidad = variable.folio_unidad
+                folioInvent = variable.folio
+            }
+        })
+        document.getElementById('cantidad').value = cantidad
+        document.getElementById('cantidad_existente').value = cantidad
+        document.getElementById('unidad').value = unidad
+        document.getElementById('folioInvent').value = folioInvent
+    }
+</script>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

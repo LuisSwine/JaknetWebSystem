@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>REDIRECCIONADOR</title>
+
+        <style>
+            body{
+                background-color: rgb(1, 35, 63);
+                text-align: center;
+                color: white;
+            }
+        </style>
+    </head>
+    <body>
+    
+    <main>
+        <h1><%= title %></h1>
+    </main>
+
+    <!-- INSTANCIA POR CDN DE SWEETALERT -->
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Configuracion del alert -->
+    <% if (alert) { %>
+        <script>
+            Swal.fire({
+                title: '<%= alertTitle %>',
+                text: '<%= alertMessage %>',
+                icon: '<%= alertIcon %>',
+                showConfirmButton: '<%= showConfirmButton %>',
+                timer: '<%= timer %>',
+                allowOutsideClick: false
+            }).then(()=>{
+                let ruta1 = '/<%= ruta %>';
+                while(ruta1.includes('amp;')){
+                    ruta1 = ruta1.replace('amp;', '')
+                }
+                window.location = ruta1
+            });
+        </script>
+    <% } %> 
+
+    </body>
+</html>

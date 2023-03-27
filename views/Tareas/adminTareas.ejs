@@ -1,0 +1,188 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'Gestion de Tareas'}) %> 
+<%- include('../partials/linksNav.ejs') %> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h4>Lista de Tareas</h4>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
+                                <li class="breadcrumb-item active">Usuarios</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-title">
+                                <a href="/crearTareaAdmin" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear Nueva Tarea</a>     
+                            </div>
+                            <div class="bootstrap-data-table-panel">
+                                <div class="table-responsive">
+                                    <table id="row-select" class="display table table-borderd table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Acciones</th>
+                                                <th>Folio</th>
+                                                <th>Estatus</th>
+                                                <th>Fecha</th>
+                                                <th>Descripcion</th>
+                                                <th>Etapa</th>
+                                                <th>Area</th>
+                                                <th>Proyecto</th>
+                                                <th>Ubicacion</th>
+                                                <th>Cliente</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% tareas.forEach((tarea)=>{ %>
+                                            <tr>
+                                                <% 
+                                                let bandage = ''
+                                                switch(parseInt(tarea.folio_estatus)){
+                                                    case 1: bandage = 'primary'; break;
+                                                    case 2: bandage = 'success'; break;
+                                                    case 3: bandage = 'warning'; break;
+                                                    case 4: bandage = 'info'; break;
+                                                    case 5: bandage = 'dark'; break;
+                                                    case 6: bandage = 'danger'; break;
+                                                    case 7: bandage = 'pink'; break;
+                                                }
+                                                %>
+                                                <td>
+                                                    <div class="button-list">
+                                                        <div class="btn-group btn-group-justified">
+                                                            <% if(tarea.folio_estatus == 7){ %>
+                                                            <a class="btn btn-primary btn-sm" href="/assignAdminTask?tarea=<%= tarea.folio %>&proyecto=<%= tarea.folio_proyecto %>" title="Asignar Tarea"><i class="ti-pin"></i></a>
+                                                            <% } %>
+                                                            <% if((tarea.folio_estatus == 2 || tarea.folio_estatus == 5) && tarea.folio_tipo == 1){ %>
+                                                            <button class="btn btn-success btn-sm" onclick="verReporte('<%= tarea.folio %>', '<%= encodeURIComponent(JSON.stringify(reportes)) %>')" title="Ver Reporte"><i class="ti-eye"></i></button>
+                                                            <% } %>
+                                                            <% if(tarea.folio_estatus == 2 && tarea.folio_tipo == 1){ %>
+                                                            <button class="btn btn-info btn-sm" onclick="confirmDeclineReport('<%= tarea.folio %>')" title="Rechazar Evidencia"><i class="ti-close"></i></button>
+                                                            <button class="btn btn-warning btn-sm" onclick="confirmCheckAsIncomplete('<%= tarea.folio %>')" title="Marcar como Incompleta"><i class="ti-minus"></i></button>
+                                                            <% } %> 
+                                                            <button class="btn btn-danger btn-sm" onclick="confirmDelete('<%= tarea.folio %>')" title="Eliminar Tarea"><i class="ti-trash"></i></button>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td><%= tarea.folio %></td>
+                                                <td><span class="badge badge-<%= bandage %>"><%= tarea.estatus %></span></td>
+                                                <td><%= tarea.fecha.toLocaleDateString('en-GB')  %></td>
+                                                <td><%= tarea.descripcion %></td>
+                                                <td><%= tarea.etapa %></td>
+                                                <td><%= tarea.area %></td>
+                                                <td><%= tarea.proyecto %></td>
+                                                <td><%= tarea.ubicacion %></td>
+                                                <td><%= tarea.cliente %></td>   
+                                            </tr>
+                                            <% }) %> 
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th>Acciones</th>
+                                                <th>Folio</th>
+                                                <th>Estatus</th>
+                                                <th>Fecha</th>
+                                                <th>Descripcion</th>
+                                                <th>Etapa</th>
+                                                <th>Area</th>
+                                                <th>Proyecto</th>
+                                                <th>Ubicacion</th>
+                                                <th>Cliente</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function editUser(folio){
+        const ruta = `/editarusuario?usuario=${folio}`
+        window.location = ruta
+    }
+    function confirmDelete(folio){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se eliminara la tarea ${folio}, esto eliminará la asignación y la evidencia (en caso de existir)`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, eliminar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/deleteTareaAdmin?tarea=${folio}`
+                window.location = ruta
+            }
+        })
+    }
+    function confirmDeclineReport(folio){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se rechazará la entrega de la tarea ${folio}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Rechazar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/declineReportAdmin?tarea=${folio}`
+                window.location = ruta
+            }
+        })
+    }
+    function confirmCheckAsIncomplete(folio){
+        Swal.fire({
+            title: '¿ESTAS SEGURO?',
+            text: `Se marcará como incompleta la tarea ${folio}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Marcar'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                const ruta = `/checkAsIncAdmin?tarea=${folio}`
+                window.location = ruta
+            }
+        })
+    }
+    function verReporte(tarea, objeto){
+        let reportes = JSON.parse(decodeURIComponent(objeto))
+
+        reportes.forEach((reporte)=>{
+            if(reporte.tarea == tarea){
+                window.open(reporte.enlace, '_blank')
+            }
+        })
+    }
+</script>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/dataTableJS.ejs') %> 
+<%- include('../partials/footer.ejs') %> 
