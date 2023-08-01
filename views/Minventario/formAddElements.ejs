@@ -2,6 +2,8 @@
 <%- include('../partials/linksNav.ejs')%> 
 <%- include('../partials/header.ejs', {user: user}) %> 
 
+<!-- TODO: ACTUALIZAR EL ALMACEN AL SELECCIONAR EL PRODUCTO -->
+
 <div class="content-wrap">
     <div class="main">
         <div class="container-fluid">
@@ -20,9 +22,9 @@
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
                                 <% if(flag == 1){%>
-                                    <li class="breadcrumb-item"><a href="/miInventario?usuario=<%= usuario[0].folio %>&flag=<%= flag %>">Mi Inventario</a></li>
+                                    <li class="breadcrumb-item"><a href="mi_inventario?usuario=<%= usuario[0].folio %>&flag=<%= flag %>">Inventario</a></li>
                                 <%}else{%>
-                                <li class="breadcrumb-item"><a href="/miInventario?usuario=<%= usuario[0].folio %>">Mi Inventario</a></li>
+                                <li class="breadcrumb-item"><a href="mi_inventario?usuario=<%= usuario[0].folio %>">Mi Inventario</a></li>
                                 <%} %> 
                                 <li class="breadcrumb-item active">Agregar Elementos</li>
                             </ol>
@@ -39,7 +41,7 @@
                         </div>
                         <div class="card-body">
                             <div class="basic-elements">
-                                <form action="/addProduct2User" method="post">
+                                <form action="agregar" method="post">
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
@@ -63,7 +65,10 @@
                                             <div class="form-group">
                                                 <input type="number" class="form-control" id="folioInvent" name="folioInvent" hidden>
                                                 <input type="number" value="<%= user.folio %>" class="form-control" id="usuario" name="usuario" hidden>
+                                                <input type="number" value="<%= usuario[0].folio %>" class="form-control" id="usuario_afectado" name="usuario_afectado" hidden>
+                                                <input type="number" value="<%= flag %>" class="form-control" id="flag" name="flag" hidden>
                                                 <input type="number" class="form-control" id="cantidad_existente" name="cantidad_existente" hidden>
+                                                <input type="number" class="form-control" id="almacen" name="almacen" hidden>
                                             </div>
                                             <button type="submit" class="btn btn-primary m-b-10">Mover Inventario</button>
                                         </div>
@@ -91,17 +96,20 @@
         let precio = 0
         let unidad = 0
         let folioInvent = 0
+        let almacen = 0
         valor.forEach((variable)=>{
             if(variable.folio_producto == selected){
                 cantidad = variable.cantidad
                 unidad = variable.folio_unidad
                 folioInvent = variable.folio
+                almacen = variable.folio_almacen
             }
         })
         document.getElementById('cantidad').value = cantidad
         document.getElementById('cantidad_existente').value = cantidad
         document.getElementById('unidad').value = unidad
         document.getElementById('folioInvent').value = folioInvent
+        document.getElementById('almacen').value = almacen
     }
 </script>
 

@@ -9,7 +9,7 @@
                 <div class="col-lg-8 p-r-0 title-margin-right">
                     <div class="page-header">
                         <div class="page-title">
-                            <h1>VIATICOS DE <%= user.nombres %>  (<button type="button" class="btn btn-link m-b-10 m-l-5" onclick="filtrarPorFecha('<%= usuario[0].folio %>')" >Filtrar por fecha</button> | <button type="button" class="btn btn-link m-b-10 m-l-5" onclick="window.open('/adminViaticosPersonal?usuario=<%=usuario[0].folio%>', '_self')" >LimpiarFiltro</button>) </h1>
+                            <h1>VIATICOS DE <%= user.nombres %>  (<button type="button" class="btn btn-link m-b-10 m-l-5" onclick="filtrarPorFecha('<%= usuario[0].folio %>')" >Filtrar por fecha</button> | <button type="button" class="btn btn-link m-b-10 m-l-5" onclick="window.open('admin_personal?usuario=<%=usuario[0].folio%>', '_self')" >LimpiarFiltro</button>) </h1>
                         </div>
                     </div>
                 </div>
@@ -80,7 +80,7 @@
                                     <div class="col-lg-12">
                                         <div class="card">
                                             <div class="card-title">
-                                                <a href="/exportDataUsuario?data=depositos&<%= complemento_ruta %>" class="btn btn-success btn-flat btn-addon"><i class="ti-new-window"></i>Exportar Datos</a> 
+                                                <a href="exportar_usuario?data=depositos&<%= complemento_ruta %>" class="btn btn-success btn-flat btn-addon"><i class="ti-new-window"></i>Exportar Datos</a> 
                                             </div>
                                             <div class="bootstrap-data-table-panel">
                                                 <div class="table-responsive">
@@ -106,14 +106,14 @@
                                                                 <td><%= deposito.concepto %></td>
                                                                 <td><%= deposito.uso %></td>
                                                                 <td><%= deposito.nombre_proyecto %></td>
-                                                                <td><a href="/adminClaves?clave=<%= deposito.folio_clave %>"><%= deposito.clave %></a></td>
+                                                                <td><a href="claves_personal?clave=<%= deposito.folio_clave %>"><%= deposito.clave %></a></td>
                                                                 <td><%= deposito.fecha.toLocaleDateString('en-GB') %></td>
                                                                 <td>$<%= deposito.monto.toFixed(2) %></td>
                                                                 <td>
                                                                     <div class="button-list">
                                                                         <div class="btn-group btn-group-justified">
                                                                             <% if(user.folio == usuario[0].folio){%>
-                                                                            <a class="btn btn-primary btn-sm" href="/formLoadTicket?usuario=<%= user.folio %>&clave=<%= deposito.folio_clave %>" title="Comprobar Deposito"><i class="ti-ticket"></i></a>
+                                                                            <a class="btn btn-primary btn-sm" href="comprobar?usuario=<%= user.folio %>&clave=<%= deposito.folio_clave %>" title="Comprobar Deposito"><i class="ti-ticket"></i></a>
                                                                             <%} %> 
                                                                             <a class="btn btn-warning btn-sm" href="<%= deposito.enlace %>" target="_blank" title="DOCUMENTACION DEL PROYECTO"><i class="ti-files"></i></a>
                                                                         </div>
@@ -146,9 +146,9 @@
                                         <div class="card">
                                             <div class="card-title">
                                                 <% if (user.folio == usuario[0].folio) {%>
-                                                <a href="/formLoadTicket?usuario=<%= user.folio %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Subir Comprobante</a>
+                                                <a href="comprobar?usuario=<%= user.folio %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Subir Comprobante</a>
                                                 <%} %>
-                                                <a href="/exportDataUsuario?data=comprobantes&<%= complemento_ruta %>" class="btn btn-success btn-flat btn-addon"><i class="ti-new-window"></i>Exportar Datos</a>      
+                                                <a href="exportar_usuario?data=comprobantes&<%= complemento_ruta %>" class="btn btn-success btn-flat btn-addon"><i class="ti-new-window"></i>Exportar Datos</a>      
                                             </div>
                                             <div class="bootstrap-data-table-panel">
                                                 <div class="table-responsive">
@@ -229,7 +229,7 @@
             confirmButtonText: 'Elimiar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/deleteComprobanteUsuario?usuario=${user}&saldo=${saldo}&folio=${folio}&monto=${monto}`
+                const ruta = `eliminar_comprobante_personal?usuario=${user}&saldo=${saldo}&folio=${folio}&monto=${monto}`
                 window.location = ruta
             }
         })
@@ -246,7 +246,7 @@
             if(result.isConfirmed){
                 const inicio = document.getElementById('fecha_inicio').value;
                 const termino = document.getElementById('fecha_termino').value;
-                const ruta = `/adminViaticosPersonal?usuario=${usuario}&inicio=${inicio}&termino=${termino}`
+                const ruta = `admin_personal?usuario=${usuario}&inicio=${inicio}&termino=${termino}`
                 window.location = ruta
             }
         })

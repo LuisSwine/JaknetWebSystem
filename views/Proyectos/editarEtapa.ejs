@@ -20,13 +20,13 @@
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
                                 <% if(flag == 1){%>
-                                    <li class="breadcrumb-item"><a href="/profileProyect?proyecto=<%= proyecto %>&cliente=<%= cliente %>&flag=<%= flag %>">Proyecto</a></li>
+                                    <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<%= proyecto %>&cliente=<%= cliente %>&flag=<%= flag %>">Proyecto</a></li>
                                 <%}else if(flag == 3 || flag == 2){%>
-                                    <li class="breadcrumb-item"><a href="/profileProyect?proyecto=<%= proyecto %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>">Proyecto</a></li>
+                                    <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<%= proyecto %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>">Proyecto</a></li>
                                 <%}else if(flag == 0){%>
-                                    <li class="breadcrumb-item"><a href="/profileProyect?proyecto=<%= proyecto %>&flag=<%= flag %>">Proyecto</a></li>
+                                    <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<%= proyecto %>&flag=<%= flag %>">Proyecto</a></li>
                                 <%}else if(flag == 4){%>
-                                    <li class="breadcrumb-item"><a href="/profileProyect?proyecto=<%= proyecto %>&flag=<%= flag %>&permisos=<%= permisos %>">Proyecto</a></li> 
+                                    <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<%= proyecto %>&flag=<%= flag %>&permisos=<%= permisos %>">Proyecto</a></li> 
                                 <%} %>
                                 <li class="breadcrumb-item active">Editar Etapa</li>
                             </ol>
@@ -43,22 +43,13 @@
                         </div>
                         <div class="card-body">
                             <div class="basic-elements">
-                                <form action="/editEtapa" method="post">
+                                <form action="/etapas/editar" method="post">
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label>NOMBRE</label>
                                                 <input type="text" class="form-control" value="<%= etapa[0].nombre %>" id="nombre" name="nombre" required>
                                             </div>
-                                            <div class="form-group">
-                                                <input type="text" class="form-control" value="<%= etapa[0].folio %>" id="folio" name="folio" hidden>
-                                                <input type="number" class="form-control" value="<%= proyecto %>" id="proyecto" name="proyecto" hidden>
-                                                <input type="number" class="form-control" value="<%= cliente %>" id="cliente" name="cliente" hidden>
-                                                <input type="number" class="form-control" value="<%= ubicacion %>" id="ubicacion" name="ubicacion" hidden>
-                                                <input type="number" class="form-control" value="<%= flag %>" id="flag" name="flag" hidden>
-                                                <input type="number" class="form-control" value="<%= permisos %>" id="permisos" name="permisos" hidden>
-                                            </div>
-                                            <button type="submit" class="btn btn-primary m-b-10">EDITAR ETAPA</button>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
@@ -70,6 +61,15 @@
                                                     <% }) %> 
                                                 </select>
                                             </div>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <input type="text" class="form-control" value="<%= etapa[0].folio %>" id="folio" name="folio" hidden>
+                                            <input type="number" class="form-control" value="<%= proyecto %>" id="proyecto" name="proyecto" hidden>
+                                            <input type="number" class="form-control" value="<%= cliente %>" id="cliente" name="cliente" hidden>
+                                            <input type="number" class="form-control" value="<%= ubicacion %>" id="ubicacion" name="ubicacion" hidden>
+                                            <input type="number" class="form-control" value="<%= flag %>" id="flag" name="flag" hidden>
+                                            <input type="number" class="form-control" value="<%= permisos %>" id="permisos" name="permisos" hidden>
+                                            <button type="submit" class="btn btn-primary m-b-10">EDITAR ETAPA</button>
                                         </div>
                                     </div>
                                 </form>

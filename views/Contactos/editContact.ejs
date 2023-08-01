@@ -19,11 +19,7 @@
                         <div class="page-title">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-                                <% if(flag == 1){%>
-                                    <li class="breadcrumb-item"><a href="/perfilCliente?cliente=<%= clienteSelected %>">Cliente</a></li>
-                                    <%}else{%>
-                                    <li class="breadcrumb-item"><a href="/admincontactos">Lista</a></li>
-                                    <%} %> 
+                                <li class="breadcrumb-item"><a href="/clientes/administrar?cliente=<%= clienteSelected %>">Cliente</a></li>
                                 <li class="breadcrumb-item active">Editar Contacto</li>
                             </ol>
                         </div>
@@ -39,7 +35,7 @@
                         </div>
                         <div class="card-body">
                             <div class="basic-elements">
-                                <form action="/editContact" method="post">
+                                <form action="editar" method="post">
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">

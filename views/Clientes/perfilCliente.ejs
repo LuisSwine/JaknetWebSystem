@@ -19,7 +19,7 @@
                         <div class="page-title">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
-                                <% if(user.tipo_usuario != 2){%><li class="breadcrumb-item"><a href="/adminclients">Clientes</a></li><% } %> 
+                                <% if(user.tipo_usuario != 2){%><li class="breadcrumb-item"><a href="/clientes/gestionar">Clientes</a></li><% } %> 
                                 <li class="breadcrumb-item active"><%= cliente[0].nombre %></li>
                             </ol>
                         </div>
@@ -64,7 +64,7 @@
                                 <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#ubicaciones" role="tab"><span class="hidden-sm-up"><i class="ti-stats-up"></i></span> <span class="hidden-xs-down">Ubicaciones</span></a></li>
                                 <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#contactos" role="tab"><span class="hidden-sm-up"><i class="ti-id-badge"></i></span> <span class="hidden-xs-down">Contactos</span></a> </li>
                                 <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#proyectos" role="tab"><span class="hidden-sm-up"><i class="ti-mobile"></i></span><span class="hidden-xs-down">Proyectos</span></a></li>
-                                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#cotizaciones" role="tab"><span class="hidden-sm-up"><i class="ti-clipboard"></i></span> <span class="hidden-xs-down">Cotizaciones</span></a></li>
+                                <!--<li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#cotizaciones" role="tab"><span class="hidden-sm-up"><i class="ti-clipboard"></i></span> <span class="hidden-xs-down">Cotizaciones</span></a></li> -->
                             </ul>
                             <!-- Tab panes -->
                             <div class="tab-content">
@@ -73,7 +73,7 @@
                                         <div class="card">
                                             <% if(user.tipo_usuario != 2){%>
                                             <div class="card-title">
-                                                <a href="/formcreateubicacion?cliente=<%= cliente[0].folio %>&flag=1" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Añadir Ubicacion</a>     
+                                                <a href="/ubicaciones/nueva_ubicacion?cliente=<%= cliente[0].folio %>&flag=1" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Añadir Ubicacion</a>     
                                             </div>
                                             <% } %> 
                                             <div class="bootstrap-data-table-panel">
@@ -96,7 +96,7 @@
                                                                 <td>
                                                                     <div class="button-list">
                                                                         <div class="btn-group btn-group-justified">
-                                                                            <a class="btn btn-info btn-sm" href="/perfilUbicacion?ubicacion=<%= ubicacion.folio %>&cliente=<%= cliente[0].folio%>&flag=1" title="Configuracion"><i class="ti-settings"></i></a>
+                                                                            <a class="btn btn-info btn-sm" href="/ubicaciones/perfil?ubicacion=<%= ubicacion.folio %>&cliente=<%= cliente[0].folio%>&flag=1" title="Configuracion"><i class="ti-settings"></i></a>
                                                                             <a class="btn btn-pink btn-sm" target="_blank" href="https://www.google.com.mx/maps/search/<%= ubicacion.direccion %>" title="LOCALIZAR"><i class="ti-map-alt"></i></a>
                                                                             <% if(user.tipo_usuario != 2){%><button class="btn btn-danger btn-sm" onclick="confirmDeleteUbi('<%= ubicacion.folio %>', '<%= cliente[0].folio%>')"><i class="ti-trash"></i></button><% } %> 
                                                                         </div>
@@ -124,7 +124,7 @@
                                         <div class="card">
                                             <% if(user.tipo_usuario != 2){%>
                                             <div class="card-title">
-                                                <a href="/formcreatecontact?cliente=<%= cliente[0].folio %>&flag=1" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear Contacto</a>     
+                                                <a href="/contactos/nuevo_contacto?cliente=<%= cliente[0].folio %>&flag=1" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear Contacto</a>     
                                             </div>
                                             <% } %> 
                                             <div class="bootstrap-data-table-panel">
@@ -151,7 +151,7 @@
                                                                         <div class="btn-group btn-group-justified">
                                                                             <button class="btn btn-pink btn-sm" onclick="showDesc('<%= contacto.descripcion %>')" title="INFORMACION"><i class="ti-info"></i></button>
                                                                             <% if(user.tipo_usuario != 2){%>
-                                                                            <a class="btn btn-primary btn-sm" href="/editarContacto?contacto=<%= contacto.folio  %>&cliente=<%= cliente[0].folio %>&flag=1"><i class="ti-pencil"></i></a>
+                                                                            <a class="btn btn-primary btn-sm" href="/contactos/editar?contacto=<%= contacto.folio  %>&cliente=<%= cliente[0].folio %>&flag=1"><i class="ti-pencil"></i></a>
                                                                             <button class="btn btn-danger btn-sm" onclick="confirmDeleteContact('<%= contacto.folio %>', '<%= cliente[0].folio %>')"><i class="ti-trash"></i></button>
                                                                             <% } %> 
                                                                         </div>
@@ -180,7 +180,7 @@
                                         <div class="card">
                                             <% if(user.tipo_usuario != 2){%>
                                             <div class="card-title">
-                                                <a href="/formcreateproyect?cliente=<%= cliente[0].folio %>&flag=1" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear Proyecto</a>   
+                                                <a href="/proyectos/nuevo_proyecto?cliente=<%= cliente[0].folio %>&flag=1" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear Proyecto</a>   
                                             </div>
                                             <% } %> 
                                             <div class="bootstrap-data-table-panel">
@@ -206,9 +206,9 @@
                                                                     <div class="button-list">
                                                                         <div class="btn-group btn-group-justified">
                                                                             <% if(user.tipo_usuario != 2){%>
-                                                                            <a class="btn btn-info btn-sm" href="/profileProyect?proyecto=<%= proyecto.folio %>&cliente=<%= cliente[0].folio %>&flag=1" title="CONFIGURACION DEL PROYECTO"><i class="ti-settings"></i></a>
-                                                                            <a class="btn btn-pink btn-sm" href="/proyectosInvent?proyecto=<%= proyecto.folio %>&cliente=<%= cliente[0].folio %>&flag=1" title="INVENTARIO EN EL PROYECTO"><i class="ti-truck"></i></a>
-                                                                            <a class="btn btn-success btn-sm" href="/proyectViaticos?proyecto=<%= proyecto.folio %>&cliente=<%= cliente[0].folio %>&flag=1" title="VIATICOS DEL PROYECTO"><i class="ti-money"></i></a>
+                                                                            <a class="btn btn-info btn-sm" href="/proyectos/perfil?proyecto=<%= proyecto.folio %>&cliente=<%= cliente[0].folio %>&flag=1" title="CONFIGURACION DEL PROYECTO"><i class="ti-settings"></i></a>
+                                                                            <a class="btn btn-pink btn-sm" href="/proyectos/inventario?proyecto=<%= proyecto.folio %>&cliente=<%= cliente[0].folio %>&flag=1" title="INVENTARIO EN EL PROYECTO"><i class="ti-truck"></i></a>
+                                                                            <a class="btn btn-success btn-sm" href="/proyectos/viaticos?proyecto=<%= proyecto.folio %>&cliente=<%= cliente[0].folio %>&flag=1" title="VIATICOS DEL PROYECTO"><i class="ti-money"></i></a>
                                                                             <button class="btn btn-danger btn-sm" onclick="confirmDeleteProyecto('<%= proyecto.folio %>', '<%= cliente[0].folio %>')"><i class="ti-trash"></i></button>
                                                                             <% } %> 
                                                                             <a class="btn btn-primary btn-sm" href="<%= proyecto.galeria %>" target="_blank" title="GALERIA DEL PROYECTO"><i class="ti-image"></i></a>
@@ -329,7 +329,7 @@
             confirmButtonText: 'Elimiar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/deleteContact?contacto=${contacto}&cliente=${cliente}&flag=1`
+                const ruta = `/contactos/eliminar?contacto=${contacto}&cliente=${cliente}&flag=1`
                 window.location = ruta
             }
         })
@@ -345,7 +345,7 @@
             confirmButtonText: 'Elimiar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/deleteUbicacionCliente?ubicacion=${ubicacion}&cliente=${cliente}`
+                const ruta = `/clientes/eliminar_ubicacion?ubicacion=${ubicacion}&cliente=${cliente}`
                 window.location = ruta
             }
         })
@@ -361,7 +361,7 @@
             confirmButtonText: 'Elimiar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/deleteProyectoCliente?proyecto=${folio}&cliente=${cliente}`
+                const ruta = `/clientes/eliminar_proyecto?proyecto=${folio}&cliente=${cliente}`
                 window.location = ruta
             }
         })
@@ -382,6 +382,7 @@
             }
         })
     }
+
     function cambiarNombre(actual,folio){
         Swal.fire({
             title: 'CAMBIAR NOMBRE DEL CLIENTE',
@@ -394,7 +395,7 @@
                 if (!value) {
                     return 'Tienes que escribir algo'
                 }else{
-                    const ruta = `/cambiarNombreCliente?cliente=${folio}&nombre=${value}`
+                    const ruta = `/clientes/cambiar_nombre?cliente=${folio}&nombre=${value}`
                     window.location = ruta
                 }
             }
@@ -418,7 +419,7 @@
                 if(!value){
                     return 'Necesitas seleccionar algo'
                 }else{
-                    const ruta = `/editServicioCliente?cliente=${cliente}&servicio=${value}`
+                    const ruta = `/clientes/editar_servicio?cliente=${cliente}&servicio=${value}`
                     window.location = ruta
                 }
             }
@@ -441,7 +442,7 @@
                 if(!value){
                     return 'Necesitas seleccionar algo'
                 }else{
-                    const ruta = `/editTipoCliente?cliente=${cliente}&tipo=${value}`
+                    const ruta = `/clientes/editar_tipo?cliente=${cliente}&tipo=${value}`
                     window.location = ruta
                 }
             }

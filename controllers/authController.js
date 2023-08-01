@@ -164,6 +164,7 @@ const { nextTick } = require('process')
             return next()
         }
     }
+
     //Crear usuario
     exports.createUser = async(req, res, next)=>{
         try {
@@ -183,7 +184,7 @@ const { nextTick } = require('process')
                 if(error){
                     throw error
                 }else{
-                    res.redirect('/adminusers')
+                    res.redirect('/usuarios/adminusers')
                     return next()    
                 }
             })    
@@ -192,6 +193,7 @@ const { nextTick } = require('process')
             return next()
         }
     }
+
     exports.editUser = async(req, res, next)=>{
         try {
             let folio           = req.body.folio
@@ -207,7 +209,7 @@ const { nextTick } = require('process')
                 if(error){
                     throw error
                 }else{
-                    res.redirect('/adminusers')
+                    res.redirect('/usuarios/adminusers')
                     return next()
                 }
             })
@@ -330,62 +332,7 @@ const { nextTick } = require('process')
     }
 //FIN DEL CRUD PARA LA GESTION DE USUARIOS
 
-exports.relateContWUbi = async(req, res, next)=>{
-    try {
-        //Primero validamos si la relacion no existe ya
-        conexion.query("SELECT * FROM op015_contacto_ubicacion WHERE ubicacion = ? AND contacto = ?", [req.body.ubicacion, req.body.contacto], (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                //Validamos si el registro no existe
-                let data = {
-                    ubicacion: req.body.ubicacion,
-                    contacto: req.body.contacto
-                }
-                
-                let posibleRuta = ''
-                if(req.body.flag == 1) {posibleRuta = `/perfilUbicacion?ubicacion=${data.ubicacion}&cliente=${req.body.cliente}&flag=${req.body.flag}`}
-                else if(req.body.flag == 0){posibleRuta = `/perfilUbicacion?ubicacion=${data.ubicacion}&flag=${req.body.flag}`}
-                
-                if(fila.length === 0){
-                    conexion.query("INSERT INTO op015_contacto_ubicacion SET ?", data, (error2, fila2)=>{
-                        if(error2){
-                            throw error2
-                        }else{
-                            res.redirect(posibleRuta)
-                            return next()
-                        }
-                    })
-                }else{
-                    res.redirect(posibleRuta)
-                    return next()
-                }
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.deleteContOfUbi = async(req, res, next)=>{
-    try {
-        let posibleRuta = ''
-        if(req.query.flag == 1) {posibleRuta = `/perfilUbicacion?ubicacion=${req.query.ubicacion}&cliente=${req.query.cliente}&flag=${req.query.flag}`}
-        else if(req.query.flag == 0){posibleRuta = `/perfilUbicacion?ubicacion=${req.query.ubicacion}&flag=${req.query.flag}`}
-        
-        conexion.query("DELETE FROM op015_contacto_ubicacion WHERE folio = ?", [req.query.contacto], (err, fila)=>{
-            if(err){
-                throw err
-            }else{
-                res.redirect(posibleRuta)
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
+
 
 //CRUD DEL INVENTARIO
     exports.selectInvent = async(req, res, next) =>{
@@ -418,58 +365,7 @@ exports.deleteContOfUbi = async(req, res, next)=>{
             return next()
         }
     }
-    exports.moverInventario = async(req, res, next) =>{
-        try {
-            let data = {
-                producto: req.body.producto,
-                cantidad: req.body.cantidad,
-                unidades: req.body.unidades
-            }
-
-            //Primero validamos si el producto se encuentra ya en el inventario
-            conexion.query("SELECT folio, cantidad FROM cat020_inventario WHERE producto = ?", [data.producto], (err, fila)=>{
-                if(err){
-                    throw err
-                }else{
-                    if(fila.length === 0){ //No existe el producto en el inventario
-                        let insert = "INSERT INTO cat020_inventario SET ?"
-                        conexion.query(insert, data, function(error, results){
-                            if(error){
-                                throw error
-                            }
-                        })
-                    }else{ //Ya existe el registro
-                        //Modificamos la cantidad
-                        let cant = parseInt(fila[0].cantidad) + parseInt(data.cantidad)
-                        let folio = fila[0].folio
-                        conexion.query("UPDATE cat020_inventario SET cantidad = ? WHERE folio = ?", [cant, folio], (err2, fila2)=>{
-                            if(err2){
-                                throw err2
-                            }
-                        }) 
-                    }
-                    //Ahora registramos el movimiento
-                    let valores = {
-                        usuario: req.body.usuario,
-                        producto: data.producto,
-                        cantidad: data.cantidad,
-                        fecha: new Date()
-                    }
-                    conexion.query("INSERT INTO op016_movimientos_inventario SET ?", valores, (err3, fila3)=>{
-                        if(err3){
-                            throw err3
-                        }else{
-                            res.redirect('/admininventario')
-                            return next()
-                        }
-                    })
-                }
-            })       
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
+    
     exports.reporteGrlInvent = async(req, res, next)=>{
         try {
             if(req.query.inicio && req.query.termino){
@@ -568,7 +464,7 @@ exports.deleteContOfUbi = async(req, res, next)=>{
 
             let posibleRuta = `/perfilUbicacion?ubicacion=${req.body.ubicacion}`
             if(req.body.flag == 1){ 
-                posibleRuta = `/perfilCliente?cliente=${req.body.cliente}`
+                posibleRuta = `/clientes/administrar?cliente=${req.body.cliente}`
             }else if(req.body.flag == 2){
                 posibleRuta = `/perfilUbicacion?ubicacion=${req.body.ubicacion}&cliente=${req.body.cliente}&flag=1`
             }else if(req.body.flag == 0){
@@ -849,7 +745,7 @@ exports.deleteContOfUbi = async(req, res, next)=>{
                         if(err2){
                             throw err2
                         }else{
-                            let ruta = `/seguimientoClaves?usuario=${req.query.usuario}&clave=${req.query.clave}` 
+                            let ruta = `/viaticos/claves?usuario=${req.query.usuario}&clave=${req.query.clave}` 
                             res.redirect(ruta)
                             return next()
                         }
@@ -895,7 +791,7 @@ exports.deleteContOfUbi = async(req, res, next)=>{
                                 if(error3){
                                     throw error3
                                 }else{
-                                    res.redirect(`/adminClaves?clave=${clave}`)
+                                    res.redirect(`/viaticos/claves?clave=${clave}`)
                                     return next()
                                 }
                             })

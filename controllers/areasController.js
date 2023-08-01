@@ -57,8 +57,8 @@ exports.editArea = async(req, res, next) =>{
         let sql = "UPDATE cat008_areas SET nombre = ?, documentacion = ?, planta = ? WHERE folio = ?"
 
         let ruta = ''
-        if(req.body.flag == 1){ ruta = `/perfilUbicacion?ubicacion=${planta}&cliente=${req.body.cliente}&flag=${req.body.flag}`}
-        else if(req.body.flag == 0){ ruta = `/perfilUbicacion?ubicacion=${planta}&flag=${req.body.flag}`}
+        if(req.body.flag == 1){ ruta = `/ubicaciones/perfil?ubicacion=${planta}&cliente=${req.body.cliente}&flag=${req.body.flag}`}
+        else if(req.body.flag == 0){ ruta = `/ubicaciones/perfil?ubicacion=${planta}&flag=${req.body.flag}`}
 
         conexion.query(sql, [nombre, documentacion, planta, folio], function(error, results){
             if(error){
@@ -82,8 +82,8 @@ exports.createArea = async(req, res, next) =>{
         }
 
         let ruta = ''
-        if(req.body.flag == 1){ruta = `/perfilUbicacion?ubicacion=${data.planta}&cliente=${req.body.cliente}&flag=${req.body.flag}`}
-        else if(req.body.flag == 0){ruta = `/perfilUbicacion?ubicacion=${data.planta}&flag=${req.body.flag}`}
+        if(req.body.flag == 1){ruta = `/ubicaciones/perfil?ubicacion=${data.planta}&cliente=${req.body.cliente}&flag=${req.body.flag}`}
+        else if(req.body.flag == 0){ruta = `/ubicaciones/perfil?ubicacion=${data.planta}&flag=${req.body.flag}`}
 
         let insert = "INSERT INTO cat008_areas SET ?"
         conexion.query(insert, data, function(error, results){
@@ -107,8 +107,8 @@ exports.deleteArea = async(req, res, next) =>{
                 throw err
             }else{
                 let ruta = ''
-                if(req.query.flag == 1){ruta = `/perfilUbicacion?ubicacion=${req.query.ubicacion}&cliente=${req.query.cliente}&flag=${req.query.flag}`}
-                else if(req.query.flag == 0){ruta = `/perfilUbicacion?ubicacion=${req.query.ubicacion}&flag=${req.query.flag}`}
+                if(req.query.flag == 1){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&cliente=${req.query.cliente}&flag=${req.query.flag}`}
+                else if(req.query.flag == 0){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&flag=${req.query.flag}`}
                 
                 if(fila.length === 0){
                     conexion.query("DELETE FROM cat008_areas WHERE folio = ?", [req.query.area], function(err2, fila2){

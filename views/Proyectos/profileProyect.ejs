@@ -20,15 +20,15 @@
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
                                 <% if(flag == 1){%>
-                                    <li class="breadcrumb-item"><a href="/perfilCliente?cliente=<%= cliente %>">Cliente</a></li>
+                                    <li class="breadcrumb-item"><a href="/clientes/administrar?cliente=<%= cliente %>">Cliente</a></li>
                                 <%}else if(flag == 2){%>
-                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=1">Ubicacion</a></li>
+                                    <li class="breadcrumb-item"><a href="/ubicaciones/perfil?ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=1">Ubicacion</a></li>
                                 <%}else if(flag == 3){%>
-                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&flag=0">Ubicacion</a></li>
+                                    <li class="breadcrumb-item"><a href="/ubicaciones/perfil?ubicacion=<%= ubicacion %>&flag=0">Ubicacion</a></li>
                                 <%}else if(flag == 0){%>
-                                    <li class="breadcrumb-item"><a href="/adminproyectos">Proyectos</a></li>
+                                    <li class="breadcrumb-item"><a href="/proyectos/administrar">Proyectos</a></li>
                                 <%}else if(flag == 4){%>
-                                    <li class="breadcrumb-item"><a href="/misProyectos?folio=<%= user.folio %>">Proyectos</a></li>
+                                    <li class="breadcrumb-item"><a href="/proyectos/mis_proyectos?folio=<%= user.folio %>">Proyectos</a></li>
                                 <%} %>
                                 <li class="breadcrumb-item active">Perfil de Proyecto</li>
                             </ol>
@@ -86,7 +86,7 @@
                                 <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#etapas" role="tab"><span class="hidden-sm-up"><i class="ti-stats-up"></i></span> <span class="hidden-xs-down">Etapas</span></a></li>
                                 <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#roles" role="tab"><span class="hidden-sm-up"><i class="ti-id-badge"></i></span> <span class="hidden-xs-down">Roles</span></a> </li>
                                 <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#contacts" role="tab"><span class="hidden-sm-up"><i class="ti-mobile"></i></span><span class="hidden-xs-down">Contactos</span></a></li>
-                                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#cotizaciones" role="tab"><span class="hidden-sm-up"><i class="ti-clipboard"></i></span> <span class="hidden-xs-down">Cotizaciones</span></a></li>
+                                <!-- <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#cotizaciones" role="tab"><span class="hidden-sm-up"><i class="ti-clipboard"></i></span> <span class="hidden-xs-down">Cotizaciones</span></a></li> -->
                             </ul>
                             <!-- Tab panes -->
                             <div class="tab-content">
@@ -95,7 +95,7 @@
                                         <div class="card">
                                             <div class="card-title">
                                                 <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %>
-                                                <a href="/formaddetapa?proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Añadir Etapa</a>     
+                                                <a href="/etapas/agregar_etapa?proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Añadir Etapa</a>     
                                                 <% } %> 
                                             </div>
                                             <div class="bootstrap-data-table-panel">
@@ -119,10 +119,10 @@
                                                                     <div class="button-list">
                                                                         <div class="btn-group btn-group-justified">
                                                                             <% if(user.tipo_usuario != 2 || permisos != 3){ %>  
-                                                                            <a class="btn btn-pink btn-sm" href="/tareasetapa?etapa=<%= etapa.folio %>&proyecto=<%= proyecto[0].folio %>&cliente=<%= proyecto[0].folio_cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>&permisos=<%= permisos %>" title="TAREAS"><i class="ti-view-list-alt"></i></a>
+                                                                            <a class="btn btn-pink btn-sm" href="/tareas/etapa?etapa=<%= etapa.folio %>&proyecto=<%= proyecto[0].folio %>&cliente=<%= proyecto[0].folio_cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>&permisos=<%= permisos %>" title="TAREAS"><i class="ti-view-list-alt"></i></a>
                                                                             <% } %> 
                                                                             <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %>    
-                                                                            <a class="btn btn-primary btn-sm" href="/editarEtapa?etapa=<%= etapa.folio %>&proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>&permisos=<%= permisos %>"><i class="ti-pencil"></i></a>
+                                                                            <a class="btn btn-primary btn-sm" href="/etapas/editar?etapa=<%= etapa.folio %>&proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>&permisos=<%= permisos %>"><i class="ti-pencil"></i></a>
                                                                             <button class="btn btn-danger btn-sm" onclick="confirmDeleteEtapa('<%= etapa.folio %>','<%= proyecto[0].folio %>', '<%= ubicacion %>','<%= cliente %>', '<%= flag %>', '<%= permisos %>')"><i class="ti-trash"></i></button>
                                                                             <% } %> 
                                                                         </div>
@@ -150,7 +150,7 @@
                                         <div class="card">
                                             <div class="card-title">
                                                 <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %>
-                                                <a href="/formasignroles?proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Asignar Roles</a>     
+                                                <a href="/roles/asignar?proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Asignar Roles</a>     
                                                 <% } %> 
                                             </div>
                                             <div class="bootstrap-data-table-panel">
@@ -348,7 +348,7 @@
             confirmButtonText: 'Elimiar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/deleteEtapa?etapa=${folio}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}&permisos=${permisos}`
+                const ruta = `/etapas/eliminar?etapa=${folio}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}&permisos=${permisos}`
                 window.location = ruta
             }
         })
@@ -364,7 +364,7 @@
             confirmButtonText: 'Elimiar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/deleteRol?rol=${folio}&usuario=${usuario}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}&permisos=${permisos}`
+                const ruta = `/roles/eliminar?rol=${folio}&usuario=${usuario}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}&permisos=${permisos}`
                 window.location = ruta
             }
         })
@@ -397,7 +397,7 @@
                 if (!value) {
                     return 'Tienes que escribir algo'
                 }else{
-                    const ruta = `/cambiarNombreProyecto?proyecto=${folio}&ubicacion=${ubicacion}&flag=${flag}&cliente=${cliente}&nombre=${value}`
+                    const ruta = `/proyectos/cambiar_nombre?proyecto=${folio}&ubicacion=${ubicacion}&flag=${flag}&cliente=${cliente}&nombre=${value}`
                     window.location = ruta
                 }
             }

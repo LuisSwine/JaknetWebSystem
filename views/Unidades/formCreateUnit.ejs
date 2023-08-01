@@ -19,7 +19,7 @@
                         <div class="page-title">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-                                <li class="breadcrumb-item"><a href="/adminunidades">Lista</a></li>
+                                <li class="breadcrumb-item"><a href="administrar">Lista</a></li>
                                 <li class="breadcrumb-item active">Registrar una Unidad de Medida</li>
                             </ol>
                         </div>
@@ -35,7 +35,7 @@
                         </div>
                         <div class="card-body">
                             <div class="basic-elements">
-                                <form action="/createUnit" method="post">
+                                <form action="nueva_unidad" method="post">
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
@@ -46,13 +46,15 @@
                                                 <label>CODIGO SAT</label>
                                                 <input type="text" class="form-control" placeholder="Codigo SAT" id="codigo_sat" name="codigo_sat" required>
                                             </div>
-                                            <button type="submit" class="btn btn-primary m-b-10">REGISTRAR UNIDAD</button>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label>ABREVIATURA</label>
                                                 <input type="text" class="form-control" placeholder="Abreviatura de la unidad" id="abreviatura" name="abreviatura" required>
                                             </div>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <button type="submit" class="btn btn-primary m-b-10">REGISTRAR UNIDAD</button>
                                         </div>
                                     </div>
                                 </form>

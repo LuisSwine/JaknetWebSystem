@@ -29,8 +29,8 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-title">
-                                <a href="/formcreateusers" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear</a>
-                                <a href="/generarReporteAsistencia" class="btn btn-success btn-flat btn-addon"><i class="ti-download"></i>Generar Reporte de Asistencia</a>     
+                                <a href="/usuarios/nuevo_usuario" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear</a>
+                                <a href="/usuarios/reporte_asistencia" class="btn btn-success btn-flat btn-addon"><i class="ti-download"></i>Generar Reporte de Asistencia</a>     
                             </div>
                             <div class="bootstrap-data-table-panel">
                                 <div class="table-responsive">
@@ -78,10 +78,10 @@
                                                 <td>
                                                     <div class="button-list">
                                                         <div class="btn-group btn-group-justified">
-                                                            <a class="btn btn-success btn-sm" href="/adminViaticosPersonal?usuario=<%= usuario.folio %>"><i class="ti-money"></i></a>
+                                                            <a class="btn btn-success btn-sm" href="/viaticos/admin_personal?usuario=<%= usuario.folio %>"><i class="ti-money"></i></a>
                                                             <a class="btn btn-warning btn-sm" href="<%= usuario.documentacion %>" target="_blank"><i class="ti-link"></i></a>
                                                             <a class="btn btn-pink btn-sm" href="/reporteAsistencia?usuario=<%= usuario.folio %>&flag=1" title="Generar reporte de asistencia"><i class="ti-calendar"></i></a>
-                                                            <a class="btn btn-info btn-sm" href="/miInventario?usuario=<%= usuario.folio %>&flag=1" title="Inventario Personal"><i class="ti-briefcase"></i></a>
+                                                            <a class="btn btn-info btn-sm" href="/inventario/mi_inventario?usuario=<%= usuario.folio %>&flag=1" title="Inventario Personal"><i class="ti-briefcase"></i></a>
                                                             <% if(user.tipo_usuario == 0 || (user.tipo_usuario == 1 && usuario.tipo_usuario == 2)){%>
                                                             <button class="btn btn-primary btn-sm" onclick="editUser('<%= usuario.folio %>')"><i class="ti-pencil"></i></button>
                                                             <button class="btn btn-dark btn-sm" onclick="changeContra('<%= usuario.folio %>', '<%= user.folio %>')" title="CAMBIAR CONTRASEÑA"><i class="ti-key"></i></button>
@@ -118,7 +118,7 @@
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function editUser(folio){
-        const ruta = `/editarusuario?usuario=${folio}`
+        const ruta = `/usuarios/editar?usuario=${folio}`
         window.location = ruta
     }
     function confirmDelete(folio){
@@ -153,7 +153,7 @@
                 if(result.isConfirmed){
                     const passAdm = document.getElementById('admin').value;
                     const passNue = document.getElementById('nueva').value;
-                    const ruta = `/changeContraUserAdmin?folioUser=${folioUser}&folioAdmin=${folioAdmin}&admin=${passAdm}&nueva=${passNue}`
+                    const ruta = `/usuarios/cambiar_contra_admin?folioUser=${folioUser}&folioAdmin=${folioAdmin}&admin=${passAdm}&nueva=${passNue}`
                     window.location = ruta
                 }
             })

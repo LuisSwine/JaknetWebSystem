@@ -48,7 +48,7 @@
                         </div>
                         <div class="card-body">
                             <div class="basic-elements">
-                                <form action="/reasignTask" method="post">
+                                <form action="/tareas/editar_asignacion" method="post">
                                     <div class="row">
                                         <div class="col-lg-12">
                                             <div class="form-group">
@@ -60,16 +60,16 @@
                                                     <% }) %> 
                                                 </select>
                                             </div>
-                                            <div class="form-group">
-                                                <input type="number" class="form-control" value="<%= asignacion[0].folio_tarea %>"id="tarea" name="tarea" hidden>
-                                                <input type="number" class="form-control" value="<%= asignacion[0].folio %>" id="asignacion" name="asignacion" hidden>
-                                                <input type="number" class="form-control" value="<%= asignacion[0].etapa %>" id="etapa" name="etapa" hidden>
-                                                <input type="number" class="form-control" value="<%= proyecto %>" id="proyecto" name="proyecto" hidden>
-                                                <input type="number" class="form-control" value="<%= ubicacion %>" id="ubicacion" name="ubicacion" hidden>
-                                                <input type="number" class="form-control" value="<%= cliente %>" id="cliente" name="cliente" hidden>
-                                                <input type="number" class="form-control" value="<%= flag %>" id="flag" name="flag" hidden>
-                                                <input type="number" class="form-control" value="<%= permisos %>" id="permisos" name="permisos" hidden>
-                                            </div>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <input type="number" class="form-control" value="<%= asignacion[0].folio_tarea %>"id="tarea" name="tarea" hidden>
+                                            <input type="number" class="form-control" value="<%= asignacion[0].folio %>" id="asignacion" name="asignacion" hidden>
+                                            <input type="number" class="form-control" value="<%= asignacion[0].etapa %>" id="etapa" name="etapa" hidden>
+                                            <input type="number" class="form-control" value="<%= proyecto %>" id="proyecto" name="proyecto" hidden>
+                                            <input type="number" class="form-control" value="<%= ubicacion %>" id="ubicacion" name="ubicacion" hidden>
+                                            <input type="number" class="form-control" value="<%= cliente %>" id="cliente" name="cliente" hidden>
+                                            <input type="number" class="form-control" value="<%= flag %>" id="flag" name="flag" hidden>
+                                            <input type="number" class="form-control" value="<%= permisos %>" id="permisos" name="permisos" hidden>
                                             <button type="submit" class="btn btn-primary m-b-10">ASIGNAR TAREA</button>
                                         </div>
                                     </div>

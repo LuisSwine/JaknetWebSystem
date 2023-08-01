@@ -47,7 +47,7 @@ exports.selectUnits = async(req, res, next) =>{
 }
 exports.selectUnit = async(req, res, next) =>{
     try {
-        conexion.query("SELECT * FROM cat023_unidades WHERE folio = ?", [req.params.folio], (error, fila)=>{
+        conexion.query("SELECT * FROM cat023_unidades WHERE folio = ?", [req.query.unidad], (error, fila)=>{
             if(error){
                 throw error;
             }else{
@@ -72,7 +72,7 @@ exports.createUnit = async(req, res, next) =>{
             if(error){
                 throw error
             }else{
-                res.redirect('/adminunidades')
+                res.redirect('/unidades/administrar')
                 return next()    
             }
         })    
@@ -94,7 +94,7 @@ exports.editUnit = async(req, res, next) =>{
             if(error){
                 throw error
             }else{
-                res.redirect('/adminunidades')
+                res.redirect('/unidades/administrar')
                 return next()
             }
         })
@@ -106,7 +106,7 @@ exports.editUnit = async(req, res, next) =>{
 exports.deleteUnit = async(req, res, next) =>{
     try {
         //Primero verificamos que la unidad no este siendo utilizada en algun producto
-        let folio = req.params.folio
+        let folio = req.query.unidad
         conexion.query("SELECT folio FROM cat020_inventario WHERE unidades = ?", [folio], (e, f)=>{
             if(e){
                 throw e
@@ -131,7 +131,7 @@ exports.deleteUnit = async(req, res, next) =>{
                                                             if(error){
                                                                 throw error
                                                             }else{ 
-                                                                res.redirect('/adminunidades')
+                                                                res.redirect('/unidades/administrar')
                                                                 return next() 
                                                             }
                                                         })    

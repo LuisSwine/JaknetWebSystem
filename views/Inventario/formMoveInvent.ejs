@@ -19,7 +19,7 @@
                         <div class="page-title">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-                                <li class="breadcrumb-item"><a href="/admininventario">Lista</a></li>
+                                <li class="breadcrumb-item"><a href="inventario_general">Lista</a></li>
                                 <li class="breadcrumb-item active">Mover Inventario</li>
                             </ol>
                         </div>
@@ -35,12 +35,13 @@
                         </div>
                         <div class="card-body">
                             <div class="basic-elements">
-                                <form action="/moverInventario" method="post">
+                                <form action="agregar_general" method="post">
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label>PRODUCTO</label>
-                                                <select class="form-control" name="producto" id="producto">
+                                                <select class="form-control" name="producto" id="producto" required>
+                                                    <option selected disabled>Seleccione el producto</option>
                                                     <% productos.forEach((producto)=>{ %>
                                                     <option value="<%= producto.folio %>"><%= producto.folio %> - <%= producto.descripcion %></option>
                                                     <% }) %> 
@@ -54,14 +55,26 @@
                                                     <% }) %> 
                                                 </select>
                                             </div>
-                                            <input type="number" class="form-control" value="<%= user.folio %>" id="usuario" name="usuario" hidden>
-                                            <button type="submit" class="btn btn-primary m-b-10">MOVER INVENTARIO</button>
+                                            
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label>CANTIDAD</label>
                                                 <input type="number" step="any" class="form-control" placeholder="Cantidad" id="cantidad" name="cantidad" required>
                                             </div>
+                                            <div class="form-group">
+                                                <label>ALMACEN</label>
+                                                <select class="form-control" name="almacen" id="almacen" required>
+                                                    <option selected disabled>Seleccione el almacen</option>
+                                                    <% almacenes.forEach((almacen)=>{ %>
+                                                    <option value="<%= almacen.folio %>"><%= almacen.nombre %></option>
+                                                    <% }) %> 
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <input type="number" class="form-control" value="<%= user.folio %>" id="usuario" name="usuario" hidden>
+                                            <button type="submit" class="btn btn-primary m-b-10">MOVER INVENTARIO</button>
                                         </div>
                                     </div>
                                 </form>

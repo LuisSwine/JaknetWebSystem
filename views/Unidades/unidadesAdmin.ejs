@@ -19,8 +19,8 @@
                         <div class="page-title">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-                                <li class="breadcrumb-item"><a href="/admininventario">Inventario</a></li>
-                                <li class="breadcrumb-item active">UNIDADES</li>
+                                <li class="breadcrumb-item"><a href="/inventario/inventario_general">Inventario</a></li>
+                                <li class="breadcrumb-item active">Unidades</li>
                             </ol>
                         </div>
                     </div>
@@ -32,7 +32,7 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-title">
-                                <a href="/formcreateunit" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear Unidad</a>   
+                                <a href="nueva_unidad" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear Unidad</a>   
                             </div>
                             <div class="bootstrap-data-table-panel">
                                 <div class="table-responsive">
@@ -86,7 +86,7 @@
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function editServicio(folio){
-        const ruta = `/editarunidad/${folio}`
+        const ruta = `editar?unidad=${folio}`
         window.location = ruta
     }
     function confirmDelete(folio){
@@ -100,7 +100,7 @@
             confirmButtonText: 'Elimiar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/deleteUnidad/${folio}`
+                const ruta = `eliminar?unidad=${folio}`
                 window.location = ruta
             }
         })

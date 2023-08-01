@@ -18,30 +18,10 @@ let ruta = `/?folio=${user.folio}`
                     <% if(user.tipo_usuario != 2){%> 
                     <li class="label">PRINCIPAL</li>
                     <li><a href="<%= ruta %> "><i class="ti-home"></i> Dashboard</a></li>
-                    <li>
-                        <a class="sidebar-sub-toggle">
-                            <i class="ti-user"></i>
-                            Usuarios
-                            <span class="sidebar-collapse-icon ti-angle-down"></span> 
-                        </a>
-                        <ul>
-                            <li><a href="/adminusers">Lista de Usuarios</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a class="sidebar-sub-toggle">
-                            <i class="ti-bar-chart"></i>
-                            Proyectos
-                            <span class="sidebar-collapse-icon ti-angle-down"></span> 
-                        </a>
-                        <ul>
-                            <li><a href="/adminclients">Clientes</a></li>
-                            <li><a href="/admincontactos">Contactos</a></li>
-                            <li><a href="/adminubicaciones">Ubicaciones</a></li>
-                            <li><a href="/adminproyectos">Gestionar Proyectos</a></li>
-                            <li><a href="/admintareas">Tareas</a></li>
-                        </ul>
-                    </li>
+                    <li><a href="/usuarios/adminusers"><i class="ti-user"></i>Usuarios</a></li>
+                    
+                    <li><a href="/clientes/gestionar"><i class="ti-world"></i>Clientes</a></li>
+                    <li><a href="/proveedores/administrar"><i class="ti-truck"></i>Proveedores</a></li>
                     <li>
                         <a class="sidebar-sub-toggle">
                             <i class="ti-package"></i>
@@ -49,11 +29,8 @@ let ruta = `/?folio=${user.folio}`
                             <span class="sidebar-collapse-icon ti-angle-down"></span> 
                         </a>
                         <ul>
-                            <li><a href="/adminproveedores">Proveedores</a></li>
-                            <li><a href="/adminmarcas">Marcas</a></li>
-                            <li><a href="/adminproductos">Productos</a></li>
-                            <li><a href="/adminservicios">Servicios</a></li>
-                            <li><a href="/admininventario">Inventario</a></li>
+                            <li><a href="/almacenes/admin">Ubicaciones</a></li>
+                            <li><a href="/inventario/inventario_general">Invetario General</a></li>
                         </ul>
                     </li>
                     <li>
@@ -63,14 +40,14 @@ let ruta = `/?folio=${user.folio}`
                             <span class="sidebar-collapse-icon ti-angle-down"></span> 
                         </a>
                         <ul>
-                            <li><a href="/adminViaticosGrl">Resumen de Movimientos</a></li>
-                            <li><a href="/adminClaves">Seguimiento de Gastos</a></li>
-                            <li><a href="/asignacionViaticos">Asignar Viaticos</a></li>
+                            <li><a href="/viaticos/administrar">Resumen de Movimientos</a></li>
+                            <li><a href="/viaticos/claves">Seguimiento de Gastos</a></li>
+                            <li><a href="/viaticos/asignar">Asignar Viaticos</a></li>
                         </ul>
                     </li>
                     <%} %>
                     <li class="label">PERSONAL</li>
-                    <li><a href="/miPerfil?usuario=<%= user.folio %>"><i class="ti-user"></i> Mi Perfil</a></li>
+                    <li><a href="/usuarios/miPerfil?usuario=<%= user.folio %>"><i class="ti-user"></i> Mi Perfil</a></li>
                     <li>
                         <a class="sidebar-sub-toggle">
                             <i class="ti-money"></i>
@@ -78,14 +55,14 @@ let ruta = `/?folio=${user.folio}`
                             <span class="sidebar-collapse-icon ti-angle-down"></span> 
                         </a>
                         <ul>
-                            <li><a href="/adminViaticosPersonal?usuario=<%= user.folio %>">Comprobacion y Depositos</a></li>
-                            <li><a href="/seguimientoClaves?usuario=<%= user.folio %>">Seguimiento de Claves</a></li>
+                            <li><a href="/viaticos/admin_personal?usuario=<%= user.folio %>">Comprobacion y Depositos</a></li>
+                            <li><a href="/viaticos/claves_personal?usuario=<%= user.folio %>">Seguimiento de Claves</a></li>
                         </ul>
                     </li>
-                    <li><a href="/misProyectos?folio=<%= user.folio %>"><i class="ti-blackboard"></i> Mis Proyectos</a></li>
-                    <li><a href="/misTareas?folio=<%= user.folio %>"><i class="ti-list"></i> Mis Tareas</a></li>
-                    <li><a href="/misAsistencias?usuario=<%= user.folio %>"><i class="ti-calendar"></i> Mis Asistencias</a></li>
-                    <li><a href="/miInventario?usuario=<%= user.folio %>"><i class="ti-truck"></i> Mi Inventario</a></li>
+                    <li><a href="/proyectos/mis_proyectos?folio=<%= user.folio %>"><i class="ti-blackboard"></i> Mis Proyectos</a></li>
+                    <li><a href="/tareas/mis_tareas?folio=<%= user.folio %>"><i class="ti-list"></i> Mis Tareas</a></li>
+                    <li><a href="/asistencias/mis_asistencias?usuario=<%= user.folio %>"><i class="ti-calendar"></i> Mis Asistencias</a></li>
+                    <li><a href="/inventario/mi_inventario?usuario=<%= user.folio %>"><i class="ti-truck"></i> Mi Inventario</a></li>
                     
                     <li><a href="../../logout"><i class="ti-close"></i> Logout</a></li>
                 </ul>
@@ -271,9 +248,9 @@ let ruta = `/?folio=${user.folio}`
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="#">
-                                                    <i class="ti-settings"></i>
-                                                    <span>Setting</span>
+                                                <a href="/unidades/administrar">
+                                                    <i class="ti-ruler-alt"></i>
+                                                    <span>Unidades</span>
                                                 </a>
                                             </li>
 

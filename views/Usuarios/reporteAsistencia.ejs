@@ -19,7 +19,7 @@
                         <div class="page-title">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
-                                <li class="breadcrumb-item"><a href="/adminusers">Usuarios</a></li>
+                                <li class="breadcrumb-item"><a href="/usuarios/adminusers">Usuarios</a></li>
                                 <li class="breadcrumb-item active">Reporte de Asisetncia</li>    
                             </ol>
                         </div>
@@ -34,7 +34,7 @@
                             <div class="card-title">
                                 <div class="button-list">
                                     <button onclick="filtrarPorFecha()" class="btn btn-success btn-sm"><i class="ti-calendar"></i>    Filtrar por Fecha</button>
-                                    <button onclick="window.open('/generarReporteAsistencia', '_self')" class="btn btn-danger btn-sm"><i class="ti-trash"></i></button>
+                                    <button onclick="window.open('/usuarios/reporte_asistencia', '_self')" class="btn btn-danger btn-sm"><i class="ti-trash"></i></button>
                                 </div>     
                             </div>
                             <div class="bootstrap-data-table-panel">
@@ -89,7 +89,7 @@
             if(result.isConfirmed){
                 const inicio = document.getElementById('fecha_inicio').value;
                 const termino = document.getElementById('fecha_termino').value;
-                const ruta = `/generarReporteAsistencia?inicio=${inicio}&termino=${termino}`
+                const ruta = `/usuarios/reporte_asistencia?inicio=${inicio}&termino=${termino}`
                 window.location = ruta
             }
         })

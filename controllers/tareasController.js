@@ -6,11 +6,11 @@ const { nextTick } = require('process')
 function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
     let ruta = '';
     switch(parseInt(flag)){
-        case 0: ruta = `tareasetapa?etapa=${etapa}&proyecto=${proyecto}&flag=0`; break;
-        case 1: ruta = `tareasetapa?etapa=${etapa}&proyecto=${proyecto}&cliente=${cliente}&flag=1`; break;
-        case 2: ruta = `tareasetapa?etapa=${etapa}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`;break;
-        case 3: ruta = `tareasetapa?etapa=${etapa}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`;break;
-        case 4: ruta = `tareasetapa?etapa=${etapa}&proyecto=${proyecto}&flag=${flag}&permisos=${permisos}`; break;
+        case 0: ruta = `tareas/etapa?etapa=${etapa}&proyecto=${proyecto}&flag=0`; break;
+        case 1: ruta = `tareas/etapa?etapa=${etapa}&proyecto=${proyecto}&cliente=${cliente}&flag=1`; break;
+        case 2: ruta = `tareas/etapa?etapa=${etapa}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`;break;
+        case 3: ruta = `tareas/etapa?etapa=${etapa}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`;break;
+        case 4: ruta = `tareas/etapa?etapa=${etapa}&proyecto=${proyecto}&flag=${flag}&permisos=${permisos}`; break;
         //case 5: ruta = `tareasetapa?etapa=${etapa}&ubicacion=${ubicacion}&cliente=${cliente}&flag=5`; break;
         //case 6: ruta = `tareasetapa?etapa=${etapa}&cliente=${cliente}&flag=6`;break;
         default: ruta = 'adminubicaciones'; break;
@@ -224,7 +224,7 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
                 if(error){
                     throw error
                 }else{
-                    res.redirect(ruta)
+                    res.redirect(`/${ruta}`)
                     return next()
                 }
             })
@@ -338,7 +338,7 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
                                     if(err2){
                                         throw err2
                                     }else{ 
-                                        res.redirect(ruta)
+                                        res.redirect(`/${ruta}`)
                                         return next()  
                                     }
                                 })

@@ -57,30 +57,40 @@ function showError(res, titulo, mensaje, ruta){
 //Inventario
 exports.addInvent2User = async(req, res, next)=>{
     try {
+        //Data es el movimiento del material
         let data = {
-            usuario: req.body.usuario,
-            producto: req.body.producto,
-            cantidad: req.body.cantidad,
-            unidades: req.body.unidad
+            usuario: req.body.usuario_afectado, //Usuario a quien se le asigna el material
+            producto: req.body.producto,        //El producto que esta siendo asignado
+            cantidad: req.body.cantidad,        //La cantidad de producto que esta siendo asiganada
+            unidades: req.body.unidad           //La unidad con la que se mide cierto producto
         }
         let bitacora = {
-            usuario: data.usuario,
-            producto: data.producto,
-            cantidad: (-1) * parseFloat(data.cantidad),
-            fecha: new Date()
+            usuario_registra: req.body.usuario,            //Usuario que registra el movimiento
+            producto: data.producto,                       //Producto que se esta asignando
+            cantidad: (-1) * parseFloat(data.cantidad),    //Cantidad que se esta movilizando
+            fecha: new Date(),                             //Datos de la fecha del movimiento
+            usuario_afectado: data.usuario,                 //Folio del usuario afectado
+            almacen: req.body.almacen
         }
-        //Primero validamos la cantidad
-        const cantidad_existente = req.body.cantidad_existente
-        const folioInvent = req.body.folioInvent
 
+        let ruta_regreso = (req.body.flag == 1) ? `moverInventUser?usuario=${data.usuario}&flag=${req.body.flag}` : `moverInventUser?usuario=${data.usuario}`;
+        let ruta_back = (req.body.flag == 1) ? `/inventario/mi_inventario?usuario=${data.usuario}&flag=${req.body.flag}` : `/inventario/mi_inventario?usuario=${data.usuario}`;
+
+
+        //Primero validamos la cantidad
+        const cantidad_existente = req.body.cantidad_existente //Obtenemos la cantidad actual en bodega para saber si hay suficientes existencias
+        const folioInvent = req.body.folioInvent               //Obtenemso el folio de inventario del producto que es diferente a su folio como producto 
+
+        //Si la cantidad que se quiere mover es mayor a la cantidad existente, rechazamos el movimiento
         if(parseInt(data.cantidad) > parseInt(cantidad_existente)){
-            showError(res, 'Error al mover el material', 'No hay suficientes existencias en el inventario', `moverInventUser?usuario=${data.usuario}`)
+            showError(res, 'Error al mover el material', 'No hay suficientes existencias en el inventario', ruta_regreso)
         }else{
             //Primero registramos el movimiento en la bitacora
             conexion.query("INSERT INTO op016_movimientos_inventario SET ?", bitacora, (error, fila)=>{
                 if(error){
-                    throw error
+                    throw error //EN CASO DE UN ERROR MOSTRAMOS ESTE POR CONSOLA
                 }else{
+                    //Verificamos si la cantidad es la misma que en la bodega es decir, se queda sin material la bodega
                     if(data.cantidad == cantidad_existente){
                         //Eliminamos el registro del inventario
                         conexion.query("DELETE FROM cat020_inventario WHERE folio = ?", [folioInvent], (error2, fila2)=>{
@@ -98,7 +108,7 @@ exports.addInvent2User = async(req, res, next)=>{
                                                 if(error4){
                                                     throw error4
                                                 }else{
-                                                    res.redirect(`/miInventario?usuario=${data.usuario}`)
+                                                    res.redirect(`${ruta_back}`)
                                                     return next
                                                 }
                                             })
@@ -109,7 +119,7 @@ exports.addInvent2User = async(req, res, next)=>{
                                                 if(error4){
                                                     throw error4
                                                 }else{
-                                                    res.redirect(`/miInventario?usuario=${data.usuario}`)
+                                                    res.redirect(`${ruta_back}`)
                                                     return next
                                                 }
                                             })
@@ -136,7 +146,7 @@ exports.addInvent2User = async(req, res, next)=>{
                                                 if(error4){
                                                     throw error4
                                                 }else{
-                                                    res.redirect(`/miInventario?usuario=${data.usuario}`)
+                                                    res.redirect(`${ruta_back}`)
                                                     return next
                                                 }
                                             })
@@ -147,7 +157,7 @@ exports.addInvent2User = async(req, res, next)=>{
                                                 if(error4){
                                                     throw error4
                                                 }else{
-                                                    res.redirect(`/miInventario?usuario=${data.usuario}`)
+                                                    res.redirect(`${ruta_back}`)
                                                     return next
                                                 }
                                             })
@@ -172,15 +182,20 @@ exports.returnAll2Invent = async(req, res, next)=>{
         const registro = req.query.registro
         const producto = req.query.producto
         const cantidad = req.query.cantidad
-        const usuario = req.query.usuario
-        const unidades =  req.query.unidades
+        const usuario_registra = req.query.usuario_registra
+        const usuario_afectado = req.query.usuario_afectado
+        const unidades =  req.query.unidades4
+        const flag =  req.query.flag
 
         let bitacora = {
-            usuario: usuario,
+            usuario_registra: usuario_registra,
             producto: producto,
             cantidad: cantidad, 
-            fecha: new Date()
+            fecha: new Date(),
+            usuario_afectado: usuario_afectado
         }
+
+        let ruta_regreso = (flag == 1) ? `/miInventario?usuario=${usuario_afectado}&flag=${flag}` : `/miInventario?usuario=${usuario_afectado}`
 
         //Elinamos el registro
         conexion.query("DELETE FROM op013_material_usuario WHERE folio = ?", [registro], (error, fila)=>{
@@ -208,7 +223,7 @@ exports.returnAll2Invent = async(req, res, next)=>{
                                         if(error4){
                                             throw error4
                                         }else{
-                                            res.redirect(`/miInventario?usuario=${usuario}`)
+                                            res.redirect(ruta_regreso)
                                             return next()
                                         }
                                     })
@@ -219,7 +234,7 @@ exports.returnAll2Invent = async(req, res, next)=>{
                                         if(error4){
                                             throw error4
                                         }else{
-                                            res.redirect(`/miInventario?usuario=${usuario}`)
+                                            res.redirect(ruta_regreso)
                                             return next()
                                         }
                                     })
@@ -235,139 +250,21 @@ exports.returnAll2Invent = async(req, res, next)=>{
         return next()
     }
 }
-exports.modificarInventPersonal = async(req, res, next)=>{
-    try {
-        const cantidadActual = parseInt(req.query.cantidadActual)
-        const nuevaCantidad = parseInt(req.query.nuevaCantidad)
-        const producto = req.query.producto
-        const usuario = req.query.usuario
-        const registro = req.query.registro
-        const unidades = req.query.unidades
 
-        let bitacora = {
-            usuario: usuario,
-            producto: producto,
-            cantidad: 0,
-            fecha: new Date()
-        }
-        //Primero analizamos si es aumento o drecrento
-        if(cantidadActual === nuevaCantidad){
-            //No hacemos nada
-            res.redirect(`/miInventario?usuario=${usuario}`)
-            return next()
-        }else if(cantidadActual < nuevaCantidad){
-            //Calculamos la diferencia
-            let diferencia = nuevaCantidad - cantidadActual
-            //Validamos que haya suficiente existencia en el inventario
-            conexion.query("SELECT folio, cantidad FROM cat020_inventario WHERE producto = ?", [producto], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    let existencias = parseInt(fila[0].cantidad)
-                    const folioInvent = fila[0].folio
-                    if(existencias >= diferencia){
-                        //Podemos hacer el movimiento (Primero registramos en la bitacora)
-                        bitacora.cantidad = (-1) * diferencia
-                        conexion.query("INSERT INTO op016_movimientos_inventario SET ?", bitacora, (error2, fila2)=>{
-                            if(error2){
-                                throw error2
-                            }else{
-                                //Modificamos la cantidad en el Inventario del Usuario
-                                conexion.query("UPDATE op013_material_usuario SET cantidad = ? WHERE folio = ?", [nuevaCantidad, registro], (error3, fila3)=>{
-                                    if(error3){
-                                        throw error3
-                                    }else{
-                                        //Modificamos el inventario
-                                        if(existencias == diferencia){
-                                            //Eliminamos el registro del inventario
-                                            conexion.query("DELETE FROM cat020_inventario WHERE folio = ?", [folioInvent], (error4, fila4)=>{
-                                                if(error4){
-                                                    throw error4
-                                                }else{
-                                                    res.redirect(`/miInventario?usuario=${usuario}`)
-                                                    return next()
-                                                }
-                                            })
-                                        }else{
-                                            let difInvent = existencias - diferencia
-                                            conexion.query("UPDATE cat020_inventario SET cantidad = ? WHERE folio = ?", [difInvent, folioInvent], (error4, fila4)=>{
-                                                if(error4){
-                                                    throw error4
-                                                }else{
-                                                    res.redirect(`/miInventario?usuario=${usuario}`)
-                                                    return next()
-                                                }
-                                            })
-                                        }
-                                    }
-                                })
-                            }
-                        })
-                    }else if(existencias < diferencia){
-                        showError(res, 'Imposible mover Inventario', `No fue posible mover el inventario pues no hay suficientes existencias en Bodega`, `/miInventario?usuario=${usuario}`)
-                        return next()
-                    }
-                }
-            })
-        }else if(cantidadActual > nuevaCantidad){
-            //Quiere decir que devolveremos existencias al inventario
-            //Primero registramos el movimiento 
-            let diferencia = cantidadActual - nuevaCantidad
-            bitacora.cantidad = diferencia
-            conexion.query("INSERT INTO op016_movimientos_inventario SET ?", bitacora, (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    //Modificamos las existencias en el inventario
-                    conexion.query("UPDATE op013_material_usuario SET cantidad = ? WHERE folio = ?", [nuevaCantidad, registro], (error2, fila2)=>{
-                        if(error2){
-                            throw error2
-                        }else{
-                            //Consultamos las existencias del inventario
-                            conexion.query("SELECT folio, cantidad FROM cat020_inventario WHERE producto = ?", [producto], (error3, fila3)=>{
-                                if(error3){
-                                    throw error3
-                                }else{
-                                    if(fila3[0].cantidad === 0){
-                                        //Si no hay registro en el inventario, entonces lo agregamos
-                                        let inventario = {
-                                            producto: producto,
-                                            cantidad: diferencia,
-                                            unidades: unidades
-                                        }
-                                        conexion.query("INSERT INTO cat020_inventario SET ?", inventario, (error4, fila4)=>{
-                                            if(error4){
-                                                throw error4
-                                            }else{
-                                                res.redirect(`/miInventario?usuario=${usuario}`)
-                                                return next()
-                                            }
-                                        })
-                                    }else{
-                                        //Lo modificamos
-                                        let folioInvent = fila3[0].folio
-                                        let cantidadInvent = parseInt(fila3[0].cantidad) + diferencia
-                                        conexion.query("UPDATE cat020_inventario SET cantidad = ? WHERE folio = ?", [cantidadInvent, folioInvent], (error4, fila4)=>{
-                                            if(error4){
-                                                throw error4
-                                            }else{
-                                                res.redirect(`/miInventario?usuario=${usuario}`)
-                                                return next()
-                                            }
-                                        })
-                                    }
-                                }
-                            })
-                        }
-                    })
-                }
-            })
-        }
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
+function getExistenciasAlmacen(producto, almacen){
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT folio, cantidad FROM cat020_inventario WHERE producto = ? AND almacen = ?", [producto, almacen], (error, fila)=>{
+            if(error){
+                throw error;
+            }else{
+                resolve(fila[0])
+            }
+        })
+    })
 }
+
+
+
 
 //Funciones del perfil
 exports.changeNombreUsuario = async(req, res, next)=>{
@@ -484,7 +381,7 @@ exports.changePassUserAdmin = async(req, res, next)=>{
                         if(error2){
                             throw error2
                         }else{
-                            res.redirect( `/adminusers`)
+                            res.redirect( `/usuarios/adminusers`)
                             return next()
                         }
                     })

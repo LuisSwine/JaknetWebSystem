@@ -106,7 +106,7 @@ function showError(res, titulo, mensaje, ruta){
                     throw error
                 }else{
                     if(req.body.back == 1){
-                        let ruta = `/perfilCliente?cliente=${data.cliente}`
+                        let ruta = `/clientes/administrar?cliente=${data.cliente}`
                         res.redirect(ruta)
                         return next()
                     }else if (req.body.back == 2){
@@ -175,11 +175,15 @@ function showError(res, titulo, mensaje, ruta){
             return next()
         }
     }
+
+
+
+    //FUNCIONES CORRECTAS
     exports.editNombreUbicacion = async(req, res, next)=>{
         try {
             let ruta = ''
-            if(req.query.flag == 1){ruta = `/perfilUbicacion?ubicacion=${req.query.ubicacion}&cliente=${req.query.cliente}&flag=1`}
-            else if(req.query.flag == 0){ruta = `/perfilUbicacion?ubicacion=${req.query.ubicacion}&flag=0`}
+            if(req.query.flag == 1){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&cliente=${req.query.cliente}&flag=1`}
+            else if(req.query.flag == 0){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&flag=0`}
             conexion.query("UPDATE cat007_ubicaciones SET nombre = ? WHERE folio = ?", [req.query.nombre, req.query.ubicacion], (error, fila)=>{
                 if(error){
                     throw error
@@ -196,8 +200,8 @@ function showError(res, titulo, mensaje, ruta){
     exports.editDireccionUbicacion = async(req, res, next)=>{
         try {
             let ruta = ''
-            if(req.query.flag == 1){ruta = `/perfilUbicacion?ubicacion=${req.query.ubicacion}&cliente=${req.query.cliente}&flag=1`}
-            else if(req.query.flag == 0){ruta = `/perfilUbicacion?ubicacion=${req.query.ubicacion}&flag=0`}
+            if(req.query.flag == 1){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&cliente=${req.query.cliente}&flag=1`}
+            else if(req.query.flag == 0){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&flag=0`}
             conexion.query("UPDATE cat007_ubicaciones SET direccion = ? WHERE folio = ?", [req.query.direccion, req.query.ubicacion], (error, fila)=>{
                 if(error){
                     throw error
@@ -211,6 +215,10 @@ function showError(res, titulo, mensaje, ruta){
             return next()
         }
     }
+
+
+
+
 //FIN DEL CRUD PARA LA GESTION DE UBICACIONES
 
 //COTIZACIONES NIVEL UBICACION

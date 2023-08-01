@@ -20,13 +20,13 @@
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
                                 <% if(clave !== undefined && usuario === undefined){%>
-                                <li class="breadcrumb-item active"><a href="/adminClaves?clave=<%= clave %>">Clave</a></li>
+                                <li class="breadcrumb-item active"><a href="claves?clave=<%= clave %>">Clave</a></li>
                                 <%}else if(usuario === undefined){%>
-                                <li class="breadcrumb-item active"><a href="/adminViaticosGrl">Viaticos</a></li>
+                                <li class="breadcrumb-item active"><a href="administrar">Viaticos</a></li>
                                 <%}else if(clave !== undefined){%>
-                                <li class="breadcrumb-item active"><a href="/seguimientoClaves?usuario=<%= usuario %>&clave=<%= clave %>">Clave</a></li>
+                                <li class="breadcrumb-item active"><a href="claves_personal?usuario=<%= usuario %>&clave=<%= clave %>">Clave</a></li>
                                 <%}else if(clave === undefined){%>
-                                <li class="breadcrumb-item active"><a href="/adminViaticosPersonal?usuario=<%= usuario %>">Viaticos</a></li>
+                                <li class="breadcrumb-item active"><a href="admin_personal?usuario=<%= usuario %>">Viaticos</a></li>
                                 <%}%> 
                             </ol>
                         </div>

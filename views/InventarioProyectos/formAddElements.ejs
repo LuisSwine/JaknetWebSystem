@@ -20,13 +20,13 @@
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
                                 <% if(flag == 1){%>
-                                    <li class="breadcrumb-item"><a href="/proyectosInvent?proyecto=<%= proyecto[0].folio %>&cliente=<%= cliente %>&flag=<%= flag %>"><%= proyecto[0].nombre %></a></li>
+                                    <li class="breadcrumb-item"><a href="/proyectos/inventario?proyecto=<%= proyecto[0].folio %>&cliente=<%= cliente %>&flag=<%= flag %>"><%= proyecto[0].nombre %></a></li>
                                 <%}else if(flag == 3 || flag == 2){%>
-                                    <li class="breadcrumb-item"><a href="/proyectosInvent?proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>"><%= proyecto[0].nombre %></a></li>
+                                    <li class="breadcrumb-item"><a href="/proyectos/inventario?proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>"><%= proyecto[0].nombre %></a></li>
                                 <%}else if(flag == 0){%>
-                                    <li class="breadcrumb-item"><a href="/proyectosInvent?proyecto=<%= proyecto[0].folio %>&flag=<%= flag %>"><%= proyecto[0].nombre %></a></li>
+                                    <li class="breadcrumb-item"><a href="/proyectos/inventario?proyecto=<%= proyecto[0].folio %>&flag=<%= flag %>"><%= proyecto[0].nombre %></a></li>
                                 <%}else if(flag == 4){%>
-                                    <li class="breadcrumb-item"><a href="/proyectosInvent?proyecto=<%= proyecto[0].folio %>&flag=<%= flag %>&permisos=<%= permisos %>"><%= proyecto[0].nombre %></a></li>
+                                    <li class="breadcrumb-item"><a href="/proyectos/inventario?proyecto=<%= proyecto[0].folio %>&flag=<%= flag %>&permisos=<%= permisos %>"><%= proyecto[0].nombre %></a></li>
                                 <%} %>
                                 <li class="breadcrumb-item active">Agregar Elementos</li>
                             </ol>
@@ -43,7 +43,7 @@
                         </div>
                         <div class="card-body">
                             <div class="basic-elements">
-                                <form action="/addProduct2Proyecto" method="post">
+                                <form action="agregar" method="post">
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
@@ -51,7 +51,7 @@
                                                 <select class="form-control" name="producto" id="producto" onchange="cambioValores('<%= encodeURIComponent(JSON.stringify(inventario)) %>')">
                                                     <option disabled selected>--Seleccione--</option>
                                                     <% inventario.forEach((producto)=>{ %>
-                                                    <option value="<%= producto.folio_producto %>"><%= producto.producto %></option>
+                                                    <option value="<%= producto.folio_producto %>"><%= producto.almacen %> - <%= producto.producto %></option>
                                                     <% }) %> 
                                                 </select>
                                             </div>
@@ -64,6 +64,14 @@
                                                     <% }) %> 
                                                 </select>
                                             </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>CANTIDAD</label> 
+                                                <input type="number" step="any" class="form-control" id="cantidad" name="cantidad" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12">
                                             <div class="form-group">
                                                 <input type="number" class="form-control" id="folioInvent" name="folioInvent" hidden>
                                                 <input type="number" value="<%= proyecto[0].folio %>" class="form-control" id="proyecto" name="proyecto" hidden>
@@ -73,14 +81,9 @@
                                                 <input type="number" class="form-control" value="<%= cliente %>" id="cliente" name="cliente" hidden>
                                                 <input type="number" class="form-control" value="<%= flag %>" id="flag" name="flag" hidden>
                                                 <input type="number" class="form-control" value="<%= permisos %>" id="permisos" name="permisos" hidden>
+                                                <input type="number" class="form-control" value="0" id="almacen" name="almacen" hidden>
                                             </div>
                                             <button type="submit" class="btn btn-primary m-b-10">Mover Inventario</button>
-                                        </div>
-                                        <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <label>CANTIDAD</label> 
-                                                <input type="number" step="any" class="form-control" id="cantidad" name="cantidad" required>
-                                            </div>
                                         </div>
                                     </div>
                                 </form>
@@ -105,11 +108,13 @@
                 cantidad = variable.cantidad
                 unidad = variable.folio_unidad
                 folioInvent = variable.folio
+                almacen = variable.folio_almacen
             }
         })
         document.getElementById('cantidad').value = cantidad
         document.getElementById('cantidad_existente').value = cantidad
         document.getElementById('unidad').value = unidad
+        document.getElementById('almacen').value = almacen
         document.getElementById('folioInvent').value = folioInvent
     }
 </script>

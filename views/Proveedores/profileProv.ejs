@@ -19,7 +19,7 @@
                         <div class="page-title">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
-                                <li class="breadcrumb-item"><a href="/adminproveedores">Proveedores</a></li>
+                                <li class="breadcrumb-item"><a href="administrar">Proveedores</a></li>
                                 <li class="breadcrumb-item active"><%= proveedor[0].nombre %></li>
                             </ol>
                         </div>
@@ -44,7 +44,7 @@
                                     <div class="col-lg-12">
                                         <div class="card">
                                             <div class="card-title">
-                                                <a href="/relateMarcaProveedor?proveedor=<%= proveedor[0].folio %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Añadir Marca A Proveedor</a>     
+                                                <a href="agregar_marca?proveedor=<%= proveedor[0].folio %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Añadir Marca A Proveedor</a>     
                                             </div>
                                             <div class="bootstrap-data-table-panel">
                                                 <div class="table-responsive">
@@ -64,8 +64,7 @@
                                                                 <td>
                                                                     <div class="button-list">
                                                                         <div class="btn-group btn-group-justified">
-                                                                            <a class="btn btn-info btn-sm" href="/perfilMarca?marca=<%= marca.folio_marca %>"><i class="ti-settings"></i></a>
-                                                                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteMarca('<%= marca.folio_marca %>', '<%= proveedor[0].folio %>')"><i class="ti-trash"></i></button>
+                                                                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteMarca('<%= marca.folio %>', '<%= proveedor[0].folio %>')"><i class="ti-trash"></i></button>
                                                                         </div>
                                                                     </div>
                                                                 </td>
@@ -89,7 +88,7 @@
                                     <div class="col-lg-12">
                                         <div class="card">
                                             <div class="card-title">
-                                                <h4>PRODUCTOS DISPONIBLES CON PROVEEDOR</h4>     
+                                                <a href="agregar_producto?proveedor=<%= proveedor[0].folio %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Añadir nuevo producto</a>     
                                             </div>
                                             <div class="bootstrap-data-table-panel">
                                                 <div class="table-responsive">
@@ -171,7 +170,7 @@
             confirmButtonText: 'Elimiar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/deleteMarcaProveedor?registro=${registro}&proveedor=${proveedor}`
+                const ruta = `eliminar_marca?registro=${registro}&proveedor=${proveedor}`
                 window.location = ruta
             }
         })

@@ -40,7 +40,7 @@
                                         <span class="caret"></span></button>
                                     <ul class="dropdown-menu">
                                         <% claves.forEach((clave)=>{%>
-                                            <li><a href="/seguimientoClaves?usuario=<%= user.folio %>&clave=<%= clave.folio %>"><%= clave.clave %></a></li>
+                                            <li><a href="claves_personal?usuario=<%= user.folio %>&clave=<%= clave.folio %>"><%= clave.clave %></a></li>
                                             <%}) %>
                                     </ul>
                                 </div>
@@ -137,8 +137,8 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-title">
-                                <a href="/formLoadTicket?usuario=<%= user.folio %>&clave=<%= claveSelected[0].folio %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Subir Comprobante</a>
-                                <a href="/exportDataClaves?data=comprobantes&clave=<%= claveSelected[0].folio %>&usuario=<%= user.folio %>" class="btn btn-success btn-flat btn-addon"><i class="ti-new-window"></i>Exportar Datos</a>
+                                <a href="comprobar?usuario=<%= user.folio %>&clave=<%= claveSelected[0].folio %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Subir Comprobante</a>
+                                <a href="exportar_claves?data=comprobantes&clave=<%= claveSelected[0].folio %>&usuario=<%= user.folio %>" class="btn btn-success btn-flat btn-addon"><i class="ti-new-window"></i>Exportar Datos</a>
                             </div>
                             <div class="bootstrap-data-table-panel">
                                 <div class="table-responsive">
@@ -213,7 +213,7 @@
             confirmButtonText: 'Elimiar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/deleteComprobanteClavePer?usuario=${user}&clave=${clave}&saldo=${saldo}&folio=${folio}&monto=${monto}`
+                const ruta = `eliminar_comprobante_clave_per?usuario=${user}&clave=${clave}&saldo=${saldo}&folio=${folio}&monto=${monto}`
                 window.location = ruta
             }
         })

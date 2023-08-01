@@ -20,13 +20,13 @@
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
                                 <% if(flag == 0){%>
-                                <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%= etapa[0].folio %>&proyecto=<%= proyecto %>&flag=<%= flag %>">Tareas</a></li>
+                                <li class="breadcrumb-item"><a href="/tareas/etapa?etapa=<%= etapa[0].folio %>&proyecto=<%= proyecto %>&flag=<%= flag %>">Tareas</a></li>
                                 <%}else if(flag == 1){%>
-                                <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%= etapa[0].folio %>&proyecto=<%= proyecto %>&cliente=<%= cliente %>&flag=<%= flag %>">Tareas</a></li>
+                                <li class="breadcrumb-item"><a href="/tareas/etapa?etapa=<%= etapa[0].folio %>&proyecto=<%= proyecto %>&cliente=<%= cliente %>&flag=<%= flag %>">Tareas</a></li>
                                 <%}else if(flag == 2 || flag == 3){%>
-                                <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%= etapa[0].folio %>&proyecto=<%= proyecto %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>">Tareas</a></li>
+                                <li class="breadcrumb-item"><a href="/tareas/etapa?etapa=<%= etapa[0].folio %>&proyecto=<%= proyecto %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>">Tareas</a></li>
                                 <%}else if(flag == 4){%>
-                                <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%= etapa[0].folio %>&proyecto=<%= proyecto %>&flag=<%= flag %>&permisos=<%= permisos %>">Tareas</a></li>
+                                <li class="breadcrumb-item"><a href="/tareas/etapa?etapa=<%= etapa[0].folio %>&proyecto=<%= proyecto %>&flag=<%= flag %>&permisos=<%= permisos %>">Tareas</a></li>
                                 <!-- <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%//= etapa[0].folio %>&ubicacion=<%//= ubicacion %>&flag=4">Tareas</a></li>
                                 <%//}else if(flag == 5){%>
                                 <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%//= etapa[0].folio %>&ubicacion=<%//= ubicacion %>&cliente=<%//= cliente %>&flag=5">Tareas</a></li>                                    
@@ -48,21 +48,12 @@
                         </div>
                         <div class="card-body">
                             <div class="basic-elements">
-                                <form action="/createTarea" method="post">
+                                <form action="/tareas/agregar" method="post">
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label>DESCRIPCION DE LA TAREA</label>
                                                 <textarea class="form-control" rows="3" placeholder="Describa brevemente la tarea" required name="descripcion" id="descripcion"></textarea>
-                                            </div>
-                                            <div class="form-group">
-                                                <input type="number" class="form-control" value="<%= etapa[0].folio %>" id="etapa" name="etapa" hidden>
-                                                <input type="number" class="form-control" value="7" id="estatus" name="estatus" hidden>
-                                                <input type="number" class="form-control" value="<%= proyecto %>" id="proyecto" name="proyecto" hidden>
-                                                <input type="number" class="form-control" value="<%= ubicacion %>" id="ubicacion" name="ubicacion" hidden>
-                                                <input type="number" class="form-control" value="<%= cliente %>" id="cliente" name="cliente" hidden>
-                                                <input type="number" class="form-control" value="<%= flag %>" id="flag" name="flag" hidden>
-                                                <input type="permisos" class="form-control" value="<%= permisos %>" id="permisos" name="permisos" hidden>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
@@ -79,6 +70,15 @@
                                                     <% }) %> 
                                                 </select>
                                             </div>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <input type="number" class="form-control" value="<%= etapa[0].folio %>" id="etapa" name="etapa" hidden>
+                                            <input type="number" class="form-control" value="7" id="estatus" name="estatus" hidden>
+                                            <input type="number" class="form-control" value="<%= proyecto %>" id="proyecto" name="proyecto" hidden>
+                                            <input type="number" class="form-control" value="<%= ubicacion %>" id="ubicacion" name="ubicacion" hidden>
+                                            <input type="number" class="form-control" value="<%= cliente %>" id="cliente" name="cliente" hidden>
+                                            <input type="number" class="form-control" value="<%= flag %>" id="flag" name="flag" hidden>
+                                            <input type="permisos" class="form-control" value="<%= permisos %>" id="permisos" name="permisos" hidden>
                                             <button type="submit" class="btn btn-primary m-b-10">CREAR TAREA</button>
                                         </div>
                                     </div>

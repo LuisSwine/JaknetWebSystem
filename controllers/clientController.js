@@ -2,6 +2,7 @@ const conexion = require('../database/db')
 const {promisify} = require('util')
 const { query } = require('../database/db')
 const { nextTick } = require('process')
+const { resolve } = require('path')
 
 function showError(res, titulo, mensaje, ruta){
     res.render('Error/showInfo', {
@@ -94,7 +95,7 @@ function showError(res, titulo, mensaje, ruta){
                 if(error){
                     throw error
                 }else{
-                    res.redirect('/adminclients')
+                    res.redirect('/clientes/gestionar')
                     return next()    
                 }
             })    
@@ -103,14 +104,15 @@ function showError(res, titulo, mensaje, ruta){
             return next()
         }
     }
-    //Cambiar el nombre del cliente
-    exports.editNameClient = async(req, res, next)=>{
+
+    //EDITAR DATOS DEL CLIENTE
+    exports.editarNombre = async(req, res, next)=>{
         try {
             conexion.query("UPDATE cat003_clientes SET nombre = ? WHERE folio = ?", [req.query.nombre, req.query.cliente], (error, fila)=>{
                 if(error){
                     throw error
                 }else{
-                    res.redirect(`/perfilCliente?cliente=${req.query.cliente}`)
+                    res.redirect(`/clientes/administrar?cliente=${req.query.cliente}`)
                     return next()
                 }
             })
@@ -119,13 +121,13 @@ function showError(res, titulo, mensaje, ruta){
             return next
         }
     }
-    exports.editServicioCliente = async(req, res, next)=>{
+    exports.editarServicio = async(req, res, next)=>{
         try {
             conexion.query("UPDATE cat003_clientes SET tipo_servicio = ? WHERE folio = ?", [req.query.servicio, req.query.cliente], (error, fila)=>{
                 if(error){
                     throw error
                 }else{
-                    res.redirect(`/perfilCliente?cliente=${req.query.cliente}`)
+                    res.redirect(`/clientes/administrar?cliente=${req.query.cliente}`)
                     return next()
                 }
             })
@@ -134,13 +136,13 @@ function showError(res, titulo, mensaje, ruta){
             return next
         }
     }
-    exports.editTipoCliente = async(req, res, next)=>{
+    exports.editarTipo = async(req, res, next)=>{
         try {
             conexion.query("UPDATE cat003_clientes SET tipo_cliente = ? WHERE folio = ?", [req.query.tipo, req.query.cliente], (error, fila)=>{
                 if(error){
                     throw error
                 }else{
-                    res.redirect(`/perfilCliente?cliente=${req.query.cliente}`)
+                    res.redirect(`/clientes/administrar?cliente=${req.query.cliente}`)
                     return next()
                 }
             })
@@ -149,6 +151,7 @@ function showError(res, titulo, mensaje, ruta){
             return next
         }
     }
+
     //Eliminar un cliente
     exports.deleteClient = async(req, res, next) =>{
         try {
@@ -171,7 +174,7 @@ function showError(res, titulo, mensaje, ruta){
                                         if(error3){
                                             throw error3
                                         }else{
-                                            res.redirect('/adminclients')
+                                            res.redirect('/clientes/gestionar')
                                             return next()
                                         }
                                     })
@@ -194,55 +197,82 @@ function showError(res, titulo, mensaje, ruta){
     }
 //FIN DEL CRUD PARA LA GESTION DE CLIENTES
 
+function validate_areas_ubi(ubicacion){
+    return new Promise((resolve, reject)=>{
+        conexion.query('SELECT folio FROM cat008_areas WHERE planta = ?', ubicacion, (error, fila)=>{
+            if(error){
+                throw error;
+            }else{
+                if(fila.length === 0){
+                    resolve(false);
+                }else{
+                    resolve(true);
+                }
+            }
+        });
+    });
+}
+function validate_proyectos_ubi(ubicacion){
+    return new Promise((resolve,reject)=>{
+        conexion.query("SELECT folio FROM cat009_proyectos WHERE ubicacion = ?", ubicacion, (error, fila)=>{
+            if(error){
+                throw error;
+            }else{
+                if(fila.length === 0){
+                    resolve(false)
+                }else{
+                    resolve(true)
+                }
+            }
+        })
+    })
+}
+function validate_contacts_ubi(ubicacion){
+    return new Promise((resolve,reject)=>{
+        conexion.query("SELECT folio FROM op015_contacto_ubicacion WHERE ubicacion = ?", ubicacion, (error, fila)=>{
+            if(error){
+                throw error;
+            }else{
+                if(fila.length === 0){
+                    resolve(false)
+                }else{
+                    resolve(true)
+                }
+            }
+        })
+    })
+}
+
 //Ubicaciones a Nivel Cliente
     exports.deleteUbicacionCliente = async(req, res, next)=>{
         try {
             let ubicacion = req.query.ubicacion
-            const ruta = `perfilCliente?cliente=${req.query.cliente}`
+            const ruta = `clientes/gestionar?cliente=${req.query.cliente}`
 
-            //Validamos las areas
-            conexion.query("SELECT folio FROM cat008_areas WHERE planta = ?", [ubicacion], (error, fila)=>{
-                if(error){
-                    throw error
+            let ubi_has_areas = await validate_areas_ubi(ubicacion)
+            if(ubi_has_areas){
+                showError(res, 'No se ha podido eliminar la ubicacion', `La ubicacion ${ubicacion} tiene areas creadas`, ruta)
+                return next()
+            }
+
+            let ubi_has_proys = await validate_proyectos_ubi(ubicacion)
+            if(ubi_has_proys){
+                showError(res, 'No se ha podido eliminar la ubicacion', `La ubicacion ${ubicacion} tiene proyectos en curso`, ruta)
+                return next()
+            }
+            
+            let ubi_has_contacts = await validate_contacts_ubi(ubicacion)
+            if(ubi_has_contacts){
+                showError(res, 'No se ha podido eliminar la ubicacion', `La ubicacion ${ubicacion} tiene contactos asignados`, ruta)
+                return next()
+            }
+
+            conexion.query("DELETE FROM cat007_ubicaciones WHERE folio = ?", ubicacion, (error4, fila4)=>{
+                if(error4){
+                    throw error4
                 }else{
-                    if(fila.length === 0){
-                        //Validamos proyectos
-                        conexion.query("SELECT folio FROM cat009_proyectos WHERE ubicacion = ?", [ubicacion], (error2, fila2)=>{
-                            if(error2){
-                                throw error2
-                            }else{
-                                if(fila2.length === 0){
-                                    //validamos contactos
-                                    conexion.query("SELECT folio FROM op015_contacto_ubicacion WHERE ubicacion = ?", [ubicacion], (error3, fila3)=>{
-                                        if(error3){
-                                            throw error3
-                                        }else{
-                                            if(fila3.length === 0){
-                                                //Ahora si ya eliminamos
-                                                conexion.query("DELETE FROM cat007_ubicaciones WHERE folio = ?", [ubicacion], (error4, fila4)=>{
-                                                    if(error4){
-                                                        throw error4
-                                                    }else{
-                                                        res.redirect(`/${ruta}`)
-                                                        return next()
-                                                    }
-                                                })
-                                            }else{
-                                                showError(res, 'No se ha podido eliminar la ubicacion', `La ubicacion ${ubicacion} tiene contactos asignados`, ruta)
-                                                return next()
-                                            }
-                                        }
-                                    })
-                                }else{
-                                    showError(res, 'No se ha podido eliminar la ubicacion', `La ubicacion ${ubicacion} tiene proyectos en curso`, ruta)
-                                    return next()
-                                }
-                            }
-                        })
-                    }else{
-                        showError(res, 'No se ha podido eliminar la ubicacion', `La ubicacion ${ubicacion} tiene areas creadas`, ruta)
-                        return next()
-                    }
+                    res.redirect(`/${ruta}`)
+                    return next()
                 }
             })
         } catch (error) {

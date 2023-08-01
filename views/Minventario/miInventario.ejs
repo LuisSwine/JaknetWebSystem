@@ -42,9 +42,9 @@
                         <div class="card">
                             <div class="card-title">
                                 <div class="button-list">
-                                    <a href="/movimientosInventarioPersonal?usuario=<%= usuario[0].folio %>&flag=<%= flag %>" class="btn btn-success btn-flat btn-addon"><i class="ti-notepad"></i>Reporte de movimientos</a>
-                                    <% if(user.folio == usuario[0].folio){ %> 
-                                        <a class="btn btn-primary btn-flat btn-addon" href="/moverInventUser?usuario=<%= usuario[0].folio %>&flag=<%= flag %>"><i class="ti-plus"></i>Añadir Elementos</a>
+                                    <a href="reporte_personal?usuario=<%= usuario[0].folio %>&flag=<%= flag %>" class="btn btn-success btn-flat btn-addon"><i class="ti-notepad"></i>Reporte de movimientos</a>
+                                    <% if(user.tipo_usuario == 0 || user.tipo_usuario == 1){ %> 
+                                        <a class="btn btn-primary btn-flat btn-addon" href="agregar?usuario=<%= usuario[0].folio %>&flag=<%= flag %>"><i class="ti-plus"></i>Añadir Elementos</a>
                                     <% } %> 
                                 </div>     
                             </div>
@@ -53,7 +53,7 @@
                                     <table id="row-select" class="display table table-borderd table-hover">
                                         <thead>
                                             <tr>
-                                                <th>Acciones</th>
+                                                <% if(user.tipo_usuario == 0 || user.tipo_usuario == 1){ %> <th>Acciones</th><% } %>
                                                 <th>Cantidad</th>
                                                 <th>SKU</th>
                                                 <th>Producto</th>
@@ -65,14 +65,16 @@
                                         <tbody>
                                             <% productos.forEach((producto)=>{ %>
                                             <tr>
+                                                <% if(user.tipo_usuario == 0 || user.tipo_usuario == 1){ %> 
                                                 <td>
                                                     <div class="button-list">
                                                         <div class="btn-group btn-group-justified">
-                                                            <button onclick="eliminarRegistro('<%= producto.folio %>', '<%= producto.folio_producto %>', '<%= producto.cantidad %>', '<%= producto.folio_unidades %>','<%= usuario[0].folio %>', '<%= flag %>')" class="btn btn-danger btn-sm"><i class="ti-trash"></i></button>
-                                                            <button onclick="editarRegistro('<%= producto.folio %>', '<%= producto.folio_producto %>', '<%= producto.cantidad %>', '<%= producto.folio_unidades %>','<%= usuario[0].folio %>', '<%= flag %>')" class="btn btn-primary btn-sm"><i class="ti-pencil"></i></button>
+                                                            <button onclick="eliminarRegistro('<%= producto.folio %>', '<%= producto.folio_producto %>', '<%= producto.cantidad %>', '<%= producto.folio_unidades %>','<%= user.folio %>', '<%= usuario[0].folio %>', '<%= flag %>')" class="btn btn-danger btn-sm"><i class="ti-trash"></i></button>
+                                                            <button onclick="editarRegistro('<%= producto.folio %>', '<%= producto.folio_producto %>', '<%= producto.cantidad %>', '<%= producto.folio_unidades %>','<%= user.folio %>', '<%= usuario[0].folio %>', '<%= flag %>', '<%= encodeURIComponent(JSON.stringify(almacenes)) %>')" class="btn btn-primary btn-sm"><i class="ti-pencil"></i></button>
                                                         </div>
                                                     </div>
                                                 </td> 
+                                                <% } %>
                                                 <td><%= producto.cantidad %> <%= producto.abreviatura %></td>  
                                                 <td><%= producto.sku %></td>
                                                 <td><%= producto.descripcion %></td>
@@ -84,7 +86,7 @@
                                         </tbody>
                                         <tfoot>
                                             <tr>
-                                                <th>Acciones</th>
+                                                <% if(user.tipo_usuario == 0 || user.tipo_usuario == 1){ %> <th>Acciones</th><% } %>
                                                 <th>Cantidad</th>
                                                 <th>SKU</th>
                                                 <th>Producto</th>
@@ -106,7 +108,7 @@
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    function eliminarRegistro(registro, producto, cantidad, unidades, user, flag){
+    function eliminarRegistro(registro, producto, cantidad, unidades, user_registra, user_afectado, flag){
         Swal.fire({
             title: '¿ESTAS SEGURO?',
             text: `Se devolveran las existencias al inventario`,
@@ -117,12 +119,13 @@
             confirmButtonText: 'Elimiar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/returnAll2Invent?registro=${registro}&producto=${producto}&cantidad=${cantidad}&unidades=${unidades}&usuario=${user}&flag=${flag}`
+                const ruta = `eliminar_personal?registro=${registro}&producto=${producto}&cantidad=${cantidad}&unidades=${unidades}&usuario_registra=${user_registra}&usuario_afectado=${user_afectado}&flag=${flag}`
                 window.location = ruta
             }
         })
     }
-    function editarRegistro(registro, producto, cantidad, unidades, user, flag){
+
+    function editarRegistro(registro, producto, cantidad, unidades, user_registra, user_afectado, flag){
         Swal.fire({
             title: 'Modificar Cantidad del producto en posesion',
             input: 'text',
@@ -137,10 +140,10 @@
                     return 'No puede haber existencias negativas'
                 }else{
                     if(parseInt(value) === 0){
-                        const ruta = `/returnAll2Invent?registro=${registro}&producto=${producto}&cantidad=${cantidad}&unidades=${unidades}&usuario=${user}&flag=${flag}`
+                        const ruta = `eliminar_personal?registro=${registro}&producto=${producto}&cantidad=${cantidad}&unidades=${unidades}&usuario_registra=${user_registra}&usuario_afectado=${user_afectado}&flag=${flag}`
                         window.location = ruta
                     }else{
-                        const ruta = `/modificarPersonalInvent?registro=${registro}&producto=${producto}&cantidadActual=${cantidad}&nuevaCantidad=${value}&unidades=${unidades}&usuario=${user}&flag=${flag}`
+                        const ruta = `editar_personal?registro=${registro}&producto=${producto}&cantidadActual=${cantidad}&nuevaCantidad=${value}&unidades=${unidades}&usuario_registra=${user_registra}&usuario_afectado=${user_afectado}&flag=${flag}`
                         window.location = ruta
                     }
                 }

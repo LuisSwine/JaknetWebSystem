@@ -9,7 +9,7 @@
                 <div class="col-lg-8 p-r-0 title-margin-right">
                     <div class="page-header">
                         <div class="page-title">
-                            <h4>REPORTE DE MOVIMIENTOS (<button type="button" class="btn btn-link m-b-10 m-l-5" onclick="filtrarPorFecha()" >Filtrar por fecha</button> | <button type="button" class="btn btn-link m-b-10 m-l-5" onclick="window.open('/movimientosInventarioGrl', '_self')" >LimpiarFiltro</button>)</h4>
+                            <h4>REPORTE DE MOVIMIENTOS (<button type="button" class="btn btn-link m-b-10 m-l-5" onclick="filtrarPorFecha()" >Filtrar por fecha</button> | <button type="button" class="btn btn-link m-b-10 m-l-5" onclick="window.open('reporte_general', '_self')" >LimpiarFiltro</button>)</h4>
                         </div>
                     </div>
                 </div>
@@ -19,7 +19,7 @@
                         <div class="page-title">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
-                                <li class="breadcrumb-item active"><a href="/admininventario">Inventario</a></li>
+                                <li class="breadcrumb-item active"><a href="inventario_general">Inventario</a></li>
                             </ol>
                         </div>
                     </div>
@@ -35,7 +35,9 @@
                                     <thead>
                                         <tr>
                                             <th>Folio</th>
-                                            <th>Usuario</th>
+                                            <th>Usuario Registra</th>
+                                            <th>Usuario Afectado</th>
+                                            <th>Almacen</th>
                                             <th>SKU</th>
                                             <th>Producto</th>
                                             <th>Cantidad</th>
@@ -46,7 +48,9 @@
                                         <% movimientos.forEach((movimiento)=>{%>
                                         <tr>
                                             <td><%= movimiento.folio %></td>
-                                            <td><%= movimiento.nombre_usuario %> <%= movimiento.apellido_usuario %></td>
+                                            <td><%= movimiento.nombre_usuario_registra %> <%= movimiento.apellido_usuario_registra %></td>
+                                            <td><%= movimiento.nombre_usuario_afectado %> <%= movimiento.apellido_usuario_afectado %></td>
+                                            <td><%= movimiento.almacen %></td>
                                             <td><%= movimiento.sku %></td>
                                             <td><%= movimiento.descripcion %></td>
                                             <td><%= movimiento.cantidad %></td>
@@ -77,7 +81,7 @@
             if(result.isConfirmed){
                 const inicio = document.getElementById('fecha_inicio').value;
                 const termino = document.getElementById('fecha_termino').value;
-                const ruta = `/movimientosInventarioGrl?inicio=${inicio}&termino=${termino}`
+                const ruta = `reporte_general?inicio=${inicio}&termino=${termino}`
                 window.location = ruta
             }
         })

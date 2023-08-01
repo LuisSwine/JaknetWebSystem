@@ -20,7 +20,7 @@
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
                                 <% if(flag == 1){%>
-                                    <li class="breadcrumb-item"><a href="/perfilCliente?cliente=<%= cliente[0].folio %>">Cliente</a></li>
+                                    <li class="breadcrumb-item"><a href="/clientes/administrar?cliente=<%= cliente[0].folio %>">Cliente</a></li>
                                 <%}else if(flag == 2){%>
                                     <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&cliente=<%= cliente[0].folio %>&flag=<%= flag %>">Ubicacion</a></li>
                                 <%}else if(flag == 0){%>
@@ -41,25 +41,25 @@
                         </div>
                         <div class="card-body">
                             <div class="basic-elements">
-                                <form action="/createProject" method="post">
+                                <form action="/proyectos/nuevo_proyecto" method="post">
                                     <div class="row">
+                                        <% if(flag != 2 && flag != 0){%>
+                                            <div class="col-lg-12">
+                                                <div class="form-group">
+                                                    <label>UBICACION</label>
+                                                    <select class="form-control" name="ubicacion" id="ubicacion">
+                                                        <option disabled selected>--Seleccione--</option>
+                                                        <% ubicaciones.forEach((ubicacion)=>{ %>
+                                                        <option value="<%= ubicacion.folio %>"><%= ubicacion.nombre %></option>
+                                                        <% }) %> 
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        <%}%>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label>NOMBRE DEL PROYECTO</label>
                                                 <input type="text" class="form-control" placeholder="Defina el nombre del proyecto" id="nombre" name="nombre" required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>UBICACION</label>
-                                            <% if(flag == 2 || flag == 0){%>
-                                                <input type="number" class="form-control" value="<%= ubicacion %>" id="ubicacion" name="ubicacion" readonly>
-                                            <%}else{%>
-                                                <select class="form-control" name="ubicacion" id="ubicacion">
-                                                    <option disabled selected>--Seleccione--</option>
-                                                    <% ubicaciones.forEach((ubicacion)=>{ %>
-                                                    <option value="<%= ubicacion.folio %>"><%= ubicacion.nombre %></option>
-                                                    <% }) %> 
-                                                </select>
-                                            <%}%>
                                             </div>
                                             <div class="form-group">
                                                 <label>LINK DE DOCUMENTACION</label>
@@ -68,13 +68,8 @@
                                                     <small>Puede generar la carpeta y link de proyecto <a href="https://drive.google.com/drive/folders/19g34ssIJlP_uY1sZEU8WzDb4F_Ktdos_?usp=sharing" target="_blank">aquí</a></small>
                                                 </span>
                                             </div>
-                                            <button type="submit" class="btn btn-primary m-b-10">CREAR PROYECTO</button>
                                         </div>
                                         <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <label>CLIENTE</label>
-                                                <input class="form-control" value="<%= cliente[0].folio %>" name="cliente" id="cliente" readonly>
-                                            </div>
                                             <div class="form-group">
                                                 <label>LINK DE GALERIA</label>
                                                 <input class="form-control" type="url" placeholder="Enlace a la Galeria del proyecto" name="galeria" id="galeria" required>
@@ -82,10 +77,15 @@
                                                     <small>Puede generar el album y link de proyecto <a href="https://drive.google.com/drive/folders/19g34ssIJlP_uY1sZEU8WzDb4F_Ktdos_?usp=sharing" target="_blank">aquí</a></small>
                                                 </span>
                                             </div>
-                                            <div class="form-group">
-                                                <input type="number" class="form-control" value="1" id="estatus" name="estatus" hidden>
-                                                <input type="number" class="form-control" value="<%= flag %>" id="flag" name="flag" hidden>
-                                            </div>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <% if(flag == 2 || flag == 0){%>
+                                                <input type="number" class="form-control" value="<%= ubicacion %>" id="ubicacion" name="ubicacion" hidden>
+                                            <%}%>
+                                            <input type="number" class="form-control" value="1" id="estatus" name="estatus" hidden>
+                                            <input type="number" class="form-control" value="<%= flag %>" id="flag" name="flag" hidden>
+                                            <input class="form-control" value="<%= cliente[0].folio %>" name="cliente" id="cliente" hidden>
+                                            <button type="submit" class="btn btn-primary m-b-10">CREAR PROYECTO</button>
                                         </div>
                                     </div>
                                 </form>

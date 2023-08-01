@@ -20,11 +20,11 @@
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
                                 <% if(flag == 1){%>
-                                    <li class="breadcrumb-item"><a href="/perfilCliente?cliente=<%= cliente %>">Cliente</a></li>
+                                    <li class="breadcrumb-item"><a href="/clientes/administrar?cliente=<%= cliente %>">Cliente</a></li>
                                 <%}else if(flag == 2){%>
-                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=1">Ubicacion</a></li>
+                                    <li class="breadcrumb-item"><a href="/ubicaciones/perfil?ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=1">Ubicacion</a></li>
                                 <%}else if(flag == 3){%>
-                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&flag=0">Ubicacion</a></li>
+                                    <li class="breadcrumb-item"><a href="/ubicaciones/perfil?ubicacion=<%= ubicacion %>&flag=0">Ubicacion</a></li>
                                 <%}else if(flag == 0){%>
                                     <li class="breadcrumb-item"><a href="/adminproyectos">Proyectos</a></li>
                                 <%}else if(flag == 4){%>
@@ -43,7 +43,7 @@
                         <div class="card">
                             <div class="card-title">
                                 <div class="button-list">
-                                    <a class="btn btn-primary btn-flat btn-addon" href="/moverInventProy?proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>"><i class="ti-plus"></i>Añadir Elementos</a>
+                                    <a class="btn btn-primary btn-flat btn-addon" href="/proyectos/mover_inventario?proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>"><i class="ti-plus"></i>Añadir Elementos</a>
                                 </div>     
                             </div>
                             <div class="bootstrap-data-table-panel">
@@ -115,7 +115,7 @@
             confirmButtonText: 'Elimiar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/returnAll2InventProy?registro=${registro}&producto=${producto}&cantidad=${cantidad}&unidades=${unidades}&proyecto=${proyecto}&flag=${flag}&cliente=${cliente}&ubicacion=${ubicacion}&permisos=${permisos}&usuario=${usuario}`
+                const ruta = `eliminar_inventario?registro=${registro}&producto=${producto}&cantidad=${cantidad}&unidades=${unidades}&proyecto=${proyecto}&flag=${flag}&cliente=${cliente}&ubicacion=${ubicacion}&permisos=${permisos}&usuario=${usuario}`
                 window.location = ruta
             }
         })
@@ -135,10 +135,10 @@
                     return 'No puede haber existencias negativas'
                 }else{
                     if(parseInt(value) === 0){
-                        const ruta = `/returnAll2InventProy?registro=${registro}&producto=${producto}&cantidad=${cantidad}&unidades=${unidades}&proyecto=${proyecto}&flag=${flag}&cliente=${cliente}&ubicacion=${ubicacion}&permisos=${permisos}&usuario=${usuario}`
+                        const ruta = `eliminar_inventario?registro=${registro}&producto=${producto}&cantidad=${cantidad}&unidades=${unidades}&proyecto=${proyecto}&flag=${flag}&cliente=${cliente}&ubicacion=${ubicacion}&permisos=${permisos}&usuario=${usuario}`
                         window.location = ruta
                     }else{
-                        const ruta = `/modificarProyectInvent?registro=${registro}&producto=${producto}&cantidadActual=${cantidad}&nuevaCantidad=${value}&unidades=${unidades}&proyecto=${proyecto}&flag=${flag}&cliente=${cliente}&ubicacion=${ubicacion}&permisos=${permisos}&usuario=${usuario}`
+                        const ruta = `editar_inventario?registro=${registro}&producto=${producto}&cantidadActual=${cantidad}&nuevaCantidad=${value}&unidades=${unidades}&proyecto=${proyecto}&flag=${flag}&cliente=${cliente}&ubicacion=${ubicacion}&permisos=${permisos}&usuario=${usuario}`
                         window.location = ruta
                     }
                 }

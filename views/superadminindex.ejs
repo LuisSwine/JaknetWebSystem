@@ -167,12 +167,13 @@
                     const valorSeleccionado = document.getElementById('proyecto').value
                     if(valorSeleccionado === '--Seleccione--'){alert('Debes seleccionar un proyecto');}
                     else{
-                        let ruta = `/registrarAsistencia?usuario=${usuario}&proyecto=${valorSeleccionado}`
+                        let ruta = `/asistencias/registrar?usuario=${usuario}&proyecto=${valorSeleccionado}`
                         window.location = ruta
                     }
                 }
             })
         }
+        
         function showInfoTarea(descripcion){
             Swal.fire({
                 icon: 'info',

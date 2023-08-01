@@ -20,13 +20,13 @@
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
                                 <% if(flag == 0){%>
-                                    <li class="breadcrumb-item"><a href="/proyectViaticos?proyecto=<%= proyecto %>&flag=0">Proyecto</a></li>
+                                    <li class="breadcrumb-item"><a href="viaticos?proyecto=<%= proyecto %>&flag=0">Proyecto</a></li>
                                 <%}else if(flag == 1){%>
-                                    <li class="breadcrumb-item"><a href="/proyectViaticos?proyecto=<%= proyecto %>&cliente=<%= cliente %>&flag=1">Proyecto</a></li>
+                                    <li class="breadcrumb-item"><a href="viaticos?proyecto=<%= proyecto %>&cliente=<%= cliente %>&flag=1">Proyecto</a></li>
                                 <%}else if(flag == 2 || flag == 3){%>
-                                    <li class="breadcrumb-item"><a href="/proyectViaticos?proyecto=<%= proyecto %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>">Proyecto</a></li>
+                                    <li class="breadcrumb-item"><a href="viaticos?proyecto=<%= proyecto %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>">Proyecto</a></li>
                                 <%}else if(flag == 4){%>
-                                    <li class="breadcrumb-item"><a href="/proyectViaticos?proyecto=<%= proyecto %>&flag=4&permisos=<%= permisos %>">Proyecto</a></li>
+                                    <li class="breadcrumb-item"><a href="viaticos?proyecto=<%= proyecto %>&flag=4&permisos=<%= permisos %>">Proyecto</a></li>
                                 <% } %> 
                                 <li class="breadcrumb-item active">Exportar Datos</li>
                             </ol>

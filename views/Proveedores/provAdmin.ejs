@@ -31,7 +31,8 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-title">
-                                <a href="/formcreateprov" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear</a>     
+                                <a href="nuevo_proveedor" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Crear</a>     
+                                <a href="/productos/administrar" class="btn btn-success btn-flat btn-addon"><i class="ti-package"></i>Ver Todos los Productos</a>     
                             </div>
                             <div class="bootstrap-data-table-panel">
                                 <div class="table-responsive">
@@ -51,9 +52,9 @@
                                                 <td>
                                                     <div class="button-list">
                                                         <div class="btn-group btn-group-justified">
-                                                            <a class="btn btn-info btn-sm" href="/perfilProveedor?proveedor=<%= proveedor.folio %>" title="Perfil"><i class="ti-settings"></i></a>
+                                                            <a class="btn btn-info btn-sm" href="perfil?proveedor=<%= proveedor.folio %>" title="Perfil"><i class="ti-settings"></i></a>
                                                             <a class="btn btn-success btn-sm" href="<%= proveedor.web %>" target="_blank"><i class="ti-link"></i></a>
-                                                            <a class="btn btn-primary btn-sm" href="/editarproveedor?proveedor=<%= proveedor.folio %>"><i class="ti-pencil"></i></a>
+                                                            <a class="btn btn-primary btn-sm" href="editar?proveedor=<%= proveedor.folio %>"><i class="ti-pencil"></i></a>
                                                             <button class="btn btn-danger btn-sm" onclick="confirmDelete('<%= proveedor.folio %>')"><i class="ti-trash"></i></button>
                                                         </div>
                                                     </div>
@@ -91,7 +92,7 @@
             confirmButtonText: 'Elimiar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/deleteProv/${folio}`
+                const ruta = `eliminar?folio=${folio}`
                 window.location = ruta
             }
         })

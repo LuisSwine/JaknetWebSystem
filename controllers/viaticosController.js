@@ -4,15 +4,16 @@ const { query } = require('../database/db')
 const { nextTick } = require('process')
 const formidable = require('formidable')
 const { path } = require('pdfkit')
+const { resolve } = require('path')
 
 function calculateRutaProy(cliente, ubicacion, proyecto, flag, permisos){
     let ruta = '';
     switch(parseInt(flag)){
-        case 0: ruta = `/proyectViaticos?proyecto=${proyecto}&flag=0`; break;
-        case 1: ruta = `/proyectViaticos?proyecto=${proyecto}&cliente=${cliente}&flag=1`; break;
-        case 2: ruta = `/proyectViaticos?proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`; break;
-        case 3: ruta = `/proyectViaticos?proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`; break;
-        case 4: ruta = `/proyectViaticos?proyecto=${proyecto}&flag=4&permisos=${permisos}`; break;
+        case 0: ruta = `/proyectos/viaticos?proyecto=${proyecto}&flag=0`; break;
+        case 1: ruta = `/proyectos/viaticos?proyecto=${proyecto}&cliente=${cliente}&flag=1`; break;
+        case 2: ruta = `/proyectos/viaticos?proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`; break;
+        case 3: ruta = `/proyectos/viaticos?proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`; break;
+        case 4: ruta = `/proyectos/viaticos?proyecto=${proyecto}&flag=4&permisos=${permisos}`; break;
     }
     return ruta;
 }
@@ -38,6 +39,88 @@ function showError(res, titulo, mensaje, ruta){
         showConfirmButton: true,
         timer: 8000,
         ruta: ruta
+    })
+}
+
+function registrar_clave(clave){
+    return new Promise((resolve, reject)=>{
+        conexion.query('INSERT INTO cat021_claves_seguimiento SET ?', clave, (error, fila)=>{
+            if(error){
+                throw error;
+            }else{
+                resolve();
+            }
+        })
+    })
+}
+function obtener_clave(clave){
+    return new Promise ((resolve,reject)=>{
+        conexion.query('SELECT * FROM cat021_claves_seguimiento WHERE clave = ?', [clave], (error, fila)=>{
+            if(error){
+                throw error;
+            }else{
+                resolve(fila[0].folio);
+            }
+        })
+    })
+}
+function registrar_operacion(operacion){
+    return new Promise((resolve, reject)=>{
+        conexion.query('INSERT INTO cat022_operaciones SET ?', operacion, (error, fila)=>{
+            if(error){
+                throw error;
+            }else{
+                resolve();
+            }
+        })
+    })
+}
+function obtener_saldo_usuario(usuario){
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT saldo FROM cat001_usuarios WHERE folio = ?", [usuario], (error, fila)=>{
+            if(error){
+                throw error
+            }else{
+                resolve(fila[0].saldo);
+            }
+        })
+    })
+}
+function actualizar_saldo(usuario, saldo){
+    return new Promise ((resolve,reject)=>{
+        conexion.query("UPDATE cat001_usuarios SET saldo = ? WHERE folio = ?", [saldo, usuario], (error, fila)=>{
+            if(error){
+                throw error;
+            }else{
+                resolve()
+            }
+        })
+    })
+}
+function validar_participacion(usuario, proyecto){
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT * FROM roles_view001 WHERE proyecto = ? AND folio_usuario = ?", [proyecto, usuario], (error, fila)=>{
+            if(error){
+                throw error;
+            }else{
+                if(fila.length === 0){
+                    resolve(false)
+                }else{
+                    resolve(true)
+                }
+            }
+        })
+    })
+}
+function eliminar_operacion(operacion){
+    return new Promise((resolve, reject)=>{
+        conexion.query("DELETE FROM cat022_operaciones WHERE folio = ?", [operacion], (error, fila)=>{
+            if(error){
+                throw error;
+            }else{
+                resolve();
+            }
+        })
     })
 }
 
@@ -86,42 +169,16 @@ function showError(res, titulo, mensaje, ruta){
                 fecha: req.body.fecha,
                 monto: req.body.monto
             }
-            //PRIMERO REGISTRAMOS LA CLAVE
-            conexion.query("INSERT INTO cat021_claves_seguimiento SET ?", [clave], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    conexion.query("SELECT folio FROM cat021_claves_seguimiento ORDER BY folio DESC LIMIT 1", (error2, fila2)=>{
-                        if(error2){
-                            throw error2
-                        }else{
-                            operacion.clave = fila2[0].folio
-                            conexion.query("INSERT INTO cat022_operaciones SET ?", [operacion], (error3, fila3)=>{
-                                if(error3){
-                                    throw error3
-                                }else{
-                                    conexion.query("SELECT saldo FROM cat001_usuarios WHERE folio = ?", [req.body.id_bene], (error4, fila4)=>{
-                                        if(error4){
-                                            throw error4
-                                        }else{
-                                            let nuevoSaldoBene = parseFloat(fila4[0].saldo) + parseFloat(operacion.monto)
-                                            conexion.query("UPDATE cat001_usuarios SET saldo = ? WHERE folio = ?", [nuevoSaldoBene, req.body.id_bene], (error5, fila5)=>{
-                                                if(error5){
-                                                    throw error5
-                                                }else{
-                                                    res.redirect(ruta)
-                                                    return next() 
-                                                }
-                                            })
-                                        }
 
-                                    })
-                                }
-                            })
-                        }
-                    })
-                }
-            })
+            await registrar_clave(clave);
+            operacion.clave = await obtener_clave(clave.clave);
+            await registrar_operacion(operacion);
+            let saldo = await obtener_saldo_usuario(operacion.id_bene)
+            let nuevoSaldoBene = parseFloat(saldo) + parseFloat(operacion.monto)
+            await actualizar_saldo(operacion.id_bene, nuevoSaldoBene);
+            res.redirect(ruta)
+            return next() 
+
         } catch (error) {
             console.log(error)
             return next()
@@ -294,6 +351,7 @@ function showError(res, titulo, mensaje, ruta){
             return next()
         }
     }
+
     exports.selectComprobaciones = async(req, res, next)=>{
         try {
             if(req.query.inicio && req.query.termino){
@@ -320,6 +378,7 @@ function showError(res, titulo, mensaje, ruta){
             return next()
         }
     }
+
     exports.assignViaticos = async(req, res, next)=>{
         try {
             const fechaHoy = formatoFecha(new Date(), 'yymmddhhnnss')
@@ -342,60 +401,29 @@ function showError(res, titulo, mensaje, ruta){
                 fecha: req.body.fecha,
                 monto: req.body.monto
             }
-            //Primero validamos que el usuario seleccionado tenga un rol en el proyecto seleccionado
-            conexion.query("SELECT * FROM roles_view001 WHERE proyecto = ? AND folio_usuario = ?", [clave.proyecto, clave.usuario], (err, result)=>{
-                if(err){
-                    throw err
-                }else{
-                    if(result.length === 0){//El usuario no tiene rol asignado en el proyecto
-                        //Mandamos error
-                        showError(res, 'No se pueden asignar viaticos', `No es posible asignarle viaticos al usuario ${clave.usuario} en el proyecto ${clave.proyecto} porque no tiene un rol asignado en el mismo`, 'adminViaticosGrl')
-                    }else{
-                        //PRIMERO REGISTRAMOS LA CLAVE
-                        conexion.query("INSERT INTO cat021_claves_seguimiento SET ?", [clave], (error, fila)=>{
-                            if(error){
-                                throw error
-                            }else{
-                                conexion.query("SELECT folio FROM cat021_claves_seguimiento ORDER BY folio DESC LIMIT 1", (error2, fila2)=>{
-                                    if(error2){
-                                        throw error2
-                                    }else{
-                                        operacion.clave = fila2[0].folio
-                                        conexion.query("INSERT INTO cat022_operaciones SET ?", [operacion], (error3, fila3)=>{
-                                            if(error3){
-                                                throw error3
-                                            }else{
-                                                conexion.query("SELECT saldo FROM cat001_usuarios WHERE folio = ?", [req.body.id_bene], (error4, fila4)=>{
-                                                    if(error4){
-                                                        throw error4
-                                                    }else{
-                                                        let nuevoSaldoBene = parseFloat(fila4[0].saldo) + parseFloat(operacion.monto)
-                                                        conexion.query("UPDATE cat001_usuarios SET saldo = ? WHERE folio = ?", [nuevoSaldoBene, req.body.id_bene], (error5, fila5)=>{
-                                                            if(error5){
-                                                                throw error5
-                                                            }else{
-                                                                res.redirect('/adminViaticosGrl')
-                                                                return next() 
-                                                            }
-                                                        })
-                                                    }
 
-                                                })
-                                            }
-                                        })
-                                    }
-                                })
-                            }
-                        })
-                    }
-                }
-            })
-            
+            let heParticipates = await validar_participacion(clave.usuario, clave.proyecto)
+            if(!heParticipates){
+                showError(res, 'No se pueden asignar viaticos', `No es posible asignarle viaticos al usuario ${clave.usuario} en el proyecto ${clave.proyecto} porque no tiene un rol asignado en el mismo`, 'viaticos/administrar')
+            }
+
+            await registrar_clave(clave);
+            operacion.clave = await obtener_clave(clave.clave);
+
+            await registrar_operacion(operacion);
+
+            let saldo = await obtener_saldo_usuario(operacion.id_bene)
+            let nuevoSaldoBene = parseFloat(saldo) + parseFloat(operacion.monto)
+            await actualizar_saldo(operacion.id_bene, nuevoSaldoBene);
+
+            res.redirect('/viaticos/administrar')
+            return next() 
         } catch (error) {
             console.log(error)
             return next()
         }
     }
+
     exports.deleteComprobanteGrl = async(req, res, next)=>{
         try {
             let datos = {
@@ -403,27 +431,14 @@ function showError(res, titulo, mensaje, ruta){
                 emisor: req.query.emisor,
                 monto: req.query.monto
             }
-            conexion.query("DELETE FROM cat022_operaciones WHERE folio = ?", [datos.comprobante], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    conexion.query("SELECT saldo FROM cat001_usuarios WHERE folio = ?", [datos.emisor], (error2, fila2)=>{
-                        if(error2){
-                            throw error2
-                        }else{
-                            let nuevoSaldo = parseFloat(datos.monto) + parseFloat(fila2[0].saldo)
-                            conexion.query("UPDATE cat001_usuarios SET saldo = ? WHERE folio = ?", [nuevoSaldo, datos.emisor], (error3, fila3)=>{
-                                if(error3){
-                                    throw error3
-                                }else{
-                                    res.redirect('/adminViaticosGrl')
-                                    return next()
-                                }
-                            })
-                        }
-                    })
-                }
-            })
+
+            await eliminar_operacion(datos.comprobante)
+            let saldo = await obtener_saldo_usuario(datos.emisor)
+            let nuevoSaldo = parseFloat(datos.monto) + parseFloat(saldo)
+            await actualizar_saldo(datos.emisor, nuevoSaldo)
+            
+            res.redirect('/viaticos/administrar')
+            return next()
         } catch (error) {
             console.log(error)
             return next()
@@ -465,7 +480,7 @@ function showError(res, titulo, mensaje, ruta){
                                                     if(err4){
                                                         throw err4
                                                     }else{
-                                                        res.redirect('/adminViaticosGrl')
+                                                        res.redirect('/viaticos/administrar')
                                                         return next()
                                                     }
                                                 })
@@ -557,33 +572,12 @@ function showError(res, titulo, mensaje, ruta){
             return next
         }
     }
+
+
+
+
     exports.loadTicket = async(req, res, next)=>{
         try {
-            //Recibimos primero el tipo de enlace que estamos recibiendo
-            let tipoComprobante = req.body.tipoComprobante;
-            let enlace;
-            let emisor = req.body.emisor;
-            console.log('emisor is: ' + emisor);
-            /* if(tipoComprobante != 2){
-                //Si recibimos ticket o factura primero la guardamos en el servidor
-                let form = formidable({})
-                const uploadFolder = '../public/files/'+emisor+'/';
-
-                form.multiples = true;
-                form.maxFileSize = 50 * 1024 * 1024
-                form.uploadDir = uploadFolder; 
-
-                console.log(form)
-                /* form.parse(req, (err, fields, files)=>{
-
-                }).on('fileBegin', (name, file)=>{
-                    enlace =  + file.name;
-                    file.path = enlace;
-                }).on('file', (name, file)=>{
-                    console.log('File uploaded');
-                }) */
-            
-
             let data = {
                 tipo_operacion: 2,
                 beneficiario: req.body.beneficiario,
@@ -594,6 +588,7 @@ function showError(res, titulo, mensaje, ruta){
                 fecha: req.body.fecha,
                 monto: req.body.monto
             }
+
             conexion.query("INSERT INTO cat022_operaciones SET ?", [data], (error, fila)=>{
                 if(error){
                     throw error
@@ -608,7 +603,7 @@ function showError(res, titulo, mensaje, ruta){
                                 if(error3){
                                     throw error3
                                 }else{
-                                    let ruta = `/adminViaticosPersonal?usuario=${data.emisor}` 
+                                    let ruta = `/viaticos/admin_personal?usuario=${data.emisor}` 
                                     res.redirect(ruta)
                                     return next() 
                                 }
@@ -622,6 +617,11 @@ function showError(res, titulo, mensaje, ruta){
             return next()
         }
     }
+
+
+
+
+
     exports.deleteComprobante = async(req, res, next)=>{
         try {
             conexion.query("DELETE FROM cat022_operaciones WHERE folio = ?", [req.query.folio], (err, fila)=>{
@@ -633,7 +633,7 @@ function showError(res, titulo, mensaje, ruta){
                         if(err2){
                             throw err2
                         }else{
-                            let ruta = `/adminViaticosPersonal?usuario=${req.query.usuario}` 
+                            let ruta = `/viaticos/admin_personal?usuario=${req.query.usuario}` 
                             res.redirect(ruta)
                             return next()
                         }

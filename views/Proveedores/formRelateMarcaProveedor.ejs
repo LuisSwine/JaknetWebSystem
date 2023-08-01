@@ -19,7 +19,7 @@
                         <div class="page-title">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-                                <li class="breadcrumb-item"><a href="/perfilProveedor?proveedor=<%= proveedor %>">Proveedor</a></li>
+                                <li class="breadcrumb-item"><a href="perfil?proveedor=<%= proveedor %>">Proveedor</a></li>
                                 <li class="breadcrumb-item active">Actual</li>
                             </ol>
                         </div>
@@ -35,19 +35,22 @@
                         </div>
                         <div class="card-body">
                             <div class="basic-elements">
-                                <form action="/relacionarMarcaProveedor" method="post">
+                                <form action="agregar_marca" method="post">
                                     <div class="row">
-                                        <div class="col-lg-12">
+                                        <div class="col-lg-12" id="to_ad">
                                             <div class="form-group">
                                                 <label>MARCA</label>
-                                                <select class="form-control" name="marca" id="marca">
+                                                <select class="form-control" name="marca" id="marca" onchange="agregarMarca()">
                                                     <option selected disabled>--Seleccione--</option>
                                                     <% marcas.forEach((marca)=>{ %>
                                                     <option value="<%= marca.folio %>"><%= marca.nombre %></option>
-                                                    <% }) %> 
+                                                    <% }) %>
+                                                    <option value="other">Otra</option>
                                                 </select>
                                             </div>
                                             <input type="number" class="form-control" value="<%= proveedor %>" id="proveedor" name="proveedor" hidden>
+                                        </div>
+                                        <div class="col-lg-12">
                                             <button type="submit" class="btn btn-primary m-b-10">ASIGNAR MARCA AL PROVEEDOR</button>
                                         </div>
                                     </div>
@@ -57,10 +60,44 @@
                     </div>
                 </div>  
             </section>
-            
         </div>
     </div>
 </div>
+
+<script>
+    function agregarMarca(){
+        let selected = document.getElementById('marca').value;
+        if(selected == 'other'){
+            let column = document.getElementById('to_ad');
+            // Crea el elemento div
+            let divFormGroup = document.createElement("div");
+            divFormGroup.className = "form-group";
+            divFormGroup.id = 'agregar_nueva_marca'
+
+            // Crea el elemento label
+            let labelMarca = document.createElement("label");
+            labelMarca.textContent = "Nueva Marca";
+
+            // Crea el elemento input
+            let inputMarca = document.createElement("input");
+            inputMarca.type = "text";
+            inputMarca.className = "form-control";
+            inputMarca.placeholder = "Nombre de la nueva marca";
+            inputMarca.id = "nueva_marca";
+            inputMarca.name = "nueva_marca";
+
+            // Agrega los elementos al div contenedor
+            divFormGroup.appendChild(labelMarca);
+            divFormGroup.appendChild(inputMarca);
+
+            // Agrega el div al elemento padre
+            column.appendChild(divFormGroup);
+        }else if(selected != 'other'){
+            let new_field = document.getElementById('agregar_nueva_marca');
+            new_field.parentNode.removeChild(new_field);
+        }
+    }
+</script>
 
 <%- include('../partials/scriptsNav.ejs') %> 
 <%- include('../partials/footer.ejs') %> 

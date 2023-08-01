@@ -20,13 +20,13 @@
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
                                 <% if(flag == 1){%>
-                                    <li class="breadcrumb-item"><a href="/perfilCliente?cliente=<%= cliente %>">Cliente</a></li>
+                                    <li class="breadcrumb-item"><a href="/clientes/administrar?cliente=<%= cliente %>">Cliente</a></li>
                                 <%}else if(flag == 2){%>
-                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=1">Ubicacion</a></li>
+                                    <li class="breadcrumb-item"><a href="/ubicaciones/perfil?ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=1">Ubicacion</a></li>
                                 <%}else if(flag == 3){%>
-                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&flag=0">Ubicacion</a></li>
+                                    <li class="breadcrumb-item"><a href="/ubicaciones/perfil?ubicacion=<%= ubicacion %>&flag=0">Ubicacion</a></li>
                                 <%}else if(flag == 0){%>
-                                    <li class="breadcrumb-item"><a href="/adminproyectos">Proyectos</a></li>
+                                    <li class="breadcrumb-item"><a href="/proyectos/administrar">Proyectos</a></li>
                                 <%}else if(flag == 4){%>
                                     <li class="breadcrumb-item"><a href="/misProyectos?folio=<%= user.folio %>">Proyectos</a></li>
                                 <%} %>
@@ -108,8 +108,8 @@
                                     <div class="col-lg-12">
                                         <div class="card">
                                             <div class="card-title">
-                                                <a href="/formassignViatics?proyecto=<%= proyecto[0].folio %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Asignar Viaticos</a>
-                                                <a href="/exportDataProyecto?data=depositos&proyecto=<%= proyecto[0].folio %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-success btn-flat btn-addon"><i class="ti-new-window"></i>Exportar Datos</a>      
+                                                <a href="asignar_viaticos?proyecto=<%= proyecto[0].folio %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Asignar Viaticos</a>
+                                                <a href="exportar_datos?data=depositos&proyecto=<%= proyecto[0].folio %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-success btn-flat btn-addon"><i class="ti-new-window"></i>Exportar Datos</a>      
                                             </div>
                                             <div class="bootstrap-data-table-panel">
                                                 <div class="table-responsive">
@@ -174,7 +174,7 @@
                                     <div class="col-lg-12">
                                         <div class="card">
                                             <div class="card-title">
-                                                <a href="/exportDataProyecto?data=comprobantes&proyecto=<%= proyecto[0].folio %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-success btn-flat btn-addon"><i class="ti-new-window"></i>Exportar Datos</a>     
+                                                <a href="exportar_datos?data=comprobantes&proyecto=<%= proyecto[0].folio %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-success btn-flat btn-addon"><i class="ti-new-window"></i>Exportar Datos</a>     
                                             </div>
                                             <div class="bootstrap-data-table-panel">
                                                 <div class="table-responsive">
@@ -262,7 +262,7 @@
             confirmButtonText: 'Elimiar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/deleteDepositoViaticosProyecto?deposito=${deposito}&clave=${clave}&bene=${bene}&monto=${monto}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}&permisos=${permisos}`
+                const ruta = `eliminar_deposito?deposito=${deposito}&clave=${clave}&bene=${bene}&monto=${monto}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}&permisos=${permisos}`
                 window.location = ruta
             }
         })
@@ -278,7 +278,7 @@
             confirmButtonText: 'Elimiar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/deleteComprobanteProyecto?comprobante=${comprobante}&emisor=${emisor}&monto=${monto}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}&permisos=${permisos}`
+                const ruta = `eliminar_comprobante?comprobante=${comprobante}&emisor=${emisor}&monto=${monto}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}&permisos=${permisos}`
                 window.location = ruta
             }
         })
@@ -294,7 +294,7 @@
                 if (!value) {
                     return 'Tienes que escribir algo'
                 }else{
-                    const ruta = `/definirPresupuesto?proyecto=${proyecto}&presupuesto=${value}&cliente=${cliente}&ubicacion=${ubicacion}&flag=${flag}&permisos=${permisos}`;
+                    const ruta = `definir_presupuesto?proyecto=${proyecto}&presupuesto=${value}&cliente=${cliente}&ubicacion=${ubicacion}&flag=${flag}&permisos=${permisos}`;
                     window.location = ruta
                 }
             }

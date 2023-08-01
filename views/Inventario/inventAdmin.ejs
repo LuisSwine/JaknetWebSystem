@@ -31,9 +31,9 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-title">
-                                <a href="/movimientosInventarioGrl" class="btn btn-success btn-flat btn-addon"><i class="ti-notepad"></i>Reporte de movimientos</a>  
-                                <a href="/formadd2invent" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Añadir a Inventario</a>  
-                                <a href="/adminunidades" class="btn btn-danger btn-flat btn-addon"><i class="ti-plus"></i>Gestionar Unidades</a>     
+                                <a href="reporte_general" class="btn btn-success btn-flat btn-addon"><i class="ti-notepad"></i>Reporte de movimientos</a>  
+                                <a href="agregar_general" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Añadir a Inventario</a>  
+                                <a href="/unidades/administrar" class="btn btn-danger btn-flat btn-addon"><i class="ti-plus"></i>Gestionar Unidades</a>     
                             </div>
                             <div class="bootstrap-data-table-panel">
                                 <div class="table-responsive">
@@ -41,6 +41,7 @@
                                         <thead>
                                             <tr>
                                                 <th>Folio</th>
+                                                <th>Almacen</th>
                                                 <th>SKU</th>
                                                 <th>Producto</th>
                                                 <th>Categoria</th>
@@ -54,6 +55,7 @@
                                             <% inventario.forEach((item)=>{ %>
                                             <tr>
                                                 <td><%= item.folio %></td>
+                                                <td><%= item.almacen %></td>
                                                 <td><%= item.sku %></td>
                                                 <td><%= item.producto %></td>
                                                 <td><%= item.categoria %></td>
@@ -63,8 +65,8 @@
                                                 <td>
                                                     <div class="button-list">
                                                         <div class="btn-group btn-group-justified">
-                                                            <button class="btn btn-primary btn-sm" onclick="editRegistro('<%= item.folio %>', '<%= item.folio_producto %>', '<%= item.cantidad %>', '<%= item.folio_unidad %>', '<%= user.folio %>')"><i class="ti-pencil"></i></button>
-                                                            <button class="btn btn-danger btn-sm" onclick="confirmDelete('<%= item.folio %>', '<%= item.folio_producto %>', '<%= item.cantidad %>', '<%= item.folio_unidad %>', '<%= user.folio %>')"><i class="ti-trash"></i></button>
+                                                            <button class="btn btn-primary btn-sm" onclick="editRegistro('<%= item.folio %>', '<%= item.folio_producto %>', '<%= item.cantidad %>', '<%= item.folio_almacen %>', '<%= user.folio %>')"><i class="ti-pencil"></i></button>
+                                                            <button class="btn btn-danger btn-sm" onclick="confirmDelete('<%= item.folio %>', '<%= item.folio_producto %>', '<%= item.cantidad %>', '<%= item.folio_almacen %>', '<%= user.folio %>')"><i class="ti-trash"></i></button>
                                                         </div>
                                                     </div>
                                                 </td>   
@@ -74,6 +76,7 @@
                                         <tfoot>
                                             <tr>
                                                 <th>Folio</th>
+                                                <th>Almacen</th>
                                                 <th>SKU</th>
                                                 <th>Producto</th>
                                                 <th>Categoria</th>
@@ -112,7 +115,7 @@
             }
         })
     }
-    function editRegistro(registro, producto, cantidad, unidades, user){
+    function editRegistro(registro, producto, cantidad, almacen, user){
         Swal.fire({
             title: 'Modificar la cantidad del producto en el inventario',
             input: 'number',
@@ -127,17 +130,17 @@
                     return 'No puede haber existencias negativas'
                 }else{
                     if(parseInt(value) === 0){
-                        const ruta = `/deleteFromInvent?registro=${registro}&producto=${producto}&cantidad=${cantidad}&unidades=${unidades}&usuario=${user}`
+                        const ruta = `eliminar_general?registro=${registro}&producto=${producto}&cantidad=${cantidad}&almacen=${almacen}&usuario=${user}`
                         window.location = ruta
                     }else{
-                        const ruta = `/modificarInvent?registro=${registro}&producto=${producto}&cantidadActual=${cantidad}&nuevaCantidad=${value}&unidades=${unidades}&usuario=${user}`
+                        const ruta = `editar_general?registro=${registro}&producto=${producto}&cantidadActual=${cantidad}&nuevaCantidad=${value}&almacen=${almacen}&usuario=${user}`
                         window.location = ruta
                     }
                 }
             }
         })
     }
-    function confirmDelete(registro, producto, cantidad, unidades, user){
+    function confirmDelete(registro, producto, cantidad, almacen, user){
         Swal.fire({
             title: '¿ESTAS SEGURO?',
             text: `Se eliminará el producto ${registro} del inventario`,
@@ -148,12 +151,11 @@
             confirmButtonText: 'Elimiar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/deleteFromInvent?registro=${registro}&producto=${producto}&cantidad=${cantidad}&unidades=${unidades}&usuario=${user}`
+                const ruta = `eliminar_general?registro=${registro}&producto=${producto}&cantidad=${cantidad}&almacen=${almacen}&usuario=${user}`
                 window.location = ruta
             }
         })
     }
-    
 </script>
 
 <%- include('../partials/scriptsNav.ejs') %> 
