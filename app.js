@@ -39,6 +39,6 @@ app.use(function(req, res, next){
 
 //Accedemos a los metodos de express
 //Utilizamos listen para levantar el servidor
-app.listen(5000, ()=>{
-    console.log('SERVER UP running in http://localhost:5000') 
+app.listen(3000, ()=>{
+    console.log('SERVER UP running in http://localhost:3000') 
 })
