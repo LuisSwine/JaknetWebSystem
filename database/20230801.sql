@@ -2,6 +2,59 @@ ALTER TABLE op016_movimientos_inventario ADD usuario_afectado INT(10) NOT NULL;
 ALTER TABLE op016_movimientos_inventario CHANGE COLUMN usuario usuario_registra INT(1) NOT NULL;
 ALTER TABLE op016_movimientos_inventario ADD almacen INT(10) NOT NULL;
 
+CREATE TABLE cat027_almacenes (
+  folio INT(10) NOT NULL PRIMARY KEY,
+  nombre VARCHAR(50) NOT NULL,
+  ubicacion VARCHAR(300) NOT NULL
+);
+
+CREATE TABLE op018_movs_invent_proy (
+	folio INT(10) NOT NULL PRIMARY KEY,
+    usuario_registra INT(10) NOT NULL,
+    producto INT(10) NOT NULL,
+    cantidad INT(10) NOT NULL,
+    fecha datetime NOT NULL,
+    proyecto INT(10) NOT NULL,
+    almacen INT(10) NOT NULL
+);
+
+
+ALTER TABLE op018_movs_invent_proy
+MODIFY folio INT(10) AUTO_INCREMENT;
+
+ALTER TABLE cat027_almacenes
+MODIFY folio INT(10) AUTO_INCREMENT;
+
+ALTER TABLE cat020_inventario
+ADD almacen INT(10) NOT NULL;
+
+CREATE VIEW movs_invent_proys_view001
+AS SELECT 
+`op018_movs_invent_proy`.`folio` AS `folio`, 
+`op018_movs_invent_proy`.`usuario_registra` AS `folio_usuario_registra`,
+`cat001_usuarios`.`nombres` AS `nombre_usuario_afectado`, 
+`cat001_usuarios`.`apellidos` AS `apellido_usuario_afectado`, 
+`op018_movs_invent_proy`.`producto` AS `folio_producto`, 
+`cat016_productos`.`sku` AS `sku`, 
+`cat016_productos`.`descripcion` AS `descripcion`, 
+`op018_movs_invent_proy`.`cantidad` AS `cantidad`, 
+`op018_movs_invent_proy`.`fecha` AS `fecha`,
+`op018_movs_invent_proy`.`proyecto` as `folio_proyecto`,
+`cat009_proyectos`.`nombre` as `proyecto`,
+`cat009_proyectos`.`ubicacion` as `folio_ubicacion`,
+`cat007_ubicaciones`.`nombre` as `ubicacion`,
+`cat007_ubicaciones`.`cliente` as `folio_cliente`,
+`cat003_clientes`.`nombre` as `cliente`,
+`op018_movs_invent_proy`.`almacen` AS `folio_almacen`,
+`cat027_almacenes`.`nombre` AS `almacen` 
+FROM `op018_movs_invent_proy` 
+JOIN `cat001_usuarios` ON `op018_movs_invent_proy`.`usuario_registra` = `cat001_usuarios`.`folio`
+JOIN `cat016_productos` ON `op018_movs_invent_proy`.`producto` = `cat016_productos`.`folio`
+JOIN `cat027_almacenes` ON `op018_movs_invent_proy`.`almacen` = `cat027_almacenes`.`folio`
+JOIN `cat009_proyectos` ON `op018_movs_invent_proy`.`proyecto` = `cat009_proyectos`.`folio`
+JOIN `cat007_ubicaciones` ON `cat009_proyectos`.`ubicacion` = `cat007_ubicaciones`.`folio`
+JOIN `cat003_clientes` ON `cat007_ubicaciones`.`cliente` = `cat003_clientes`.`folio`;
+
 ALTER VIEW movimientos_invent_view001
 AS SELECT 
 `op016_movimientos_inventario`.`folio` AS `folio`, 
@@ -23,19 +76,6 @@ JOIN `cat001_usuarios` AS `ua` ON `op016_movimientos_inventario`.`usuario_afecta
 JOIN `cat001_usuarios` AS `ur` ON `op016_movimientos_inventario`.`usuario_registra` = `ur`.`folio`
 JOIN `cat016_productos` ON `op016_movimientos_inventario`.`producto` = `cat016_productos`.`folio`
 JOIN `cat027_almacenes` ON `op016_movimientos_inventario`.`almacen` = `cat027_almacenes`.`folio`;
-
-CREATE TABLE cat027_almacenes (
-  folio INT(10) NOT NULL PRIMARY KEY,
-  nombre VARCHAR(50) NOT NULL,
-  ubicacion VARCHAR(300) NOT NULL
-);
-
-
-ALTER TABLE cat027_almacenes
-MODIFY folio INT(10) AUTO_INCREMENT;
-
-ALTER TABLE cat020_inventario
-ADD almacen INT(10) NOT NULL;
 
 ALTER VIEW inventario_view001
 AS SELECT 
@@ -64,46 +104,6 @@ AS SELECT
         JOIN `cat015_marcas` ON ((`cat016_productos`.`marca` = `cat015_marcas`.`folio`)))
         JOIN `cat023_unidades` ON ((`cat020_inventario`.`unidades` = `cat023_unidades`.`folio`)))
         JOIN `cat027_almacenes` ON ((`cat020_inventario`.`almacen` = `cat027_almacenes`.`folio`)));
-
-CREATE TABLE op018_movs_invent_proy (
-	folio INT(10) NOT NULL PRIMARY KEY,
-    usuario_registra INT(10) NOT NULL,
-    producto INT(10) NOT NULL,
-    cantidad INT(10) NOT NULL,
-    fecha datetime NOT NULL,
-    proyecto INT(10) NOT NULL,
-    almacen INT(10) NOT NULL
-);
-
-ALTER TABLE op018_movs_invent_proy
-MODIFY folio INT(10) AUTO_INCREMENT;
-
-CREATE VIEW movs_invent_proys_view001
-AS SELECT 
-`op018_movs_invent_proy`.`folio` AS `folio`, 
-`op018_movs_invent_proy`.`usuario_registra` AS `folio_usuario_registra`,
-`cat001_usuarios`.`nombres` AS `nombre_usuario_afectado`, 
-`cat001_usuarios`.`apellidos` AS `apellido_usuario_afectado`, 
-`op018_movs_invent_proy`.`producto` AS `folio_producto`, 
-`cat016_productos`.`sku` AS `sku`, 
-`cat016_productos`.`descripcion` AS `descripcion`, 
-`op018_movs_invent_proy`.`cantidad` AS `cantidad`, 
-`op018_movs_invent_proy`.`fecha` AS `fecha`,
-`op018_movs_invent_proy`.`proyecto` as `folio_proyecto`,
-`cat009_proyectos`.`nombre` as `proyecto`,
-`cat009_proyectos`.`ubicacion` as `folio_ubicacion`,
-`cat007_ubicaciones`.`nombre` as `ubicacion`,
-`cat007_ubicaciones`.`cliente` as `folio_cliente`,
-`cat003_clientes`.`nombre` as `cliente`,
-`op018_movs_invent_proy`.`almacen` AS `folio_almacen`,
-`cat027_almacenes`.`nombre` AS `almacen` 
-FROM `op018_movs_invent_proy` 
-JOIN `cat001_usuarios` ON `op018_movs_invent_proy`.`usuario_registra` = `cat001_usuarios`.`folio`
-JOIN `cat016_productos` ON `op018_movs_invent_proy`.`producto` = `cat016_productos`.`folio`
-JOIN `cat027_almacenes` ON `op018_movs_invent_proy`.`almacen` = `cat027_almacenes`.`folio`
-JOIN `cat009_proyectos` ON `op018_movs_invent_proy`.`proyecto` = `cat009_proyectos`.`folio`
-JOIN `cat007_ubicaciones` ON `cat009_proyectos`.`ubicacion` = `cat007_ubicaciones`.`folio`
-JOIN `cat003_clientes` ON `cat007_ubicaciones`.`cliente` = `cat003_clientes`.`folio`;
 
 ALTER VIEW `viaticos_depositos_view001` AS
     SELECT 
