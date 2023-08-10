@@ -87,6 +87,38 @@ exports.cambiarNombreProyecto = async(req, res, next)=>{
         return next()
     }
 }
+exports.cambiarDocumentacionProyecto = async(req, res, next)=>{
+    try {
+        let ruta = calculateRuta(req.query.flag, req.query.ubicacion, req.query.cliente, req.query.proyecto)
+        conexion.query("UPDATE cat009_proyectos SET documentacion = ? WHERE folio = ?", [req.query.documentacion, req.query.proyecto], (error, fila)=>{
+            if(error){
+                throw error
+            }else{
+                res.redirect(ruta)
+                return next()
+            }
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+exports.cambiarGaleriaProyecto = async(req, res, next)=>{
+    try {
+        let ruta = calculateRuta(req.query.flag, req.query.ubicacion, req.query.cliente, req.query.proyecto)
+        conexion.query("UPDATE cat009_proyectos SET galeria = ? WHERE folio = ?", [req.query.galeria, req.query.proyecto], (error, fila)=>{
+            if(error){
+                throw error
+            }else{
+                res.redirect(ruta)
+                return next()
+            }
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
 exports.deleteProyectoClient = async(req, res, next)=>{
     try {
         const proyecto = req.query.proyecto

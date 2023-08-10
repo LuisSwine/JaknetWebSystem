@@ -97,12 +97,18 @@ const { nextTick } = require('process')
             try {
                 const decode = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRETO)
                 conexion.query('SELECT * FROM cat001_usuarios WHERE folio = ?', [decode.id], (error, results)=>{
-                    if(!results){return next()}
-                    req.user = results[0]
-                    return next()
+                    if(error){
+                        throw error
+                    }
+                    else{    
+                        if(!results){return next()}
+                        req.user = results[0]
+                        return next()
+                    }
                 })
             } catch (error) {
                 console.log(error)
+                res.redirect('/login')
                 return next()
             } 
         }else{
