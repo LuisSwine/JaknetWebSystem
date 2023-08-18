@@ -14,10 +14,10 @@ let ruta = `/?folio=${user.folio}`
                             <span>JAKNET | MANAGER</span>
                         </a>
                     </div>
-                    <li class="label">CRM</li>
+                    <li class="label">ERP</li>
+                    <li><a href="<%= ruta %> "><i class="ti-home"></i> Dashboard</a></li>
                     <% if(user.tipo_usuario != 2){%> 
                     <li class="label">PRINCIPAL</li>
-                    <li><a href="<%= ruta %> "><i class="ti-home"></i> Dashboard</a></li>
                     <li><a href="/usuarios/adminusers"><i class="ti-user"></i>Usuarios</a></li>
                     
                     <li><a href="/clientes/gestionar"><i class="ti-world"></i>Clientes</a></li>

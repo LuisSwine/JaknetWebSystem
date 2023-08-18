@@ -57,7 +57,7 @@
                                                     <div class="button-list">
                                                         <div class="btn-group btn-group-justified">
                                                             <a class="btn btn-info btn-sm" href="perfil?proyecto=<%= proyecto.folio_proyecto %>&flag=4&permisos=<%= proyecto.folio_rol %> " title="CONFIGURACION DEL PROYECTO"><i class="ti-settings"></i></a>
-                                                            <a class="btn btn-pink btn-sm" href="/proyectosInvent?proyecto=<%= proyecto.folio_proyecto %>&flag=4&permisos=<%= proyecto.folio_rol %> " title="INVENTARIO EN EL PROYECTO"><i class="ti-truck"></i></a>
+                                                            <a class="btn btn-pink btn-sm" href="inventario?proyecto=<%= proyecto.folio_proyecto %>&flag=4&permisos=<%= proyecto.folio_rol %> " title="INVENTARIO EN EL PROYECTO"><i class="ti-truck"></i></a>
                                                             <% if(proyecto.folio_rol == 1){%> 
                                                             <a class="btn btn-success btn-sm" href="/proyectViaticos?proyecto=<%= proyecto.folio_proyecto %>&flag=4&permisos=<%= proyecto.folio_rol %>" title="VIATICOS DEL PROYECTO"><i class="ti-money"></i></a>
                                                             <% } %> 

@@ -28,7 +28,7 @@
                                 <%}else if(flag == 0){%>
                                     <li class="breadcrumb-item"><a href="/adminproyectos">Proyectos</a></li>
                                 <%}else if(flag == 4){%>
-                                    <li class="breadcrumb-item"><a href="/misProyectos?folio=<%= user.folio %>">Proyectos</a></li>
+                                    <li class="breadcrumb-item"><a href="mis_proyectos?folio=<%= user.folio %>">Proyectos</a></li>
                                 <%} %>
                                 <li class="breadcrumb-item active"><%= proyecto[0].nombre %></li>
                             </ol>

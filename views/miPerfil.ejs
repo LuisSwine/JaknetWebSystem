@@ -135,7 +135,7 @@
                 if(result.isConfirmed){
                     const nombreV = document.getElementById('nombre').value;
                     const apellidoV = document.getElementById('apellido').value;
-                    const ruta = `/changeNameUserPro?folio=${folio}&nombre=${nombreV}&apellido=${apellidoV}`
+                    const ruta = `cambiar_nombre_per?folio=${folio}&nombre=${nombreV}&apellido=${apellidoV}`
                     window.location = ruta
                 }
             })
@@ -152,7 +152,7 @@
                     if (!value) {
                         return 'Tienes que escribir algo'
                     }else{
-                        const ruta = `/changeTelUserPro?folio=${folio}&telefono=${value}`
+                        const ruta = `cambiar_telefono_per?folio=${folio}&telefono=${value}`
                         window.location = ruta
                     }
                 }
@@ -170,7 +170,7 @@
                     if (!value) {
                         return 'Tienes que escribir algo'
                     }else{
-                        const ruta = `/changeMailUserPro?folio=${folio}&email=${value}`
+                        const ruta = `cambiar_email_per?folio=${folio}&email=${value}`
                         window.location = ruta
                     }
                 }
@@ -185,14 +185,14 @@
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Cambiar',
                 html:
-                    `<input type="password" id="actual" class="swal2-input">`+        
-                    `<input type="password" id="nueva" class="swal2-input">`,
+                    `<input type="password" id="actual" placeholder="Contraseña Actual" class="swal2-input">`+        
+                    `<input type="password" id="nueva" placeholder="Nueva Contraseña" class="swal2-input">`,
                 focusConfirm: false
             }).then((result)=>{
                 if(result.isConfirmed){
                     const passAct = document.getElementById('actual').value;
                     const passNue = document.getElementById('nueva').value;
-                    const ruta = `/changeContraUserPro?folio=${folio}&actual=${passAct}&nueva=${passNue}`
+                    const ruta = `cambiar_contra_per?folio=${folio}&actual=${passAct}&nueva=${passNue}`
                     window.location = ruta
                 }
             })

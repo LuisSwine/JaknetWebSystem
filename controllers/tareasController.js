@@ -1,4 +1,5 @@
 const conexion = require('../database/db')
+const nodemailer = require('nodemailer')
 const {promisify} = require('util')
 const { query } = require('../database/db')
 const { nextTick } = require('process')
@@ -276,13 +277,17 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
     exports.editarAsignacion = async(req, res, next)=>{
         try {
             let usuario = req.body.usuario
+            let prev = req.body.previo
             let tarea = req.body.tarea
             let asignacion = req.body.asignacion
             let etapa = req.body.etapa
 
             const ruta = calculateRuta(req.body.flag, etapa, req.body.proyecto, req.body.ubicacion, req.body.cliente, req.body.permisos)
 
-            if(usuario == 0){
+            if(usuario == prev){
+                res.redirect(`/${ruta}`)
+                return next()
+            }else if(usuario == 0){
                 conexion.query("DELETE FROM op014_tarea_usuario WHERE folio = ?", [asignacion], (err, fila)=>{
                     if(err){
                         throw err
@@ -311,7 +316,7 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
                     if(err){
                         throw err
                     }else{
-                        res.redirect(ruta)
+                        res.redirect(`/${ruta}`)
                         return next()   
                     }
                 })
@@ -488,7 +493,7 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
             }
             let ruta = ''
             if(req.query.flag == 1){
-                ruta = `/misTareas?folio=${data.usuario}`
+                ruta = `/tareas/mis_tareas?folio=${data.usuario}`
             }else if(req.query.flag == 0){
                 ruta = `/?folio=${data.usuario}`
             }
@@ -541,8 +546,6 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
             return next()
         }
     }
-
-
 //ADMINISTRADOR
     exports.declineReportAdmin = async(req, res, next)=>{
         try {

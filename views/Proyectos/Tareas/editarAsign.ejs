@@ -20,19 +20,14 @@
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
                                 <% if(flag == 0){%>
-                                <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%= asignacion[0].etapa %>&proyecto=<%= proyecto %>&flag=<%= flag %>">Tareas</a></li>
+                                <li class="breadcrumb-item"><a href="/tareas/etapa?etapa=<%= asignacion[0].etapa %>&proyecto=<%= proyecto %>&flag=<%= flag %>">Tareas</a></li>
                                 <%}else if(flag == 1){%>
-                                <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%= asignacion[0].etapa %>&proyecto=<%= proyecto %>&cliente=<%= cliente %>&flag=<%= flag %>">Tareas</a></li>
+                                <li class="breadcrumb-item"><a href="/tareas/etapa?etapa=<%= asignacion[0].etapa %>&proyecto=<%= proyecto %>&cliente=<%= cliente %>&flag=<%= flag %>">Tareas</a></li>
                                 <%}else if(flag == 2 || flag == 3){%>
-                                <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%= asignacion[0].etapa %>&proyecto=<%= proyecto %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>">Tareas</a></li>
+                                <li class="breadcrumb-item"><a href="/tareas/etapa?etapa=<%= asignacion[0].etapa %>&proyecto=<%= proyecto %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>">Tareas</a></li>
                                 <%}else if(flag == 4){%>
-                                    <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%= asignacion[0].etapa %>&proyecto=<%= proyecto %>&flag=<%= flag %>&permisos=<%= permisos %>">Tareas</a></li>
-                                    <!-- <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%//= etapa[0].folio %>&ubicacion=<%//= ubicacion %>&flag=4">Tareas</a></li>
-                                    <%//}else if(flag == 5){%>
-                                    <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%//= etapa[0].folio %>&ubicacion=<%//= ubicacion %>&cliente=<%//= cliente %>&flag=5">Tareas</a></li>                                    
-                                    <%//}else if(flag == 6){%>
-                                    <li class="breadcrumb-item"><a href="/tareasetapa?etapa=<%//= etapa[0].folio %>&cliente=<%//= cliente %>&flag=<%//= flag %>">Tareas</a></li> -->
-                                    <%} %>
+                                <li class="breadcrumb-item"><a href="/tareas/etapa?etapa=<%= asignacion[0].etapa %>&proyecto=<%= proyecto %>&flag=<%= flag %>&permisos=<%= permisos %>">Tareas</a></li>
+                                <%} %>
                                 <li class="breadcrumb-item active">Reasignar Tarea</li>
                             </ol>
                         </div>
@@ -65,6 +60,7 @@
                                             <input type="number" class="form-control" value="<%= asignacion[0].folio_tarea %>"id="tarea" name="tarea" hidden>
                                             <input type="number" class="form-control" value="<%= asignacion[0].folio %>" id="asignacion" name="asignacion" hidden>
                                             <input type="number" class="form-control" value="<%= asignacion[0].etapa %>" id="etapa" name="etapa" hidden>
+                                            <input type="number" class="form-control" value="<%= asignacion[0].folio_usuario %>" name="previo" id="previo" hidden>
                                             <input type="number" class="form-control" value="<%= proyecto %>" id="proyecto" name="proyecto" hidden>
                                             <input type="number" class="form-control" value="<%= ubicacion %>" id="ubicacion" name="ubicacion" hidden>
                                             <input type="number" class="form-control" value="<%= cliente %>" id="cliente" name="cliente" hidden>

@@ -1,0 +1,338 @@
+<%- include('../partials/head.ejs', {tituloPagina: 'Añadir Producto a la Factura'}) %> 
+<%- include('../partials/linksNav.ejs')%> 
+<%- include('../partials/header.ejs', {user: user}) %> 
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 p-r-0 title-margin-right">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>Bienvenido <%= user.nombres%></h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+                <div class="col-lg-4 p-l-0 title-margin-left">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <% if(flag == 0){%>
+                                <li class="breadcrumb-item"><a href="/facturas/detalles?factura=<%= factura.folio %>&proyecto=<%= proyecto %>&flag=<%= flag %>">Factura</a></li>
+                                <%}else if(flag == 1){%>
+                                <li class="breadcrumb-item"><a href="/facturas/detalles?factura=<%= factura.folio %>&proyecto=<%= proyecto %>&cliente=<%= cliente %>&flag=<%= flag %>">Factura</a></li>
+                                <%}else if(flag == 2 || flag == 3){%>
+                                <li class="breadcrumb-item"><a href="/facturas/detalles?factura=<%= factura.folio %>&proyecto=<%= proyecto %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>">Factura</a></li>
+                                <%}else if(flag == 4){%>
+                                <li class="breadcrumb-item"><a href="/facturas/detalles?factura=<%= factura.folio %>&proyecto=<%= proyecto %>&flag=<%= flag %>&permisos=<%= permisos %>">Factura</a></li>
+                                <%} %> 
+                                <li class="breadcrumb-item active">Añadir Producto</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# column -->
+            </div>
+            <section id="main-content">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>AÑADIR PRODUCTO</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="basic-elements">
+                                <form action="agregar_producto" method="post">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>PRODUCTO</label>
+                                                <select class="form-control" name="producto" id="producto" onchange="agregarProducto()">
+                                                    <option value="0" disabled selected>--Seleccionar--</option>
+                                                    <option value="other">Otra</option> 
+                                                    <% productos.forEach((producto)=>{ %>
+                                                    <option value="<%= producto.folio %>"><%= producto.sku %> - <%= producto.descripcion %></option>
+                                                    <% }) %>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>PRECIO</label>
+                                                <input type="number" step="any" class="form-control" placeholder="$ PRECIO . 00" id="precio" name="precio" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label>CANTIDAD</label>
+                                                <input type="number" name="cantidad" id="cantidad" step="any" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>UNIDAD</label>
+                                                <select class="form-control" name="unidad" id="unidad" onchange="agregarUnidad()">
+                                                    <option value="0" disabled selected>--Seleccionar--</option>
+                                                    <% unidades.forEach((unidad)=>{ %>
+                                                    <option value="<%= unidad.folio %>"><%= unidad.nombre %></option>
+                                                    <% }) %>
+                                                    <option value="other">Otra</option> 
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12" id="add_product" hidden>
+                                                <div class="form-group">
+                                                    <label>SKU</label>
+                                                    <input type="text" class="form-control" placeholder="SKU o Numero de Parte" id="sku" name="sku">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>CATEGORIA</label>
+                                                    <select class="form-control" name="categoria" id="categoria" onchange="agregarCategoria()">
+                                                        <% categorias.forEach((categoria)=>{ %>
+                                                        <option value="<%= categoria.folio %>"><%= categoria.nombre %></option>
+                                                        <% }) %>
+                                                        <option value="other">Otra</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>MARCA</label>
+                                                    <select class="form-control" name="marca" id="marca" onchange="agregarMarca('<%= encodeURIComponent(JSON.stringify(proveedores)) %>')">
+                                                        <% marcas.forEach((marca)=>{ %>
+                                                        <option value="<%= marca.folio %>"><%= marca.nombre %></option>
+                                                        <% }) %>
+                                                        <option value="other">Otra</option> 
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>DESCRIPCION DEL PRODUCTO</label>
+                                                    <textarea class="form-control" rows="3" placeholder="Descripcion del producto" name="descripcion" id="descripcion"></textarea>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>TIPO</label>
+                                                    <select class="form-control" name="tipo" id="tipo" onchange="agregarTipo()">
+                                                        <% tipos.forEach((tipo)=>{ %>
+                                                        <option value="<%= tipo.folio %>"><%= tipo.nombre %></option>
+                                                        <% }) %>
+                                                        <option value="other">Otra</option> 
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>LINK DE COMPRA</label>
+                                                    <input class="form-control" type="url" placeholder="Enlace de Compra" name="enlace" id="enlace">
+                                                    <span class="help-block">
+                                                        <small>En caso de no contar con link de compra, colocar cualquier link de posible proveedor. Revise los proveedores <a href="/adminproveedores" target="_blank">aquí</a></small>
+                                                    </span>
+                                                </div>
+                                        </div>
+                                        <div class="col-lg-6 add_product" id="to_ad_product">                                              </div>
+                                        <div class="col-lg-12" id="to_ad"></div>
+                                        <div class="col-lg-12">
+                                            <input type="number" name="factura" id="factura" class="form-control" value="<%= factura.folio %>" hidden>
+                                            <input type="number" name="usuario" id="usuario" class="form-control" value="<%= user.folio %>" hidden> 
+                                            <input type="number" name="proveedor" id="proveedor" class="form-control" value="<%= factura.folio_proveedor %>" hidden>
+                                            <input type="number" class="form-control" value="<%= proyecto %>" id="proyecto" name="proyecto" hidden>
+                                            <input type="number" class="form-control" value="<%= ubicacion %>" id="ubicacion" name="ubicacion" hidden>
+                                            <input type="number" class="form-control" value="<%= cliente %>" id="cliente" name="cliente" hidden>
+                                            <input type="number" class="form-control" value="<%= flag %>" id="flag" name="flag" hidden>
+                                            <input type="permisos" class="form-control" value="<%= permisos %>" id="permisos" name="permisos" hidden>
+                                            <button type="submit" class="btn btn-primary m-b-10">AÑADIR PRODUCTO</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </section>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    function agregarProducto(){
+        let selected = document.getElementById('producto').value
+        let div = document.getElementById('add_product')
+        if(selected == 'other'){
+            div.removeAttribute('hidden')
+        }else{
+            div.setAttribute('hidden', true)
+        }
+    }
+    function agregarUnidad(){
+        let selected = document.getElementById('unidad').value;
+        if(selected == 'other'){
+            let column = document.getElementById('to_ad');
+
+            // Creamos los elementos div
+            let divFormGroupUnidad = document.createElement("div");
+            let divFormGroupAbreviatura = document.createElement("div");
+            let divFormGroupSAT = document.createElement("div");
+
+            divFormGroupUnidad.className = "form-group";
+            divFormGroupAbreviatura.className = "form-group";
+            divFormGroupSAT.className = "form-group";
+
+            divFormGroupUnidad.id = 'nu_unidad_div'
+            divFormGroupAbreviatura.id = 'nu_abreviatura_div'
+            divFormGroupSAT.id = 'nu_sat_div'
+
+            // Creamos las labels
+            let labelMarcaUnidad = document.createElement("label");
+            let labelMarcaAbreviatura = document.createElement("label");
+            let labelMarcaSAT = document.createElement("label");
+
+            labelMarcaUnidad.textContent = "UNIDAD";
+            labelMarcaAbreviatura.textContent = "ABREVIATURA";
+            labelMarcaSAT.textContent = "CODIGO SAT";
+
+            // Crea el elemento input
+            let inputMarcaUnidad = document.createElement("input");
+            let inputMarcaAbreviatura = document.createElement("input");
+            let inputMarcaSAT = document.createElement("input");
+
+            inputMarcaUnidad.type = "text";
+            inputMarcaAbreviatura.type = "text";
+            inputMarcaSAT.type = "text";
+
+            inputMarcaUnidad.className = "form-control";
+            inputMarcaAbreviatura.className = "form-control";
+            inputMarcaSAT.className = "form-control";
+            
+            inputMarcaUnidad.placeholder = "Nombre de la nueva unidad";
+            inputMarcaUnidad.id = "nu_unidad";
+            inputMarcaUnidad.name = "nu_unidad";
+            
+            inputMarcaAbreviatura.placeholder = "Abreviatura de la nueva unidad";
+            inputMarcaAbreviatura.id = "nu_abreviatura";
+            inputMarcaAbreviatura.name = "nu_abreviatura";
+
+            inputMarcaSAT.placeholder = "Codigo SAT de la nueva unidad";
+            inputMarcaSAT.id = "nu_sat";
+            inputMarcaSAT.name = "nu_sat";
+
+            // Agrega los elementos al div contenedor
+            divFormGroupUnidad.appendChild(labelMarcaUnidad);
+            divFormGroupUnidad.appendChild(inputMarcaUnidad);
+
+            divFormGroupAbreviatura.appendChild(labelMarcaAbreviatura);
+            divFormGroupAbreviatura.appendChild(inputMarcaAbreviatura);
+            
+            divFormGroupSAT.appendChild(labelMarcaSAT);
+            divFormGroupSAT.appendChild(inputMarcaSAT);
+
+            // Agrega el div al elemento padre
+            column.appendChild(divFormGroupUnidad);
+            column.appendChild(divFormGroupAbreviatura);
+            column.appendChild(divFormGroupSAT);
+        }else if(selected != 'other'){
+            let new_fieldUnidad = document.getElementById('nu_unidad_div');
+            let new_fieldAbreviatura = document.getElementById('nu_abreviatura_div');
+            let new_fieldSAT = document.getElementById('nu_sat_div');
+            new_fieldUnidad.parentNode.removeChild(new_fieldUnidad);
+            new_fieldAbreviatura.parentNode.removeChild(new_fieldAbreviatura);
+            new_fieldSAT.parentNode.removeChild(new_fieldSAT);
+        }
+    }
+    function agregarMarca(objeto){
+        let proveedores = JSON.parse(decodeURIComponent(objeto))
+        let selected = document.getElementById('marca').value;
+
+        if(selected == 'other'){
+            //Seleccionamos la columna para añadir los elementos
+            let column = document.getElementById('to_ad_product');
+
+            // Crea el elemento div
+            let divFormGroup = document.createElement("div");
+            divFormGroup.className = "form-group";
+            divFormGroup.id = 'agregar_nueva_marca'
+
+            // Crea el elemento label
+            let labelMarca = document.createElement("label");
+            labelMarca.textContent = "Nueva Marca";
+
+            // Crea el elemento input
+            let inputMarca = document.createElement("input");
+            inputMarca.type = "text";
+            inputMarca.className = "form-control";
+            inputMarca.placeholder = "Nombre de la nueva marca";
+            inputMarca.id = "nueva_marca";
+            inputMarca.name = "nueva_marca";
+
+            // Agrega los elementos al div contenedor
+            divFormGroup.appendChild(labelMarca);
+            divFormGroup.appendChild(inputMarca);
+
+            // Agrega el div al elemento padre
+            column.appendChild(divFormGroup);
+        }else if(selected != 'other'){
+            let new_field = document.getElementById('agregar_nueva_marca');
+            new_field.parentNode.removeChild(new_field);
+
+        }
+    }
+    function agregarTipo(){
+        let selected = document.getElementById('tipo').value;
+        if(selected == 'other'){
+            let column = document.getElementById('to_ad_product');
+            // Crea el elemento div
+            let divFormGroup = document.createElement("div");
+            divFormGroup.className = "form-group";
+            divFormGroup.id = 'agregar_nuevo_tipo'
+
+            // Crea el elemento label
+            let labelTipo = document.createElement("label");
+            labelTipo.textContent = "Nuevo Tipo";
+
+            // Crea el elemento input
+            let inputTipo = document.createElement("input");
+            inputTipo.type = "text";
+            inputTipo.className = "form-control";
+            inputTipo.placeholder = "Nombre del nuevo tipo";
+            inputTipo.id = "nuevo_tipo";
+            inputTipo.name = "nuevo_tipo";
+
+            // Agrega los elementos al div contenedor
+            divFormGroup.appendChild(labelTipo);
+            divFormGroup.appendChild(inputTipo);
+
+            // Agrega el div al elemento padre
+            column.appendChild(divFormGroup);
+        }else if(selected != 'other'){
+            let new_field = document.getElementById('agregar_nuevo_tipo');
+            new_field.parentNode.removeChild(new_field);
+        }
+    }
+    function agregarCategoria(){
+        let selected = document.getElementById('categoria').value;
+        if(selected == 'other'){
+            let column = document.getElementById('to_ad_product');
+            // Crea el elemento div
+            let divFormGroup = document.createElement("div");
+            divFormGroup.className = "form-group";
+            divFormGroup.id = 'agregar_nueva_categoria'
+
+            // Crea el elemento label
+            let labelCategoria = document.createElement("label");
+            labelCategoria.textContent = "Nueva Categoria";
+
+            // Crea el elemento input
+            let inputCategoria = document.createElement("input");
+            inputCategoria.type = "text";
+            inputCategoria.className = "form-control";
+            inputCategoria.placeholder = "Nombre de la nueva categoria";
+            inputCategoria.id = "nueva_categoria";
+            inputCategoria.name = "nueva_categoria";
+
+            // Agrega los elementos al div contenedor
+            divFormGroup.appendChild(labelCategoria);
+            divFormGroup.appendChild(inputCategoria);
+
+            // Agrega el div al elemento padre
+            column.appendChild(divFormGroup);
+        }else if(selected != 'other'){
+            let new_field = document.getElementById('agregar_nueva_categoria');
+            new_field.parentNode.removeChild(new_field);
+        }
+    }
+</script>
+
+<%- include('../partials/scriptsNav.ejs') %> 
+<%- include('../partials/footer.ejs') %> 

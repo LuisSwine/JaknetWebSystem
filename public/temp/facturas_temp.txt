@@ -1,57 +1,19 @@
-<div class="tab-pane p-20" id="facturas" role="tabpanel">
-                                        <div class="col-lg-12">
-                                            <div class="card">
-                                                <div class="card-title">
-                                                    <% 
-                                                        let newFlag = flag;
-                                                        if(flag == 4){ newFlag = 7} 
-                                                    %> 
-                                                    <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %>
-                                                    <a href="/createcotizacionProyecto?proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= proyecto[0].folio_cliente %>&flag=<%= flag %>&permisos=<%= permisos %>" class="btn btn-primary btn-flat btn-addon"><i class="ti-plus"></i>Registrar Nueva Factura</a>     
-                                                    <% } %> 
-                                                </div>
-                                                <div class="bootstrap-data-table-panel">
-                                                    <div class="table-responsive">
-                                                        <table id="row-select4" class="display table table-borderd table-hover">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Identificador</th>
-                                                                    <th>Proveedor</th>
-                                                                    <th>Total</th>
-                                                                    <th>Acciones</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                <% facturas.forEach((factura)=>{ %>
-                                                                <tr>
-                                                                    <td><%= factura.identificador %></td>
-                                                                    <td><%= factura.proveedor %></td>
-                                                                    <td>$<%= factura.total %></td>
-                                                                    <td>
-                                                                        <div class="button-list">
-                                                                            <div class="btn-group btn-group-justified">
-                                                                                <a class="btn btn-info btn-sm" href="/cotizacionMain?cotizacion=&proyecto=<%= proyecto[0].folio %>&cliente=<%= proyecto[0].folio_cliente %>&ubicacion=<%= ubicacion %>&flag=<%= newFlag %>&permisos=<%= permisos %>" title="INFORMACION"><i class="ti-settings"></i></a>
-                                                                                <a href="/cotizacionPDF?cotizacion=" class="btn btn-danger btn-sm" target="_blank" title="Configurar"><i class="ti-file"></i></a>
-                                                                                <% if(user.tipo_usuario != 2 || permisos == 1 || permisos == 2){ %>
-                                                                                <button class="btn btn-warning btn-sm" onclick="confirmDeleteCoti('<%= proyecto[0].folio %>', '<%= ubicacion %>','<%= cliente %>', '<%= flag %>', '<%= permisos %>')" title="ELIMINAR COTIZACION"><i class="ti-trash"></i></button>
-                                                                                <% } %> 
-                                                                            </div>
-                                                                        </div>
-                                                                    </td>
-                                                                </tr> 
-                                                                <% }) %> 
-                                                            </tbody>
-                                                            <tfoot>
-                                                                <tr>
-                                                                    <th>Identificador</th>
-                                                                    <th>Proveedor</th>
-                                                                    <th>Total</th>
-                                                                    <th>Acciones</th>
-                                                                </tr>
-                                                            </tfoot>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+<% comprobaciones.forEach((comprobacion)=>{%>
+                                                    <tr>
+                                                        <td><%= comprobacion.folio %></td>
+                                                        <td><%= comprobacion.beneficiario %></td>
+                                                        <td><%= comprobacion.concepto %></td>
+                                                        <td><%= comprobacion.uso %></td>
+                                                        <td><%= comprobacion.nombre_proyecto %></td>
+                                                        <td><%= comprobacion.fecha.toLocaleDateString('en-GB') %></td>
+                                                        <td>$<%= comprobacion.monto.toFixed(2) %></td>
+                                                        <td>
+                                                            <div class="button-list">
+                                                                <div class="btn-group btn-group-justified">
+                                                                    <a class="btn btn-warning btn-sm" href="<%= comprobacion.enlace %>" target="_blank" title="DOCUMENTACION DEL PROYECTO"><i class="ti-files"></i></a>
+                                                                    <button class="btn btn-danger btn-sm" onclick="confirmDeleteComprobacion('<%= comprobacion.folio_emisor %>','<%=claveSelected[0].folio%>','<%= comprobacion.folio %>','<%= comprobacion.monto %>')"><i class="ti-trash"></i></button>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                <% }) %>

@@ -17,7 +17,7 @@
                     <div class="page-header">
                         <div class="page-title">
                             <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/?folio=<%= user.folio %>">Dashboard</a></li>
                                 <li class="breadcrumb-item active">Usuarios</li>
                             </ol>
                         </div>
@@ -37,7 +37,6 @@
                                     <table id="row-select" class="display table table-borderd table-hover">
                                         <thead>
                                             <tr>
-                                                <th>Folio</th>
                                                 <th>Rol</th>
                                                 <th>Nombre</th>
                                                 <th>Apellidos</th>
@@ -68,7 +67,6 @@
                                                         break;
                                                 }    
                                                 %> 
-                                                <td><%= usuario.folio %></td>
                                                 <td><span class="badge badge-<%= color %>"><%= rol %></span></td>
                                                 <td><%= usuario.nombres %></td>
                                                 <td><%= usuario.apellidos %></td>
@@ -80,7 +78,7 @@
                                                         <div class="btn-group btn-group-justified">
                                                             <a class="btn btn-success btn-sm" href="/viaticos/admin_personal?usuario=<%= usuario.folio %>"><i class="ti-money"></i></a>
                                                             <a class="btn btn-warning btn-sm" href="<%= usuario.documentacion %>" target="_blank"><i class="ti-link"></i></a>
-                                                            <a class="btn btn-pink btn-sm" href="/reporteAsistencia?usuario=<%= usuario.folio %>&flag=1" title="Generar reporte de asistencia"><i class="ti-calendar"></i></a>
+                                                            <a class="btn btn-pink btn-sm" href="/asistencias/mis_asistencias?usuario=<%= usuario.folio %>&flag=1" title="Generar reporte de asistencia"><i class="ti-calendar"></i></a>
                                                             <a class="btn btn-info btn-sm" href="/inventario/mi_inventario?usuario=<%= usuario.folio %>&flag=1" title="Inventario Personal"><i class="ti-briefcase"></i></a>
                                                             <% if(user.tipo_usuario == 0 || (user.tipo_usuario == 1 && usuario.tipo_usuario == 2)){%>
                                                             <button class="btn btn-primary btn-sm" onclick="editUser('<%= usuario.folio %>')"><i class="ti-pencil"></i></button>
@@ -95,7 +93,6 @@
                                         </tbody>
                                         <tfoot>
                                             <tr>
-                                                <th>Folio</th>
                                                 <th>Rol</th>
                                                 <th>Nombre</th>
                                                 <th>Apellidos</th>
@@ -132,7 +129,7 @@
             confirmButtonText: 'Elimiar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/deleteUser/${folio}`
+                const ruta = `/usuarios/eliminar?usuario=${folio}`
                 window.location = ruta
             }
         })

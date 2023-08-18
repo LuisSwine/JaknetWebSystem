@@ -224,111 +224,151 @@ const { nextTick } = require('process')
             return next()
         }
     }
+
+function checkViaticos(usuario){
+    return new Promise((resolve, reject)=>{
+        conexion.query('SELECT folio FROM cat021_claves_seguimiento WHERE usuario = ?', usuario, (error, fila)=>{
+            if(error){
+                throw error
+            }else{
+                if(fila.length === 0){
+                    resolve(true)
+                }else{
+                    resolve(false)
+                }
+            }
+        })
+    })    
+}
+function checkOperaciones(usuario){
+    return new Promise((resolve, reject)=>{
+        conexion.query('SELECT folio FROM cat022_operaciones WHERE id_bene = ? OR emisor = ?', [usuario, usuario], (error, fila)=>{
+            if(error){
+                throw error
+            }else{
+                if(fila.length === 0){
+                    resolve(true)
+                }else{
+                    resolve(false)
+                }
+            }
+        })
+    })    
+}
+function checkReportes(usuario){
+    return new Promise((resolve, reject)=>{
+        conexion.query('SELECT folio FROM op004_reporte WHERE usuario = ?', usuario, (error, fila)=>{
+            if(error){
+                throw error
+            }else{
+                if(fila.length === 0){
+                    resolve(true)
+                }else{
+                    resolve(false)
+                }
+            }
+        })
+    })    
+}
+function checkRoles(usuario){
+    return new Promise((resolve, reject)=>{
+        conexion.query('SELECT folio FROM op005_roles WHERE usuario = ?', usuario, (error, fila)=>{
+            if(error){
+                throw error
+            }else{
+                if(fila.length === 0){
+                    resolve(true)
+                }else{
+                    resolve(false)
+                }
+            }
+        })
+    })    
+}
+function checkAsistencias(usuario){
+    return new Promise((resolve, reject)=>{
+        conexion.query('SELECT folio FROM op006_asistencia WHERE usuario = ?', usuario, (error, fila)=>{
+            if(error){
+                throw error
+            }else{
+                if(fila.length === 0){
+                    resolve(true)
+                }else{
+                    resolve(false)
+                }
+            }
+        })
+    })    
+}
+function checkMaterial(usuario){
+    return new Promise((resolve, reject)=>{
+        conexion.query('SELECT folio FROM op013_material_usuario WHERE usuario = ?', usuario, (error, fila)=>{
+            if(error){
+                throw error
+            }else{
+                if(fila.length === 0){
+                    resolve(true)
+                }else{
+                    resolve(false)
+                }
+            }
+        })
+    })    
+}
+function checkTareas(usuario){
+    return new Promise((resolve, reject)=>{
+        conexion.query('SELECT folio FROM op014_tarea_usuario WHERE usuario = ?', usuario, (error, fila)=>{
+            if(error){
+                throw error
+            }else{
+                if(fila.length === 0){
+                    resolve(true)
+                }else{
+                    resolve(false)
+                }
+            }
+        })
+    })    
+}
+function checkMovimientos(usuario){
+    return new Promise((resolve, reject)=>{
+        conexion.query('SELECT folio FROM op016_movimientos_inventario WHERE usuario_registra = ?', usuario, (error, fila)=>{
+            if(error){
+                throw error
+            }else{
+                if(fila.length === 0){
+                    resolve(true)
+                }else{
+                    resolve(false)
+                }
+            }
+        })
+    })    
+}
+
     exports.deleteUser = async (req, res, next)=>{
         try {
-            const usuario = req.params.folio
-            //Validamos Claves de Seguimiento
-            conexion.query("SELECT folio FROM cat021_claves_seguimiento WHERE usuario = ?", [usuario], (error, fila)=>{
+            const usuario = req.query.usuario
+
+            let hasViaticos = await checkViaticos(usuario)
+            let hasOperaciones = await checkOperaciones(usuario)
+            let hasReportes = await checkReportes(usuario)
+            let hasRoles = await checkRoles(usuario)
+            let hasAsistencias = await checkAsistencias(usuario)
+            let hasMaterial = await checkMaterial(usuario)
+            let hasTareas = await checkTareas(usuario)
+            let hasMovimientos = await checkMovimientos(usuario)
+            if(!hasViaticos || !hasOperaciones || !hasReportes || !hasRoles || !hasAsistencias || !hasMaterial || !hasMovimientos || !hasTareas){
+                showError(res, 'Imposible eliminar usuario', `No se ha podido eliminar al usuario ${usuario}`, 'usuarios/adminusers')
+                return next()
+            }
+
+            conexion.query('DELETE FROM cat001_usuarios WHERE folio = ?', usuario, (error, fila)=>{
                 if(error){
                     throw error
                 }else{
-                    if(fila.length === 0){
-                        //Validamos Operaciones
-                        conexion.query("SELECT folio FROM cat022_operaciones WHERE id_bene = ? OR emisor = ?", [usuario, usuario], (error2, fila2)=>{
-                            if(error2){
-                                throw error2
-                            }else{
-                                if(fila2.length === 0){
-                                    //Validamos reportes
-                                    conexion.query("SELECT folio FROM op004_reporte WHERE usuario = ?", [usuario], (error3, fila3)=>{
-                                        if(error3){
-                                            throw error3
-                                        }else{
-                                            if(fila3.length === 0){
-                                                //Validamos Roles
-                                                conexion.query("SELECT folio FROM op005_roles WHERE usuario = ?", [usuario], (error4, fila4)=>{
-                                                    if(error4){
-                                                        throw error4
-                                                    }else{
-                                                        if(fila4.length === 0){
-                                                            //Validamos asistencias
-                                                            conexion.query("SELECT folio FROM op006_asistencia WHERE usuario = ?", [usuario], (error5, fila5)=>{
-                                                                if(error5){
-                                                                    throw error5
-                                                                }else{
-                                                                    if(fila5.length === 0){
-                                                                        //Validamos Material
-                                                                        conexion.query("SELECT folio FROM op013_material_usuario WHERE usuario = ?", [usuario], (error6, fila6)=>{
-                                                                            if(error6){
-                                                                                throw error6
-                                                                            }else{
-                                                                                if(fila6.length === 0){
-                                                                                    //Validamos Tareas
-                                                                                    conexion.query("SELECT folio FROM op014_tarea_usuario WHERE usuario = ?", [usuario], (error7, fila7)=>{
-                                                                                        if(error7){
-                                                                                            throw error7
-                                                                                        }else{
-                                                                                            if(fila7.length === 0){
-                                                                                                //Validamos movimientos de inventario
-                                                                                                conexion.query("SELECT folio FROM op016_movimientos_inventario WHERE usuario = ?", [usuario], (error8, fila8)=>{
-                                                                                                    if(error8){
-                                                                                                        throw error8
-                                                                                                    }else{
-                                                                                                        if(fila8.length === 0){
-                                                                                                            conexion.query("DELETE FROM cat001_usuarios WHERE folio = ?", [usuario], (error9, fila9)=>{
-                                                                                                                if(error9){
-                                                                                                                    throw error9
-                                                                                                                }else{
-                                                                                                                    res.redirect('/adminusers')
-                                                                                                                    return next()
-                                                                                                                }
-                                                                                                            })
-                                                                                                        }else{
-                                                                                                            showError(res, 'Imposible eliminar usuario', `No se ha podido eliminar al usuario ${usuario} porque ya ha realizado movimientos de material en el inventario`, 'adminusers')
-                                                                                                            return next()
-                                                                                                        }
-                                                                                                    }
-                                                                                                })
-                                                                                            }else{
-                                                                                                showError(res, 'Imposible eliminar usuario', `No se ha podido eliminar al usuario ${usuario} porque tiene tareas asignadas`, 'adminusers')
-                                                                                                return next()
-                                                                                            }
-                                                                                        }
-                                                                                    })
-                                                                                }else{
-                                                                                    showError(res, 'Imposible eliminar usuario', `No se ha podido eliminar al usuario ${usuario} porque tiene en su posesión material o herramienta`, 'adminusers')
-                                                                                    return next()
-                                                                                }
-                                                                            }
-                                                                        })
-                                                                    }else{
-                                                                        showError(res, 'Imposible eliminar usuario', `No se ha podido eliminar al usuario ${usuario} porque ya tuvo participacion en proyectos`, 'adminusers')
-                                                                        return next()
-                                                                    }
-                                                                }
-                                                            })
-                                                        }else{
-                                                            showError(res, 'Imposible eliminar usuario', `No se ha podido eliminar al usuario ${usuario} porque tiene roles asignados en algun proyecto`, 'adminusers')
-                                                            return next()
-                                                        }
-                                                    }
-                                                })
-                                            }else{
-                                                showError(res, 'Imposible eliminar usuario', `No se ha podido eliminar al usuario ${usuario} porque ya ha entregado reporte de tareas`, 'adminusers')
-                                                return next()
-                                            }
-                                        }
-                                    })
-                                }else{
-                                    showError(res, 'Imposible eliminar usuario', `No se ha podido eliminar al usuario ${usuario} porque ya ha tenido operaciones de viaticos`, 'adminusers')
-                                    return next()
-                                }
-                            }
-                        })
-                    }else{
-                        showError(res, 'Imposible eliminar usuario', `No se ha podido eliminar al usuario ${usuario} porque tiene viaticos asignados`, 'adminusers')
-                        return next()
-                    }
+                    res.redirect('/usuarios/adminusers')
+                    return next()
                 }
             })
         } catch (error) {
@@ -751,7 +791,7 @@ const { nextTick } = require('process')
                         if(err2){
                             throw err2
                         }else{
-                            let ruta = `/viaticos/claves?usuario=${req.query.usuario}&clave=${req.query.clave}` 
+                            let ruta = `/viaticos/claves_personal?usuario=${req.query.usuario}&clave=${req.query.clave}` 
                             res.redirect(ruta)
                             return next()
                         }

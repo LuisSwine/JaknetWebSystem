@@ -20,6 +20,7 @@ const Proveedor  = require('./proveedores')
 const Producto   = require('./productos')
 const Unidad     = require('./unidades')
 const Inventario = require('./inventario')
+const Factura    = require('./facturas')
 
 router.use('/usuarios', User)
 router.use('/almacenes', Almacen)
@@ -37,6 +38,7 @@ router.use('/proveedores', Proveedor)
 router.use('/productos', Producto)
 router.use('/unidades', Unidad)
 router.use('/inventario', Inventario)
+router.use('/facturas', Factura)
 
 //INSTANCIACION A NUESTROS CONTROLADORES
 const authController         = require('../controllers/authController')
@@ -187,7 +189,6 @@ router.get('/adminProject/:folio', authController.isAuthenticated, authControlle
 })
 router.get('/selectUsers', authController.selectUsers)
 router.get('/selectUser/:folio', authController.selectUser)
-router.get('/deleteUser/:folio', authController.deleteUser)
 router.get('/deleteCoti', cotizacionesController.deleteCotizacion)
 
 module.exports = router

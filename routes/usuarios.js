@@ -8,18 +8,18 @@ const authController = require('../controllers/authController')
 const usuarioController = require('../controllers/usuarioController')
 
 
-//#2.1.1.1. Visualización del Perfil
+//#2.1.1.1. Visualización del modulo de Mi Perfil
 router.get('/miPerfil', authController.isAuthenticated, (req, res)=>{
     res.render('miPerfil', {user: req.user})
 })
 //#2.1.1.2. Cambiar Nombre y Apellidos del usuario
-router.get('/changeNameUserPro', usuarioController.changeNombreUsuario)
+router.get('/cambiar_nombre_per', usuarioController.changeNombreUsuario)
 //#2.1.1.3. Cambiar Telefono
-router.get('/changeTelUserPro', usuarioController.changeTelUsuario)
+router.get('/cambiar_telefono_per', usuarioController.changeTelUsuario)
 //#2.1.1.4. Cambiar Email
-router.get('/changeMailUserPro', usuarioController.changeMailUsuario)
+router.get('/cambiar_email_per', usuarioController.changeMailUsuario)
 //#2.1.1.5. Cambiar Contraseña
-router.get('/changeContraUserPro', usuarioController.changePassUser)
+router.get('/cambiar_contra_per', usuarioController.changePassUser)
     
 //#2.2.1.1. TABLA DE USUARIOS
 router.get('/adminusers', authController.isAuthenticated, authController.selectUsers, (req, res)=>{
@@ -51,5 +51,8 @@ router.get('/reporte_asistencia', authController.isAuthenticated, authController
         
 //#2.2.5.1. FUNCION QUE CAMBIA LA CONTRASEÑA
 router.get('/cambiar_contra_admin', usuarioController.changePassUserAdmin)
+
+
+router.get('/eliminar', authController.deleteUser)
 
 module.exports = router;

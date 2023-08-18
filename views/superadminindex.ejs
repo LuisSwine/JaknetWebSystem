@@ -149,7 +149,7 @@
             let proyectos = JSON.parse(decodeURIComponent(objeto))
             let opciones = ''
             proyectos.forEach((proyecto)=>{
-                opciones = opciones + `<option value="${proyecto.folio_proyecto}">${proyecto.proyecto}</option>`
+                opciones = opciones + `<option value="${proyecto.folio_proyecto}">${proyecto.cliente} - ${proyecto.ubicacion} - ${proyecto.proyecto}</option>`
             })
             Swal.fire({
                 title: 'Seleccionar Proyecto',
@@ -191,7 +191,7 @@
                     if (!value) {
                         return 'Tienes que escribir algo'
                     }else{
-                        let ruta = `/subirReporteTarea?tarea=${tarea}&usuario=${usuario}&url=${value}&flag=0`
+                        let ruta = `/tareas/subir_reporte?tarea=${tarea}&usuario=${usuario}&url=${value}&flag=0`
                         window.location = ruta
                     }
                 }

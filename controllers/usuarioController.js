@@ -266,7 +266,7 @@ function getExistenciasAlmacen(producto, almacen){
 
 
 
-//Funciones del perfil
+//Funciones del modulo de mi perfil
 exports.changeNombreUsuario = async(req, res, next)=>{
     try {
         let folio = req.query.folio
@@ -277,7 +277,7 @@ exports.changeNombreUsuario = async(req, res, next)=>{
             if(error){
                 throw error
             }else{
-                res.redirect(`/miPerfil?usuario=${folio}`)
+                res.redirect(`/usuarios/miPerfil?usuario=${folio}`)
                 return next()
             }
         })
@@ -286,7 +286,6 @@ exports.changeNombreUsuario = async(req, res, next)=>{
         return next()
     }
 }
-
 exports.changeTelUsuario = async(req, res, next)=>{
     try {
         let folio = req.query.folio
@@ -296,7 +295,7 @@ exports.changeTelUsuario = async(req, res, next)=>{
             if(error){
                 throw error
             }else{
-                res.redirect(`/miPerfil?usuario=${folio}`)
+                res.redirect(`/usuarios/miPerfil?usuario=${folio}`)
                 return next()
             }
         })
@@ -305,7 +304,6 @@ exports.changeTelUsuario = async(req, res, next)=>{
         return next()
     }
 }
-
 exports.changeMailUsuario = async(req, res, next)=>{
     try {
         let folio = req.query.folio
@@ -315,7 +313,7 @@ exports.changeMailUsuario = async(req, res, next)=>{
             if(error){
                 throw error
             }else{
-                res.redirect(`/miPerfil?usuario=${folio}`)
+                res.redirect(`/usuarios/miPerfil?usuario=${folio}`)
                 return next()
             }
         })
@@ -346,7 +344,7 @@ exports.changePassUser = async(req, res, next)=>{
                         if(error2){
                             throw error2
                         }else{
-                            res.redirect( `/miPerfil?usuario=${folio}`)
+                            res.redirect( `/usuarios/miPerfil?usuario=${folio}`)
                             return next()
                         }
                     })

@@ -161,6 +161,8 @@ function producto_con_usuario(producto){
         })
     })
 }
+
+
 exports.deleteProduct = async(req, res, next) =>{
     try {
         let producto = req.query.producto
