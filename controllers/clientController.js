@@ -1,9 +1,155 @@
-const conexion = require('../database/db')
-const {promisify} = require('util')
-const { query } = require('../database/db')
-const { nextTick } = require('process')
-const { resolve } = require('path')
+import conexion from '../database/db.js'
+import { 
+    seleccionar_clientes, 
+    seleccionar_cliente, 
+    seleccionar_servicios, 
+    seleccionar_tipos_cliente, 
+    crear_cliente,
+    actualizar_tipo,
+    actualizar_servicio,
+    actualizar_nombre 
+} from '../models/Cliente.js';
 
+
+const getClientes = async(req, _, next) =>{
+    try {
+        await seleccionar_clientes().then(resultado =>{
+            req.clientes = resultado
+            return next()
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al obtener los clientes: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getServicios = async(req, _, next) =>{
+    try {
+        await seleccionar_servicios().then(resultado =>{
+            req.servicios = resultado
+            return next()
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al obtener los servicios: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const createClient = async(req, res, next) =>{
+    try {
+        let cliente = {
+            nombre: req.body.nombre,
+            tipo_cliente: req.body.tipo_cliente,
+            tipo_servicio: req.body.tipo_servicio
+        }
+        await crear_cliente(cliente).then(_ =>{
+            res.redirect('/clientes/gestionar')
+            return next()
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al registrar el cliente: ', error)
+        })  
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getCliente = async(req, res, next) =>{
+    try {
+        const cliente = req.query.cliente
+        await seleccionar_cliente(cliente).then(resultado =>{
+            req.cliente = resultado
+            return next()
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al obtener el cliente solicitado: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getTiposCliente = async(req, res, next) =>{
+    try {
+        await seleccionar_tipos_cliente().then(resultado =>{
+            req.tipos = resultado
+            return next()
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al obtener los tipos de cliente: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const updateTipo = async(req, res, next)=>{
+    try {
+        await actualizar_tipo(req.query.tipo, req.query.cliente).then(_ =>{
+            res.redirect(`/clientes/administrar?cliente=${req.query.cliente}`)
+            return next()
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al actualizar el tipo de cliente: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next
+    }
+}
+const updateServicio = async(req, res, next)=>{
+    try {
+        await actualizar_servicio(req.query.servicio, req.query.cliente).then(_ =>{
+            res.redirect(`/clientes/administrar?cliente=${req.query.cliente}`)
+            return next()
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al actualizar el tipo de cliente: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next
+    }
+}
+const updateNombre = async(req, res, next)=>{
+    try {
+        await actualizar_nombre(req.query.nombre, req.query.cliente).then(_ =>{
+            res.redirect(`/clientes/administrar?cliente=${req.query.cliente}`)
+            return next()
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al actualizar el nombre de cliente: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next
+    }
+}
+export {
+    getClientes,
+    getServicios,
+    createClient,
+    getCliente,
+    getTiposCliente,
+    updateTipo,
+    updateServicio,
+    updateNombre
+}
+
+
+/* 
 function showError(res, titulo, mensaje, ruta){
     res.render('Error/showInfo', {
         title: titulo,
@@ -17,128 +163,12 @@ function showError(res, titulo, mensaje, ruta){
     })
 }
 
-//CRUD PARA LA GESTION DE CLIENTES
-    //SELECT DE SERVICIOS
-    exports.selectTipoServicios = async(req, res, next) =>{
-        try {
-            conexion.query("SELECT * FROM cat005_tipo_servicio", (error, filas)=>{
-                if(error){
-                    throw error;
-                }else{
-                    req.servicios = filas
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    //Select de los tipos de cliente
-    exports.selectTipoClientes = async(req, res, next) =>{
-        try {
-            conexion.query("SELECT * FROM cat012_tipo_cliente", (error, filas)=>{
-                if(error){
-                    throw error;
-                }else{
-                    req.tipos = filas
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    //Select de todos los clientes
-    exports.selectClients = async(req, res, next) =>{
-        try {
-            conexion.query("SELECT * FROM clientes_view001", (error, filas)=>{
-                if(error){
-                    throw error;
-                }else{
-                    req.clientes = filas
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    //Select de un solo cliente
-    exports.selectClient = async(req, res, next) =>{
-        try {
-            conexion.query("SELECT * FROM clientes_view001 WHERE folio = ?", [req.query.cliente], (error, fila)=>{
-                if(error){
-                    throw error;
-                }else{
-                    req.cliente = fila
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    //Crear un cliente
-    exports.createClient = async(req, res, next) =>{
-        try {
-            let data = {
-                nombre: req.body.nombre,
-                tipo_cliente: req.body.tipo_cliente,
-                tipo_servicio: req.body.tipo_servicio
-            }
-            let insert = "INSERT INTO cat003_clientes SET ?"
-            conexion.query(insert, data, function(error, results){
-                if(error){
-                    throw error
-                }else{
-                    res.redirect('/clientes/gestionar')
-                    return next()    
-                }
-            })    
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
+
 
     //EDITAR DATOS DEL CLIENTE
     exports.editarNombre = async(req, res, next)=>{
         try {
             conexion.query("UPDATE cat003_clientes SET nombre = ? WHERE folio = ?", [req.query.nombre, req.query.cliente], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    res.redirect(`/clientes/administrar?cliente=${req.query.cliente}`)
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next
-        }
-    }
-    exports.editarServicio = async(req, res, next)=>{
-        try {
-            conexion.query("UPDATE cat003_clientes SET tipo_servicio = ? WHERE folio = ?", [req.query.servicio, req.query.cliente], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    res.redirect(`/clientes/administrar?cliente=${req.query.cliente}`)
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next
-        }
-    }
-    exports.editarTipo = async(req, res, next)=>{
-        try {
-            conexion.query("UPDATE cat003_clientes SET tipo_cliente = ? WHERE folio = ?", [req.query.tipo, req.query.cliente], (error, fila)=>{
                 if(error){
                     throw error
                 }else{
@@ -370,4 +400,4 @@ function validate_contacts_ubi(ubicacion){
             console.log(error)
             return next()
         }
-    }
+    } */

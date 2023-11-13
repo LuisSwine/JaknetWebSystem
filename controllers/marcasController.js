@@ -1,4 +1,24 @@
-const conexion = require('../database/db')
+import { seleccionar_marcas } from "../models/Marca.js";
+
+const getMarcas = async(req, _, next) =>{
+    try {
+        await seleccionar_marcas().then(resultado=>{
+            req.marcas = resultado
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener las marcas: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+
+export{
+    getMarcas
+}
+
+/* const conexion = require('../database/db')
 const {promisify} = require('util')
 const { query } = require('../database/db')
 const { nextTick } = require('process')
@@ -30,21 +50,7 @@ function showError(res, titulo, mensaje, ruta){
 }
 
 //CRUD PARA LA GESTION DE MARCAS
-exports.selectBrands = async(req, res, next) =>{
-    try {
-        conexion.query("SELECT * FROM cat015_marcas", (error, filas)=>{
-            if(error){
-                throw error;
-            }else{
-                req.marcas = filas
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
+
 exports.selectBrand = async(req, res, next) =>{
     try {
         conexion.query("SELECT * FROM cat015_marcas WHERE folio = ?", [req.query.marca], (error, fila)=>{
@@ -210,4 +216,4 @@ exports.deleteBrand = async(req, res, next) =>{
         return next()
     }
 }
-//FIN DEL CRUD PARA LAS MARCAS
+//FIN DEL CRUD PARA LAS MARCAS */

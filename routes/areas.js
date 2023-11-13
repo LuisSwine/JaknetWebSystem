@@ -1,22 +1,23 @@
-const express = require('express')
+import express from 'express'
+
+import { isAuthenticated } from '../controllers/authController.js'
+import { getUbicacion } from '../controllers/ubicacionesController.js' 
+import { createArea, getArea, editArea } from '../controllers/areasController.js'
 
 const router = express.Router()
-const { authorized } = require('../database/db')
 
-
-const authController = require('../controllers/authController')
-const ubicacionesController = require('../controllers/ubicacionesController')
-const areasController = require('../controllers/areasController')
-
-
-router.get('/nueva_area', authController.isAuthenticated, ubicacionesController.selectUbicacion, (req, res)=>{
-    res.render('Areas/formCreateArea', {user: req.user, ubicacion: req.ubicacion, clienteSelected: req.query.cliente, flag: req.query.flag})
+router.get('/nueva_area', isAuthenticated, getUbicacion, (req, res)=>{
+    res.render('Areas/formCreateArea', {user: req.user, ubicacion: req.ubicacion, clienteSelected: req.query.cliente})
 })
-router.post('/nueva_area', areasController.createArea)
-router.get('/editar', authController.isAuthenticated, areasController.selectArea, (req, res)=>{
+router.get('/editar', isAuthenticated, getArea, (req, res)=>{
     res.render('Areas/editArea', {user: req.user, area: req.area, ubicacion: req.query.ubicacion, clienteSelected: req.query.cliente, flag: req.query.flag})
 })
-router.post('/editar', areasController.editArea)
-router.get('/eliminar', areasController.deleteArea)
+router.post('/nueva_area', createArea)
+router.post('/editar', editArea)
 
-module.exports = router;
+
+export default router
+
+/* 
+router.get('/eliminar', areasController.deleteArea)
+*/

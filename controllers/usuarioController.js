@@ -1,11 +1,19 @@
-const conexion = require('../database/db')
-const bcryptjs = require('bcryptjs')
-const {promisify} = require('util')
-const { query } = require('../database/db')
-const { nextTick } = require('process')
-const { parse } = require('path')
+import conexion from '../database/db.js'
+import bcryptjs from 'bcryptjs'
 
-exports.proyectosAsistencia = async(req, res, next)=>{
+import { 
+    seleccionar_usuarios, 
+    crear_usuario, 
+    cambiar_nombre, 
+    cambiar_telefono, 
+    cambiar_email, 
+    get_password, 
+    cambiar_contra, 
+    seleccionar_usuario
+} from '../models/Usuario.js'
+import { mostrar_error } from '../helpers/funciones_simples.js'
+
+const proyectosAsistencia = async(req, _, next)=>{
     try {
         conexion.query("SELECT * FROM proyectos_asistencia_view001 WHERE folio_usuario = ? AND (folio_estatus <> 4 OR folio_estatus <> 6)", [req.query.folio], (error, filas)=>{
             if(error){
@@ -20,7 +28,169 @@ exports.proyectosAsistencia = async(req, res, next)=>{
         return next()
     }
 }
-exports.resgistrarAsistencia = async(req, res, next)=>{
+
+const getUsuarios = async(req, _, next)=>{
+    try {
+        await seleccionar_usuarios().then(resultado =>{
+            req.usuarios = resultado
+            return next()
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al obtener los usuarios: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getUsuario = async(req, _, next)=>{
+    try {
+        await seleccionar_usuario(req.query.usuario).then(resultado=>{
+            req.usuario = resultado
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener la información del usuario: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const createUser = async(req, res, next)=>{
+    try {
+        const passHash = await bcryptjs.hash(req.body.pass, 8)
+
+        let data = {
+            nombres: req.body.nombres,
+            apellidos: req.body.apellidos,
+            usuario: req.body.usuario,
+            pass: passHash,
+            telefono: req.body.telefono,
+            email: req.body.email,
+            documentacion: req.body.linkDoc,
+            tipo_usuario: req.body.tipoUser    
+        }
+        await crear_usuario(data).then(_ =>{
+            res.redirect('/usuarios/adminusers')
+            return next()
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al registrar usuario: ', error)
+        })    
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+
+//MI PERFIL
+const updateNombreUsuario = async(req, res, next)=>{
+    try {
+        const folio = req.query.folio
+        const nombre = req.query.nombre
+        const apellido = req.query.apellido
+
+        await cambiar_nombre(folio, nombre, apellido).then(_ =>{
+            res.redirect(`/usuarios/miPerfil?usuario=${folio}`)
+            return next()
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al editar usuario: ', error)
+        }) 
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const updateTelefonoUsuario = async(req, res, next)=>{
+    try {
+        let folio = req.query.folio
+        let telefono = req.query.telefono
+
+        await cambiar_telefono(folio, telefono).then(_ =>{
+            res.redirect(`/usuarios/miPerfil?usuario=${folio}`)
+            return next()
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al editar usuario: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const updateEmailUsuario = async(req, res, next)=>{
+    try {
+        let folio = req.query.folio
+        let email = req.query.email
+
+        await cambiar_email(folio, email).then(_ =>{
+            res.redirect(`/usuarios/miPerfil?usuario=${folio}`)
+            return next()
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al editar usuario: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const updatePassUsuario = async(req, res, next)=>{
+    try {
+        const folio = req.query.folio
+        const actual = req.query.actual
+        const nueva = req.query.nueva
+
+        let contra_consultada = ''
+
+        await get_password(folio).then(result =>{
+            contra_consultada = result
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al editar usuario: ', error)
+        })
+        
+        if(!(await bcryptjs.compare(actual, contra_consultada))){
+            mostrar_error(res, 'Error al cambiar', 'Contraseñas Actuales no coinciden', `/miPerfil?usuario=${folio}`)
+            return next()
+        }else{
+            const nuevaPass = await bcryptjs.hash(nueva, 8)
+            await cambiar_contra(folio, nuevaPass).then(_ =>{
+                res.redirect( `/usuarios/miPerfil?usuario=${folio}`)
+                return next()
+            })
+            .catch(error=>{
+                //TODO: MEJORAR LA GESTION DE LOS ERRORES
+                throw new Error('Error al editar usuario: ', error)
+            })
+        }
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+
+export {
+    proyectosAsistencia,
+    getUsuarios,
+    getUsuario,
+    createUser,
+    updateNombreUsuario,
+    updateTelefonoUsuario,
+    updateEmailUsuario,
+    updatePassUsuario
+}
+
+/* 
+
+export asyncfunction resgistrarAsistencia(req, res, next){
     try {
         let data = {
             usuario: req.query.usuario,
@@ -41,143 +211,11 @@ exports.resgistrarAsistencia = async(req, res, next)=>{
         return next()
     }
 }
-function showError(res, titulo, mensaje, ruta){
-    res.render('Error/showInfo', {
-        title: titulo,
-        alert: true,
-        alertTitle: 'INFORMACION',
-        alertMessage: mensaje,
-        alertIcon: 'info',
-        showConfirmButton: true,
-        timer: 8000,
-        ruta: ruta
-    })
-}
+
 
 //Inventario
-exports.addInvent2User = async(req, res, next)=>{
-    try {
-        //Data es el movimiento del material
-        let data = {
-            usuario: req.body.usuario_afectado, //Usuario a quien se le asigna el material
-            producto: req.body.producto,        //El producto que esta siendo asignado
-            cantidad: req.body.cantidad,        //La cantidad de producto que esta siendo asiganada
-            unidades: req.body.unidad           //La unidad con la que se mide cierto producto
-        }
-        let bitacora = {
-            usuario_registra: req.body.usuario,            //Usuario que registra el movimiento
-            producto: data.producto,                       //Producto que se esta asignando
-            cantidad: (-1) * parseFloat(data.cantidad),    //Cantidad que se esta movilizando
-            fecha: new Date(),                             //Datos de la fecha del movimiento
-            usuario_afectado: data.usuario,                 //Folio del usuario afectado
-            almacen: req.body.almacen
-        }
 
-        let ruta_regreso = (req.body.flag == 1) ? `moverInventUser?usuario=${data.usuario}&flag=${req.body.flag}` : `moverInventUser?usuario=${data.usuario}`;
-        let ruta_back = (req.body.flag == 1) ? `/inventario/mi_inventario?usuario=${data.usuario}&flag=${req.body.flag}` : `/inventario/mi_inventario?usuario=${data.usuario}`;
-
-
-        //Primero validamos la cantidad
-        const cantidad_existente = req.body.cantidad_existente //Obtenemos la cantidad actual en bodega para saber si hay suficientes existencias
-        const folioInvent = req.body.folioInvent               //Obtenemso el folio de inventario del producto que es diferente a su folio como producto 
-
-        //Si la cantidad que se quiere mover es mayor a la cantidad existente, rechazamos el movimiento
-        if(parseInt(data.cantidad) > parseInt(cantidad_existente)){
-            showError(res, 'Error al mover el material', 'No hay suficientes existencias en el inventario', ruta_regreso)
-        }else{
-            //Primero registramos el movimiento en la bitacora
-            conexion.query("INSERT INTO op016_movimientos_inventario SET ?", bitacora, (error, fila)=>{
-                if(error){
-                    throw error //EN CASO DE UN ERROR MOSTRAMOS ESTE POR CONSOLA
-                }else{
-                    //Verificamos si la cantidad es la misma que en la bodega es decir, se queda sin material la bodega
-                    if(data.cantidad == cantidad_existente){
-                        //Eliminamos el registro del inventario
-                        conexion.query("DELETE FROM cat020_inventario WHERE folio = ?", [folioInvent], (error2, fila2)=>{
-                            if(error2){
-                                throw error2
-                            }else{
-                                //Validamos si el usuario ya tiene una parte del producto en posesion
-                                conexion.query("SELECT folio, cantidad FROM op013_material_usuario WHERE usuario = ? AND producto = ?", [data.usuario, data.producto], (error3, fila3)=>{
-                                    if(error){
-                                        throw error
-                                    }else{
-                                        if(fila3.length === 0){
-                                            //Si no lo hay registramos 
-                                            conexion.query("INSERT INTO op013_material_usuario SET ?", data, (error4, fila4)=>{
-                                                if(error4){
-                                                    throw error4
-                                                }else{
-                                                    res.redirect(`${ruta_back}`)
-                                                    return next
-                                                }
-                                            })
-                                        }else{
-                                            //Si lo hay lo modificamos
-                                            let nuevaCantidad = parseInt(data.cantidad) + parseInt(fila3[0].cantidad)
-                                            conexion.query("UPDATE op013_material_usuario SET cantidad = ? WHERE folio = ?", [nuevaCantidad, fila3[0].folio], (error4, fila4)=>{
-                                                if(error4){
-                                                    throw error4
-                                                }else{
-                                                    res.redirect(`${ruta_back}`)
-                                                    return next
-                                                }
-                                            })
-                                        }
-                                    }
-                                })
-                            }
-                        })
-                    }else{
-                        //Modificamos la cantidad en el inventario
-                        let inventCant = parseInt(cantidad_existente) - parseInt(data.cantidad)
-                        conexion.query("UPDATE cat020_inventario SET cantidad = ? WHERE folio = ?", [inventCant, folioInvent], (error2, fila2)=>{
-                            if(error2){
-                                throw error2
-                            }else{
-                                //Validamos si el usuario ya tiene una parte del producto en posesion
-                                conexion.query("SELECT folio, cantidad FROM op013_material_usuario WHERE usuario = ? AND producto = ?", [data.usuario, data.producto], (error3, fila3)=>{
-                                    if(error){
-                                        throw error
-                                    }else{
-                                        if(fila3.length === 0){
-                                            //Si no lo hay registramos 
-                                            conexion.query("INSERT INTO op013_material_usuario SET ?", data, (error4, fila4)=>{
-                                                if(error4){
-                                                    throw error4
-                                                }else{
-                                                    res.redirect(`${ruta_back}`)
-                                                    return next
-                                                }
-                                            })
-                                        }else{
-                                            //Si lo hay lo modificamos
-                                            let nuevaCantidad = parseInt(data.cantidad) + parseInt(fila3[0].cantidad)
-                                            conexion.query("UPDATE op013_material_usuario SET cantidad = ? WHERE folio = ?", [nuevaCantidad, fila3[0].folio], (error4, fila4)=>{
-                                                if(error4){
-                                                    throw error4
-                                                }else{
-                                                    res.redirect(`${ruta_back}`)
-                                                    return next
-                                                }
-                                            })
-                                        }
-                                    }
-                                })
-                            }
-                        }) 
-                    }
-                    
-                        
-                }
-            })
-        }
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.returnAll2Invent = async(req, res, next)=>{
+export asyncfunction returnAll2Invent(req, res, next){
     try {
         const registro = req.query.registro
         const producto = req.query.producto
@@ -267,26 +305,8 @@ function getExistenciasAlmacen(producto, almacen){
 
 
 //Funciones del modulo de mi perfil
-exports.changeNombreUsuario = async(req, res, next)=>{
-    try {
-        let folio = req.query.folio
-        let nombre = req.query.nombre
-        let apellido = req.query.apellido
 
-        conexion.query("UPDATE cat001_usuarios SET nombres = ?, apellidos = ? WHERE folio = ?", [nombre, apellido, folio], (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                res.redirect(`/usuarios/miPerfil?usuario=${folio}`)
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.changeTelUsuario = async(req, res, next)=>{
+export asyncfunction changeTelUsuario(req, res, next){
     try {
         let folio = req.query.folio
         let telefono = req.query.telefono
@@ -304,7 +324,7 @@ exports.changeTelUsuario = async(req, res, next)=>{
         return next()
     }
 }
-exports.changeMailUsuario = async(req, res, next)=>{
+export asyncfunction changeMailUsuario(req, res, next){
     try {
         let folio = req.query.folio
         let email = req.query.email
@@ -323,7 +343,7 @@ exports.changeMailUsuario = async(req, res, next)=>{
     }
 }
 
-exports.changePassUser = async(req, res, next)=>{
+export asyncfunction changePassUser(req, res, next){
     try {
         let folio = req.query.folio
         let actual = req.query.actual
@@ -335,11 +355,11 @@ exports.changePassUser = async(req, res, next)=>{
                 throw error
             }else{
                 let contra = fila[0].pass
-                if(!(await bcryptjs.compare(actual, contra))){
+                if(!(await compare(actual, contra))){
                     showError(res, 'Error al cambiar', 'Contraseñas Actuales no coinciden', `/miPerfil?usuario=${folio}`)
                     return next()
                 }else{
-                    let nuevaPass = await bcryptjs.hash(nueva, 8)
+                    let nuevaPass = await hash(nueva, 8)
                     conexion.query("UPDATE cat001_usuarios SET pass = ? WHERE folio = ?", [nuevaPass, folio], (error2, fila2)=>{
                         if(error2){
                             throw error2
@@ -357,7 +377,7 @@ exports.changePassUser = async(req, res, next)=>{
     }
 }
 
-exports.changePassUserAdmin = async(req, res, next)=>{
+export asyncfunction changePassUserAdmin(req, res, next){
     try {
         let folioUser = req.query.folioUser
         let folioAdmin = req.query.folioAdmin
@@ -370,11 +390,11 @@ exports.changePassUserAdmin = async(req, res, next)=>{
                 throw error
             }else{
                 let contraAdmin = fila[0].pass
-                if(!(await bcryptjs.compare(admin, contraAdmin))){
+                if(!(await compare(admin, contraAdmin))){
                     showError(res, 'Error al cambiar', 'Contraseñas de Administrador Incorrecta', `/adminusers`)
                     return next()
                 }else{
-                    let nuevaPass = await bcryptjs.hash(nueva, 8)
+                    let nuevaPass = await hash(nueva, 8)
                     conexion.query("UPDATE cat001_usuarios SET pass = ? WHERE folio = ?", [nuevaPass, folioUser], (error2, fila2)=>{
                         if(error2){
                             throw error2
@@ -390,4 +410,4 @@ exports.changePassUserAdmin = async(req, res, next)=>{
         console.log(error)
         return next()
     }
-}
+} */

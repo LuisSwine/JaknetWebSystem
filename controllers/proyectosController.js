@@ -1,16 +1,26 @@
-const conexion = require('../database/db')
-const {promisify} = require('util')
-const { query } = require('../database/db')
-const { nextTick } = require('process')
+import { 
+    cambiar_documentacion_proyecto, 
+    cambiar_galeria_proyecto,
+    cambiar_nombre_proyecto, 
+    crear_proyecto, 
+    seleccionar_mis_proyectos, 
+    seleccionar_proyecto, 
+    seleccionar_proyectos, 
+    seleccionar_proyectos_cliente, 
+    seleccionar_proyectos_ubicacion, 
+    seleccionar_roles_proyecto 
+} from "../models/Proyecto.js";
 
 function calculateRuta(flag, ubicacion, cliente, proyecto, permisos){
     let ruta = '';
     switch(parseInt(flag)){
         case 0:
-            ruta = `/proyectos/perfil?proyecto=${proyecto}&flag=0`;
+            //ruta = `/proyectos/perfil?proyecto=${proyecto}&flag=0`;
+            ruta = `/proyectos/perfil?proyecto=${proyecto}&cliente=${cliente}&flag=0`;
             break;
         case 1:
-            ruta = `/proyectos/perfil?proyecto=${proyecto}&cliente=${cliente}&flag=1`;
+            ruta = `/proyectos/perfil?proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=1`
+            //ruta = `/proyectos/perfil?proyecto=${proyecto}&cliente=${cliente}&flag=1`;
             break;
         case 2:
             ruta = `/proyectos/perfil?proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=2`;
@@ -24,6 +34,186 @@ function calculateRuta(flag, ubicacion, cliente, proyecto, permisos){
     }
     return ruta
 }
+
+const getProyectos = async(req, _, next)=>{
+    try {
+        if(req.query.ubicacion){
+            await seleccionar_proyectos_ubicacion(req.query.ubicacion).then(resultado =>{
+                req.proyectos = resultado
+                return next()
+            })
+            .catch(error=>{
+                //TODO: MEJORAR LA GESTION DE LOS ERRORES
+                throw new Error('Error al obtener los proyectos en la ubicacion: ', error)
+            })
+        }else if(req.query.cliente){
+            await seleccionar_proyectos_cliente(req.query.cliente).then(resultado =>{
+                req.proyectos = resultado
+                req.flag = true
+                return next()
+            })
+            .catch(error=>{
+                //TODO: MEJORAR LA GESTION DE LOS ERRORES
+                throw new Error('Error al obtener los proyectos del cliente: ', error)
+            })
+        }else{
+            await seleccionar_proyectos().then(resultado =>{
+                req.proyectos = resultado
+                req.flag = false
+                return next()
+            })
+            .catch(error=>{
+                //TODO: MEJORAR LA GESTION DE LOS ERRORES
+                throw new Error('Error al obtener los proyectos: ', error)
+            })
+        }
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getProyecto = async(req, _, next)=>{
+    try {
+        const proyecto = req.query.proyecto
+
+        await seleccionar_proyecto(proyecto).then(resultado=>{
+            req.proyecto = resultado
+            return next()
+        })
+        .catch(error=>{
+            throw('Ha ocurrido un error al obtener los datos del proyecto seleccionado: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getRolesProyecto = async(req, _, next)=>{
+    try {
+        const proyecto = req.query.proyecto
+        await seleccionar_roles_proyecto(proyecto).then(resultado=>{
+            req.roles = resultado
+            return next()
+        })
+        .catch(error=>{
+            throw('Ha ocurrido un error al obtener los roles del proyecto: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getMisProyectos = async(req, res, next)=>{
+    try {
+        const usuario = req.query.folio
+
+        await seleccionar_mis_proyectos(usuario).then(resultado=>{
+            req.proyectos = resultado
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener los proyectos del usuario: ', error)
+        })
+
+        
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const createProyecto = async(req, res, next) =>{
+    try {
+        const proyecto = {
+            nombre: req.body.nombre,
+            ubicacion: req.body.ubicacion[0],
+            galeria: req.body.galeria,
+            documentacion: req.body.documentacion,
+            estatus: req.body.estatus
+        }
+
+        console.log(proyecto)
+
+        let posibleRuta = `/ubicaciones/perfil?ubicacion=${req.body.ubicacion}`
+        if(req.body.flag == 1){
+            posibleRuta = `/ubicaciones/perfil?ubicacion=${req.body.ubicacion}&cliente=${req.body.cliente}`
+        }else if(req.body.flag == 0){
+            posibleRuta = `/clientes/administrar?cliente=${req.body.cliente}` //CHECKED
+            //posibleRuta = `/ubicaciones/perfil?ubicacion=${req.body.ubicacion}&flag=0`
+        }
+
+        await crear_proyecto(proyecto).then(_=>{
+                res.redirect(posibleRuta)
+                return next() 
+        })
+        .catch(error=>{
+            throw('Ha ocurrido un error al registrar el proyecto: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const updateNombreProyecto = async(req, res, next)=>{
+    try {
+        const proyecto = req.query.proyecto
+        const nombre = req.query.nombre
+        let ruta = calculateRuta(req.query.flag, req.query.ubicacion, req.query.cliente, req.query.proyecto)
+        
+        await cambiar_nombre_proyecto(nombre, proyecto).then(_=>{
+            res.redirect(ruta)
+            return next()
+        })
+        .catch(error=>{
+            throw('No se ha podido cambiar el nombre del proyecto: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const updateDocumentacionProyecto = async(req, res, next)=>{
+    try {
+        let ruta = calculateRuta(req.query.flag, req.query.ubicacion, req.query.cliente, req.query.proyecto)
+        
+        await cambiar_documentacion_proyecto(req.query.documentacion, req.query.proyecto).then(_=>{
+            res.redirect(ruta)
+            return next()
+        })
+        .catch(error=>{
+            throw('Ha ocurrido un error al cambiar la dirección de documentación del proyecto: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const updateGaleriaProyecto = async(req, res, next)=>{
+    try {
+        let ruta = calculateRuta(req.query.flag, req.query.ubicacion, req.query.cliente, req.query.proyecto)
+        
+        await cambiar_galeria_proyecto(req.query.galeria, req.query.proyecto).then(_=>{
+            res.redirect(ruta)
+            return next()
+        })
+        .catch(error=>{
+            throw('Ha ocurrido un error al cambiar la dirección de galeria del proyecto: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+export {
+    getProyectos,
+    getProyecto,
+    getRolesProyecto,
+    getMisProyectos,
+    createProyecto,
+    updateNombreProyecto,
+    updateDocumentacionProyecto,
+    updateGaleriaProyecto
+}
+
+/* 
 function showError(res, titulo, mensaje, ruta){
     res.render('Error/showInfo', {
         title: titulo,
@@ -37,88 +227,11 @@ function showError(res, titulo, mensaje, ruta){
     })
 }
 
-exports.createProject = async(req, res, next) =>{
-    try {
-        let data = {
-            nombre: req.body.nombre,
-            ubicacion: req.body.ubicacion,
-            galeria: req.body.galeria,
-            documentacion: req.body.documentacion,
-            estatus: req.body.estatus
-        }
 
-        let posibleRuta = `/ubicaciones/perfil?ubicacion=${req.body.ubicacion}`
-        if(req.body.flag == 1){ 
-            posibleRuta = `/clientes/administrar?cliente=${req.body.cliente}`
-        }else if(req.body.flag == 2){
-            posibleRuta = `/ubicaciones/perfil?ubicacion=${req.body.ubicacion}&cliente=${req.body.cliente}&flag=1`
-        }else if(req.body.flag == 0){
-            posibleRuta = `/ubicaciones/perfil?ubicacion=${req.body.ubicacion}&flag=0`
-        }
 
-        let insert = "INSERT INTO cat009_proyectos SET ?"
-        conexion.query(insert, data, function(error, results){
-            if(error){
-                throw error
-            }else{
-                res.redirect(posibleRuta)
-                return next() 
-            } 
-        })    
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
 
-exports.cambiarNombreProyecto = async(req, res, next)=>{
-    try {
-        let ruta = calculateRuta(req.query.flag, req.query.ubicacion, req.query.cliente, req.query.proyecto)
-        conexion.query("UPDATE cat009_proyectos SET nombre = ? WHERE folio = ?", [req.query.nombre, req.query.proyecto], (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                res.redirect(ruta)
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.cambiarDocumentacionProyecto = async(req, res, next)=>{
-    try {
-        let ruta = calculateRuta(req.query.flag, req.query.ubicacion, req.query.cliente, req.query.proyecto)
-        conexion.query("UPDATE cat009_proyectos SET documentacion = ? WHERE folio = ?", [req.query.documentacion, req.query.proyecto], (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                res.redirect(ruta)
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.cambiarGaleriaProyecto = async(req, res, next)=>{
-    try {
-        let ruta = calculateRuta(req.query.flag, req.query.ubicacion, req.query.cliente, req.query.proyecto)
-        conexion.query("UPDATE cat009_proyectos SET galeria = ? WHERE folio = ?", [req.query.galeria, req.query.proyecto], (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                res.redirect(ruta)
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
+
+
 exports.deleteProyectoClient = async(req, res, next)=>{
     try {
         const proyecto = req.query.proyecto
@@ -495,189 +608,15 @@ exports.deleteProyectoGrl = async(req, res, next)=>{
     }
 }
 //Gestion de etapas en perfil del proyecto
-exports.addEtapa = async(req, res, next)=>{
-    try {
-        let data = {
-            nombre: req.body.nombre,
-            area: req.body.area,
-            proyecto: req.body.proyecto
-        }
 
-        let ruta =  calculateRuta(req.body.flag, req.body.ubicacion, req.body.cliente, data.proyecto, req.body.permisos)
 
-        let insert = "INSERT INTO op002_etapas SET ?"
-        conexion.query(insert, data, function(error, results){
-            if(error){
-                throw error
-            }else{
-                res.redirect(ruta)
-                return next()    
-            }
-        })    
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.selectEtapa = async(req, res, next) =>{
-    try {
-        conexion.query("SELECT * FROM etapas_view001 WHERE folio = ?", [req.query.etapa], (error, fila)=>{
-            if(error){
-                throw error;
-            }else{
-                req.etapa = fila
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.editarEtapa = async(req, res, next)=>{
-    try {
-        let etapa = req.body.folio
-        let nombre = req.body.nombre
-        let area = req.body.area
-        let proyecto = req.body.proyecto
 
-        let ruta =  calculateRuta(req.body.flag, req.body.ubicacion, req.body.cliente, proyecto, req.body.permisos)
 
-        conexion.query("UPDATE op002_etapas SET nombre = ?, area = ? WHERE folio = ?", [nombre, area, etapa], (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                res.redirect(ruta)
-                return next() 
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.deleteEtapa = async(req, res, next)=>{
-    try {
-        let etapa = req.query.etapa
-        let ruta = calculateRuta(req.query.flag, req.query.ubicacion, req.query.cliente, req.query.proyecto, req.query.permisos)
-        conexion.query("SELECT * FROM op003_tareas WHERE etapa = ?", [etapa], (err, fila)=>{
-            if(err){
-                throw err
-            }else{
-                if(fila.length === 0){
-                    conexion.query("DELETE FROM op002_etapas WHERE folio = ?", [etapa], (err2, fila2)=>{
-                        if(err2){
-                            throw err2
-                        }else{
-                            res.redirect(ruta)
-                            return next()  
-                        }
-                    })
-                }else{
-                    res.render('Error/showInfo', {
-                        title: 'Etapa con tareas creadas',
-                        alert: true,
-                        alertTitle: 'INFORMACION',
-                        alertMessage: `La etapa ${etapa} aun tiene tareas creadas, debe eliminarlas antes de eliminar la etapa del proyecto`,
-                        alertIcon: 'info',
-                        showConfirmButton: true,
-                        timer: 8000,
-                        ruta: `${ruta.replace('/', '')}` 
-                    })
-                    return next()
-                }
-            }
-        })
-    }catch (error) {
-        console.log(error)
-        return next()
-    }
-}
 //Fin de la gestion de etapas en el perfil de proyecto
 
 //Gestion de roles en el perfil de proyecto
-exports.asignRolProyect = async(req, res, next) =>{
-    try {
-        let data = {
-            proyecto: req.body.proyecto,
-            usuario: req.body.usuario,
-            rol: req.body.rol
-        }
-        let ruta = calculateRuta(req.body.flag, req.body.ubicacion, req.body.cliente, req.body.proyecto, req.body.permisos)
-        
-        //Primero validamos si el usuario no tiene ya un rol asignado en el proyecto
-        conexion.query("SELECT folio FROM op005_roles WHERE proyecto = ? AND usuario = ?", [data.proyecto, data.usuario], (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                if(fila.length === 0){ //Si no existe entonces insertamos 
-                    let insert = "INSERT INTO op005_roles SET ?"
-                    conexion.query(insert, data, function(error, results){
-                        if(error){
-                            throw error
-                        }else{
-                            res.redirect(ruta)
-                            return next()    
-                        }
-                    }) 
-                }else{ //Si ya existe enviamos el error
-                    res.render('Error/redirect', {
-                        alert: true,
-                        alertTitle: 'ERROR',
-                        alertMessage: 'Este usuario ya tiene un rol asignado en este proyecto',
-                        alertIcon: 'error',
-                        showConfirmButton: true,
-                        timer: 8000,
-                        ruta: `${ruta}`
-                    })
-                    return next()
-                }
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.deleteRol = async(req, res, next)=>{
-    try {
-        let ruta = calculateRuta(req.query.flag, req.query.ubicacion, req.query.cliente, req.query.proyecto, req.query.permisos)
-        
-        //Validamos que el usuario no tenga una tarea asignada
-        conexion.query("SELECT folio FROM validar_tarea_view001 WHERE usuario = ? AND proyecto = ?", [req.query.usuario, req.query.proyecto], (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                if(fila.length === 0){
-                    conexion.query("DELETE FROM op005_roles WHERE folio = ?", [req.query.rol], (err, fila)=>{
-                        if(err){
-                            throw err
-                        }else{ 
-                            res.redirect(ruta)
-                            return next()  
-                        }
-                    }) 
-                }else{
-                    res.render('Error/showInfo', {
-                        title: 'Rol con tareas asignadas',
-                        alert: true,
-                        alertTitle: 'INFORMACION',
-                        alertMessage: `El usuario con este rol tiene una tarea asignada, por lo que no se puede eliminar el rol`,
-                        alertIcon: 'info',
-                        showConfirmButton: true,
-                        timer: 8000,
-                        ruta: `${ruta.replace('/', '')}`
-                    })
-                    return next()
-                }
-            }
-        })
-      
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
+
+
 //Fin de la gestion de roles
 
 //Gestion de cotizaciones
@@ -784,21 +723,5 @@ exports.deleteCotizacion = async(req, res, next)=>{
 }
 
 //MIS PROYECTOS
-exports.selectMisProyectos = async(req, res, next)=>{
-    try {
-        let usuario = req.query.folio
 
-        conexion.query("SELECT * FROM roles_proyecto_view001 WHERE folio_usuario = ?", [usuario], (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                req.proyectos = fila
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-
+ */

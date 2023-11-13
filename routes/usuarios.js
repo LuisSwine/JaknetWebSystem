@@ -1,41 +1,46 @@
-const express = require('express')
-
+import express from 'express'
 const router = express.Router()
-const { authorized } = require('../database/db')
 
+import {login, isAuthenticated, logout} from '../controllers/authController.js'
+import { getUsuarios, createUser, updateNombreUsuario, updateTelefonoUsuario, updateEmailUsuario, updatePassUsuario } from '../controllers/usuarioController.js'
 
-const authController = require('../controllers/authController')
-const usuarioController = require('../controllers/usuarioController')
-
-
-//#2.1.1.1. Visualización del modulo de Mi Perfil
-router.get('/miPerfil', authController.isAuthenticated, (req, res)=>{
-    res.render('miPerfil', {user: req.user})
-})
-//#2.1.1.2. Cambiar Nombre y Apellidos del usuario
-router.get('/cambiar_nombre_per', usuarioController.changeNombreUsuario)
-//#2.1.1.3. Cambiar Telefono
-router.get('/cambiar_telefono_per', usuarioController.changeTelUsuario)
-//#2.1.1.4. Cambiar Email
-router.get('/cambiar_email_per', usuarioController.changeMailUsuario)
-//#2.1.1.5. Cambiar Contraseña
-router.get('/cambiar_contra_per', usuarioController.changePassUser)
-    
-//#2.2.1.1. TABLA DE USUARIOS
-router.get('/adminusers', authController.isAuthenticated, authController.selectUsers, (req, res)=>{
+//GESTION DE USUARIOS
+router.get('/adminusers', isAuthenticated, getUsuarios, (req, res)=>{
     res.render('Usuarios/usersAdmin', {user: req.user, usuarios: req.usuarios})
 })
+router.get('/nuevo_usuario', isAuthenticated, (req, res)=>{
+    res.render('Usuarios/formCreateUser', {user: req.user})
+})
+router.post('/nuevo_usuario', createUser)
+
+//#2.1.1.1. Visualización del modulo de Mi Perfil
+router.get('/miPerfil', isAuthenticated, (req, res)=>{
+    res.render('miPerfil', {user: req.user})
+})
+router.get('/cambiar_nombre_per', updateNombreUsuario)
+router.get('/cambiar_telefono_per', updateTelefonoUsuario)
+router.get('/cambiar_email_per', updateEmailUsuario)
+router.get('/cambiar_contra_per', updatePassUsuario)
+
+
+
+
+/* 
+//#2.1.1.2. Cambiar Nombre y Apellidos del usuario
+
+//#2.1.1.3. Cambiar Telefono
+    
+//#2.2.1.1. TABLA DE USUARIOS
+
 //#2.2.1.2. REPORTE DE ASISTENCIA
 router.get('/reporteAsistencia', authController.isAuthenticated, authController.reporteAsistencia, (req, res)=>{
     res.render('reporteAsistencia', {user: req.user, asistencias: req.asistencias, flag: req.query.flag})
 })
         
 //#2.2.2.1. Formulario para registrar un nuevo usuario
-router.get('/nuevo_usuario', authController.isAuthenticated, (req, res)=>{
-    res.render('Usuarios/formCreateUser', {user: req.user})
-})
+
 //#2.2.2.2. Funcion que registra al usuario
-router.post('/nuevo_usuario', authController.createUser)
+
         
 //#2.2.3.1. FORMULARIO PARA EDITAR USUARIO
 router.get('/editar', authController.isAuthenticated, authController.selectUser, (req, res)=>{
@@ -54,5 +59,5 @@ router.get('/cambiar_contra_admin', usuarioController.changePassUserAdmin)
 
 
 router.get('/eliminar', authController.deleteUser)
-
-module.exports = router;
+ */
+export default router

@@ -1,4 +1,127 @@
-const conexion = require('../database/db')
+import { crear_unidad, editar_unidad, eliminar_unidad, seleccionar_unidad, seleccionar_unidades, validar_unidades_compra, validar_unidades_inventario, validar_unidades_proyecto, validar_unidades_usuario } from "../models/Unidad.js";
+
+const getUnidades = async(req, res, next) =>{
+    try {
+
+        await seleccionar_unidades().then(resultado=>{
+            req.unidades = resultado
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener las unidades: ', error)
+        })
+
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const setUnidad = async(req, res, next) =>{
+    try {
+        const data = {
+            nombre: req.body.nombre,
+            abreviatura: req.body.abreviatura,
+            codigo_sat: req.body.codigo_sat
+        }
+
+        await crear_unidad(data).then(_=>{
+            res.redirect('/unidades/administrar')
+            return next() 
+        }).catch(error=>{
+            throw('Ha ocurrido un error al registrar la nueva unidad: ', error)
+        })   
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getUnidad = async(req, res, next) =>{
+    try {
+        await seleccionar_unidad(req.query.unidad).then(resultado=>{
+            req.unidad = resultado
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener la información de la unidad: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const updateUnidad = async(req, res, next) =>{
+    try {
+        const folio       = req.body.folio
+        const nombre      = req.body.nombre
+        const abreviatura = req.body.abreviatura
+        const codigo_sat  = req.body.codigo_sat
+
+        await editar_unidad(nombre, abreviatura, codigo_sat, folio).then(_=>{
+            res.redirect('/unidades/administrar')
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al editar la unidad: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const deleteUnidad = async(req, res, next) =>{
+    try {
+        //Primero verificamos que la unidad no este siendo utilizada en algun producto
+        const folio = req.query.unidad
+
+        let validar_inventario = false
+        let validar_compras = false
+        let validar_proyectos = false
+        let validar_usuarios = false
+
+        await validar_unidades_inventario(folio).then(r=>{
+            validar_inventario = r
+        }).catch(e=>{
+            throw('Ha ocurrido un error al validar las unidades en el inventario: ', e)
+        })
+        await validar_unidades_compra(folio).then(r=>{
+            validar_compras = r
+        }).catch(e=>{
+            throw('Ha ocurrido un error al validar las unidades en las compras: ', e)
+        })
+        await validar_unidades_proyecto(folio).then(r=>{
+            validar_proyectos = r
+        }).catch(e=>{
+            throw('Ha ocurrido un error al validar las unidades en los proyectos: ', e)
+        })
+        await validar_unidades_usuario(folio).then(r=>{
+            validar_usuarios = r
+        }).catch(e=>{
+            throw('Ha ocurrido un error al validar las unidades en los usuarios: ', e)
+        })
+
+        if(!validar_inventario && !validar_compras && !validar_proyectos && !validar_usuarios){
+            await eliminar_unidad(folio).then(_=>{
+                res.redirect('/unidades/administrar')
+                return next() 
+            }).catch(e=>{
+                throw('Ha ocurrido un error al eliminar la unidad: ', e)
+            })
+        }
+
+        
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+
+export {
+    getUnidades,
+    getUnidad,
+    updateUnidad,
+    setUnidad,
+    deleteUnidad
+}
+
+
+/* const conexion = require('../database/db')
 const {promisify} = require('util')
 const { query } = require('../database/db')
 const { nextTick } = require('process')
@@ -30,138 +153,6 @@ function showError(res, titulo, mensaje, ruta){
 }
 
 //CRUD PARA LA GESTION DE MEDICIONES
-exports.selectUnits = async(req, res, next) =>{
-    try {
-        conexion.query("SELECT * FROM cat023_unidades", (error, filas)=>{
-            if(error){
-                throw error;
-            }else{
-                req.unidades = filas
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.selectUnit = async(req, res, next) =>{
-    try {
-        conexion.query("SELECT * FROM cat023_unidades WHERE folio = ?", [req.query.unidad], (error, fila)=>{
-            if(error){
-                throw error;
-            }else{
-                req.unidad = fila
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.createUnit = async(req, res, next) =>{
-    try {
-        let data = {
-            nombre: req.body.nombre,
-            abreviatura: req.body.abreviatura,
-            codigo_sat: req.body.codigo_sat
-        }
-        let insert = "INSERT INTO cat023_unidades SET ?"
-        conexion.query(insert, data, function(error, results){
-            if(error){
-                throw error
-            }else{
-                res.redirect('/unidades/administrar')
-                return next()    
-            }
-        })    
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.editUnit = async(req, res, next) =>{
-    try {
-        let folio       = req.body.folio
-        let nombre      = req.body.nombre
-        let abreviatura = req.body.abreviatura
-        let codigo_sat  = req.body.codigo_sat
 
-        let sql = "UPDATE cat023_unidades SET nombre = ?, abreviatura = ?, codigo_sat = ? WHERE folio = ?"
 
-        conexion.query(sql, [nombre, abreviatura, codigo_sat, folio], function(error, results){
-            if(error){
-                throw error
-            }else{
-                res.redirect('/unidades/administrar')
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.deleteUnit = async(req, res, next) =>{
-    try {
-        //Primero verificamos que la unidad no este siendo utilizada en algun producto
-        let folio = req.query.unidad
-        conexion.query("SELECT folio FROM cat020_inventario WHERE unidades = ?", [folio], (e, f)=>{
-            if(e){
-                throw e
-            }else{
-                if(f.length === 0){
-                    conexion.query("SELECT folio FROM op010_compras WHERE unidades = ?", [folio], (e2, f2)=>{
-                        if(e2){
-                            throw e2
-                        }else{
-                            if(f2.length === 0){
-                                conexion.query("SELECT folio FROM op011_material_proyecto WHERE unidades = ?", [folio], (e3, f3)=>{
-                                    if(e3){
-                                        throw e3
-                                    }else{
-                                        if(f3.length === 0){ 
-                                            conexion.query("SELECT folio FROM op013_material_usuario WHERE unidades = ?", [folio], (e4, f4)=>{
-                                                if(e4){
-                                                    throw e4
-                                                }else{
-                                                    if(f4.length === 0){ 
-                                                        conexion.query("DELETE FROM cat023_unidades WHERE folio = ?", [folio], function(error, filas){
-                                                            if(error){
-                                                                throw error
-                                                            }else{ 
-                                                                res.redirect('/unidades/administrar')
-                                                                return next() 
-                                                            }
-                                                        })    
-                                                    }else{
-                                                        showError(res, 'No se ha podido eliminar la unidad', `La unidad ${folio} esta siendo utilizada`, 'adminunidades')
-                                                        return next()
-                                                    }
-                                                }
-                                            })
-                                        }else{
-                                            showError(res, 'No se ha podido eliminar la unidad', `La unidad ${folio} esta siendo utilizada`, 'adminunidades')
-                                            return next()
-                                        }
-                                    }
-                                })
-                            }else{
-                                showError(res, 'No se ha podido eliminar la unidad', `La unidad ${folio} esta siendo utilizada`, 'adminunidades')
-                                return next()
-                            }
-                        }
-                    })
-                }else{
-                    showError(res, 'No se ha podido eliminar la unidad', `La unidad ${folio} esta siendo utilizada`, 'adminunidades')
-                    return next()
-                }
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-//FIN DEL CRUD DE MEDICIONES
+//FIN DEL CRUD DE MEDICIONES */

@@ -1,27 +1,23 @@
-const express = require('express')
+import express from 'express'
 
-const router = express.Router()
-const { authorized } = require('../database/db')
+import { isAuthenticated } from '../controllers/authController.js'
+import { getProyecto } from '../controllers/proyectosController.js'
+import { getAreasProyecto } from '../controllers/areasController.js'
+import { addEtapa, deleteEtapa, getEtapa, updateEtapa } from '../controllers/etapasController.js'
 
+const router = express.Router() 
 
-const authController = require('../controllers/authController')
-const proyectosController = require('../controllers/proyectosController')
-
-
-//AGREGAR ETAPA
-router.get('/agregar_etapa', authController.isAuthenticated, authController.selectProyect, authController.selectAreasProyect, (req, res)=>{
+router.get('/agregar_etapa', isAuthenticated, getProyecto, getAreasProyecto, (req, res)=>{
     res.render('Proyectos/formAddEtapa', {user: req.user, proyecto: req.proyecto, areas: req.areas, cliente: req.query.cliente, ubicacion: req.query.ubicacion, flag: req.query.flag, permisos: req.query.permisos})
 })
-router.post('/agregar_etapa', proyectosController.addEtapa)
-
-//EDITAR ETAPA
-router.get('/editar', authController.isAuthenticated, proyectosController.selectEtapa, authController.selectAreasProyect, (req, res)=>{
+router.get('/editar', isAuthenticated, getEtapa, getAreasProyecto, (req, res)=>{
     res.render('Proyectos/editarEtapa', {user: req.user, etapa: req.etapa, areas: req.areas, proyecto: req.query.proyecto, cliente: req.query.cliente, ubicacion: req.query.ubicacion, flag: req.query.flag, permisos: req.query.permisos})
 })
-router.post('/editar', proyectosController.editarEtapa)
+router.get('/eliminar', deleteEtapa)
+router.post('/agregar_etapa', addEtapa)
+router.post('/editar', updateEtapa)
 
-//ELIMINAR ETAPA
-router.get('/eliminar', proyectosController.deleteEtapa)
 
 
-module.exports = router;
+export default router;
+

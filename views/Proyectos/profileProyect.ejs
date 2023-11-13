@@ -20,13 +20,15 @@
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
                                 <% if(flag == 1){%>
-                                    <li class="breadcrumb-item"><a href="/clientes/administrar?cliente=<%= cliente %>">Cliente</a></li>
+                                    <li class="breadcrumb-item"><a href="/ubicaciones/perfil?ubicacion=<%= ubicacion %>&cliente=<%= cliente %>">Ubicacion</a></li>
+                                    <!-- <li class="breadcrumb-item"><a href="/clientes/administrar?cliente=<1%= cliente %>">Cliente</a></li> -->
                                 <%}else if(flag == 2){%>
                                     <li class="breadcrumb-item"><a href="/ubicaciones/perfil?ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=1">Ubicacion</a></li>
                                 <%}else if(flag == 3){%>
                                     <li class="breadcrumb-item"><a href="/ubicaciones/perfil?ubicacion=<%= ubicacion %>&flag=0">Ubicacion</a></li>
-                                <%}else if(flag == 0){%>
-                                    <li class="breadcrumb-item"><a href="/proyectos/administrar">Proyectos</a></li>
+                                <%}else if(flag == 0){%> <!-- CHECKED -->
+                                    <!-- <li class="breadcrumb-item"><a href="/proyectos/administrar">Proyectos</a></li> -->
+                                    <li class="breadcrumb-item"><a href="/clientes/administrar?cliente=<%= cliente %>">Cliente</a></li>
                                 <%}else if(flag == 4){%>
                                     <li class="breadcrumb-item"><a href="/proyectos/mis_proyectos?folio=<%= user.folio %>">Proyectos</a></li>
                                 <%} %>

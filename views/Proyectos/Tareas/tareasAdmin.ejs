@@ -20,7 +20,8 @@
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
                                     <% if(flag == 0){%>
-                                    <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<%= proyecto %>&flag=<%= flag %>">Proyecto</a></li>
+                                    <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<%= proyecto %>&cliente=<%= cliente %>&flag=<%= flag %>">Proyecto</a></li>
+                                    <!-- CHECKED <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<%= proyecto %>&flag=<%= flag %>">Proyecto</a></li> -->
                                     <%}else if(flag == 1){%>
                                     <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<%= proyecto %>&cliente=<%= cliente %>&flag=<%= flag %>">Proyecto</a></li>
                                     <%}else if(flag == 2 || flag == 3){%>

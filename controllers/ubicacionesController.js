@@ -1,8 +1,123 @@
-const conexion = require('../database/db')
-const {promisify} = require('util')
-const { query } = require('../database/db')
-const { nextTick } = require('process')
+import { 
+    seleccionar_ubicaciones, 
+    seleccionar_ubicaciones_cliente, 
+    seleccionar_ubicacion, 
+    crear_ubicacion,
+    cambiar_nombre_ubicacion,
+    cambiar_direccion_ubicacion
+} from "../models/Ubicacion.js";
 
+const getUbicaciones = async(req, _, next) =>{
+    try {
+        if(req.query.cliente){
+            await seleccionar_ubicaciones_cliente(req.query.cliente).then(resultado =>{
+                req.ubicaciones = resultado
+                return next()
+            })
+            .catch(error=>{
+                //TODO: MEJORAR LA GESTION DE LOS ERRORES
+                throw new Error('Error al obtener las ubicaciones del cliente: ', error)
+            })
+        }else{
+            await seleccionar_ubicaciones().then(resultado =>{
+                req.ubicaciones = resultado
+                return next()
+            })
+            .catch(error=>{
+                //TODO: MEJORAR LA GESTION DE LOS ERRORES
+                throw new Error('Error al obtener las ubicaciones: ', error)
+            })
+        }
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getUbicacion = async(req, _, next) =>{
+    try {
+
+        const ubicacion = req.query.ubicacion
+
+        await seleccionar_ubicacion(ubicacion).then(resultado =>{
+            req.ubicacion = resultado
+            return next();
+        })
+        .catch(error=>{
+            console.log(error)
+            return next()
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const createUbicacion = async(req, res, next) =>{
+    try {
+        let cliente = {
+            nombre:    req.body.nombre,
+            direccion: req.body.direccion,
+            cliente:   req.body.cliente
+        }
+
+        await crear_ubicacion(cliente).then(_ =>{
+            let ruta = `/clientes/administrar?cliente=${cliente.cliente}`
+            res.redirect(ruta)
+            return next()
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al registrar la ubicacion: ', error)
+        })  
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const updateNameUbicacion = async(req, res, next)=>{
+    try {
+        let ruta = ''
+        if(req.query.flag == 1){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&cliente=${req.query.cliente}&flag=1`}
+        else if(req.query.flag == 0){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&flag=0`}
+
+        await cambiar_nombre_ubicacion(req.query.nombre, req.query.ubicacion).then(_=>{
+            res.redirect(ruta)
+            return next()
+        })
+        .catch(error=>{
+            throw('Error al cambiar el nombre de la ubicacion: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const updateDireccionUbicacion = async(req, res, next)=>{
+    try {
+        let ruta = ''
+        if(req.query.flag == 1){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&cliente=${req.query.cliente}&flag=1`}
+        else if(req.query.flag == 0){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&flag=0`}
+        
+        await cambiar_direccion_ubicacion(req.query.direccion, req.query.ubicacion).then(_=>{
+            res.redirect(ruta)
+            return next()
+        })
+        .catch(error=>{
+            throw('Error al cambiar la direccion de la ubicacion: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+export {
+    getUbicaciones,
+    getUbicacion,
+    createUbicacion,
+    updateNameUbicacion,
+    updateDireccionUbicacion
+}
+
+/* 
 //procedimiento para registrarnos
 function formatoFecha(fecha, formato) {
     const map = {
@@ -30,47 +145,8 @@ function showError(res, titulo, mensaje, ruta){
 }
 
 //CRUD PARA LA GESTION DE UBICACIONES
-    exports.selectUbicaciones = async(req, res, next) =>{
-        try {
-            if(req.query.cliente){
-                conexion.query("SELECT * FROM ubicaciones_view001 WHERE folio_cliente = ?", [req.query.cliente], (error, filas)=>{
-                    if(error){
-                        throw error;
-                    }else{
-                        req.ubicaciones = filas
-                        return next()
-                    }
-                })
-            }else{
-                conexion.query("SELECT * FROM ubicaciones_view001", (error, filas)=>{
-                    if(error){
-                        throw error;
-                    }else{
-                        req.ubicaciones = filas
-                        return next()
-                    }
-                })
-            }
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    exports.selectUbicacion = async(req, res, next) =>{
-        try {
-            conexion.query("SELECT * FROM ubicaciones_view001 WHERE folio = ?", [req.query.ubicacion], (error, fila)=>{
-                if(error){
-                    throw error;
-                }else{
-                    req.ubicacion = fila
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
+    
+    
     exports.editUbicacion = async(req, res, next) =>{
         try {
             let folio     = req.body.folio
@@ -93,33 +169,7 @@ function showError(res, titulo, mensaje, ruta){
             return next()
         }
     }
-    exports.createUbicacion = async(req, res, next) =>{
-        try {
-            let data = {
-                nombre:    req.body.nombre,
-                direccion: req.body.direccion,
-                cliente:   req.body.cliente
-            }
-            let insert = "INSERT INTO cat007_ubicaciones SET ?"
-            conexion.query(insert, data, function(error, results){
-                if(error){
-                    throw error
-                }else{
-                    if(req.body.back == 1){
-                        let ruta = `/clientes/administrar?cliente=${data.cliente}`
-                        res.redirect(ruta)
-                        return next()
-                    }else if (req.body.back == 2){
-                        res.redirect('/adminubicaciones')
-                        return next()
-                    }    
-                }
-            })    
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
+    
     exports.deleteUbicacion = async(req, res, next) =>{
         try{        
             let ubicacion = req.params.folio
@@ -179,42 +229,8 @@ function showError(res, titulo, mensaje, ruta){
 
 
     //FUNCIONES CORRECTAS
-    exports.editNombreUbicacion = async(req, res, next)=>{
-        try {
-            let ruta = ''
-            if(req.query.flag == 1){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&cliente=${req.query.cliente}&flag=1`}
-            else if(req.query.flag == 0){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&flag=0`}
-            conexion.query("UPDATE cat007_ubicaciones SET nombre = ? WHERE folio = ?", [req.query.nombre, req.query.ubicacion], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    res.redirect(ruta)
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    exports.editDireccionUbicacion = async(req, res, next)=>{
-        try {
-            let ruta = ''
-            if(req.query.flag == 1){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&cliente=${req.query.cliente}&flag=1`}
-            else if(req.query.flag == 0){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&flag=0`}
-            conexion.query("UPDATE cat007_ubicaciones SET direccion = ? WHERE folio = ?", [req.query.direccion, req.query.ubicacion], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    res.redirect(ruta)
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
+    
+    
 
 
 
@@ -317,4 +333,4 @@ function showError(res, titulo, mensaje, ruta){
             console.log(error)
             return next()
         }
-    }
+    } */

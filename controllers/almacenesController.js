@@ -1,209 +1,196 @@
-const conexion = require('../database/db')
-const {promisify} = require('util')
-const { query } = require('../database/db')
-const { nextTick } = require('process');
-const { resolve } = require('path');
-const { rejects } = require('assert');
+import { registrar_almacen, seleccionar_almacenes, seleccionar_almacen, editar_nombre_almacen, editar_ubicacion_almacen, validar_existencias_almacen, registrar_en_almacen, actualizar_cantidad_almacen, registrar_en_bitacora_almacen, seleccionar_movimientos_usuario_durante, seleccionar_movimientos_usuario, seleccionar_movimientos_proyecto_durante, seleccionar_movimientos_proyecto, editar_cantidad_almacen, eliminar_del_almacen } from "../models/Almacen.js"
 
-function registrar_almacen(almacen){
-    return new Promise((resolve, reject)=>{
-        const insert = "INSERT INTO cat027_almacenes SET ?";
-        conexion.query(insert, almacen, (error, result)=>{
-            if(error){
-                throw error;
-            }else{
-                resolve(); 
-            }
+
+
+const getAlmacenes = async(req, _, next)=>{
+    try {
+        await seleccionar_almacenes().then(resultado=>{
+            req.almacenes = resultado
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener la lista de almacenes: ', error)
         })
-    });
-}
-
-function validar_existencias(producto, almacen){
-    return new Promise((resolve, reject)=>{
-        conexion.query('SELECT * FROM cat020_inventario WHERE producto = ? AND almacen = ?', [producto, almacen], (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                if(fila.length === 0){
-                    resolve(false)
-                }else{
-                    resolve(fila[0].cantidad)
-                }
-            }
-        })
-    })
-}
-
-function add_2_storage(data){
-    return new Promise((resolve, reject)=>{
-        conexion.query('INSERT INTO cat020_inventario SET ?', data, (error, fila)=>{
-            if(error){
-                throw error;
-            }else{
-                resolve();
-            }
-        })
-    })
-}
-
-function update_cant(data){
-    return new Promise((resolve, reject)=>{
-        conexion.query('UPDATE cat020_inventario SET cantidad = ? WHERE producto = ? AND almacen = ?', [data.cantidad, data.producto, data.almacen], (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                resolve()
-            }
-        })
-    })
-}
-
-function update_cant_by_folio(cantidad, folio){
-    return new Promise((resolve, reject)=>{
-        conexion.query('UPDATE cat020_inventario SET cantidad = ? WHERE folio = ?', [cantidad, folio], (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                resolve()
-            }
-        })
-    })
-}
-
-function add_2_bitacora(data){
-    return new Promise((resolve, reject)=>{
-        conexion.query("INSERT INTO op016_movimientos_inventario SET ?", data, (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                resolve()
-            }
-        }) 
-    })
-}
-
-function delete_from_storage(folio){
-    return new Promise((resolve, reject)=>{
-        conexion.query('DELETE FROM cat020_inventario WHERE folio = ?', folio, (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                resolve()
-            }
-        })
-    })
-}
-
-exports.getStorages = async (req, res, next)=>{
-    try{
-        conexion.query("SELECT * FROM cat027_almacenes", (error, fila)=>{
-            if(error){
-                throw error;
-            }else{
-                req.almacenes = fila
-                return next()
-            }
-        })
-    }catch(e){
-        console.log(e);
+    } catch (error) {
+        throw(error)
         return next()
     }
-};
-
-exports.addStorage = async (req, res, next)=>{
+}
+const getAlmacen = async (req, _, next)=>{
     try {
-        let storage = {
+        
+        const almacen = req.query.almacen;
+
+        await seleccionar_almacen(almacen).then(resultado=>{
+            req.almacen = resultado
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtenr los datos del almacen: ', error)
+        })
+
+
+    } catch (error) {
+        console.log(error);
+        return next();
+    }
+}
+const getMovimientosUsuario = async(req, _, next)=>{
+    try {
+        const almacen = req.query.almacen
+
+        if(req.query.inicio && req.query.termino){
+            await seleccionar_movimientos_usuario_durante(req.query.inicio, req.query.termino, almacen).then(resultado=>{
+                req.movimientos_usuario = resultado
+                return next()
+            }).catch(error=>{
+                throw('Ha ocurrido un error al obtener los movimientos del almacen por parte de los usuarios: ', error)
+            })
+        }else{
+            await seleccionar_movimientos_usuario(almacen).then(resultado=>{
+                req.movimientos_usuario = resultado
+                return next()
+            }).catch(error=>{
+                throw('Ha ocurrido un error al obtener la los movmientos del almacen por parte de los usuarios: ', error)
+            })
+        }
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getMovimientosProyecto = async(req, _, next)=>{
+    try {
+        const almacen = req.query.almacen
+        if(req.query.inicio && req.query.termino){
+            await seleccionar_movimientos_proyecto_durante(req.query.inicio, req.query.termino, almacen).then(resultado=>{
+                req.movimientos_proyecto = resultado
+                return next()
+            }).catch(error=>{
+                throw('Ha ocurrido un errro al obtener los movimientos: ', error)
+            })
+        }else{
+            await seleccionar_movimientos_proyecto(almacen).then(resultado=>{
+                req.movimientos_proyecto = resultado
+                return next()
+            }).catch(error=>{
+                throw('Ha ocurrido un errro al obtener los movimientos: ', error)
+            })
+        }
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const setAlmacen = async (req, res, next)=>{
+    try {
+        const almacen = {
             nombre: req.body.nombre,
             ubicacion: req.body.ubicacion,
         };
-        await registrar_almacen(storage);
-        res.redirect('/almacenes/admin')
-        return next();
-
+        await registrar_almacen(almacen).then(_=>{
+            res.redirect('/almacenes/admin')
+            return next();
+        }).catch(error=>{
+            throw('Ha ocurrido un error al registrar el almacen: ', error)
+        })
     } catch (error) {
         console.log(error);
         return next();
     }
 };
-
-exports.getAlmacenById = async (req, res, next)=>{
+const updateNombreAlmacen = async (req, res, next)=>{
     try {
         
-        let folio = req.query.almacen;
+        const nombre = req.query.nombre
+        const folio =  req.query.folio
 
-        conexion.query('SELECT * FROM cat027_almacenes WHERE folio = ?', folio, (error, fila)=>{
-            if(error){
-                throw error;
-            }else{
-                req.almacen = fila[0];
-                return next()
-            }
+        await editar_nombre_almacen(nombre, folio).then(_=>{
+            res.redirect(`/almacenes/gestionar_almacen?almacen=${folio}`);
+            return next();
+        }).catch(error=>{
+            throw('Ha ocurrido un error al actualizar el nombre del almacen: ', error)
         })
-
-
-    } catch (error) {
-        console.log(error);
-        return next();
-    }
-};
-
-exports.changeName = async (req, res, next)=>{
-    try {
-        
-        let nombre = req.query.nombre
-        let folio =  req.query.folio
-
-        conexion.query('UPDATE cat027_almacenes SET nombre = ? WHERE folio = ?', [nombre, folio], (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                res.redirect(`/almacenes/gestionar_almacen?almacen=${folio}`);
-                return next();
-            }
-        })
-
     } catch (error) {
         console.log(error)
         return next()
     }
 }
-exports.changeUbicacion = async (req, res, next)=>{
+const updateUbicacionAlmacen = async (req, res, next)=>{
     try {
         
-        let ubicacion = req.query.ubicacion
-        let folio =  req.query.folio
+        const ubicacion = req.query.ubicacion
+        const folio =  req.query.folio
 
-        conexion.query('UPDATE cat027_almacenes SET ubicacion = ? WHERE folio = ?', [ubicacion, folio], (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                res.redirect(`/almacenes/gestionar_almacen?almacen=${folio}`);
-                return next();
-            }
+        await editar_ubicacion_almacen(ubicacion, folio).then(_=>{
+            res.redirect(`/almacenes/gestionar_almacen?almacen=${folio}`);
+            return next();
+        }).catch(error=>{
+            throw('Ha ocurrdio un error al actualizar la ubicación del almacen: ', error)
         })
-
     } catch (error) {
         console.log(error)
         return next()
     }
 }
-
-exports.moverInventario = async(req, res, next) =>{
+const updateCantidadAlmacen = async(req, res, next)=>{
     try {
-        let data = {
+        //Calculamos el movimiento
+        const registro = req.query.registro
+        const actual = req.query.cantidadActual
+        const nueva = req.query.nuevaCantidad
+
+        //Recibimos los datos
+        const movimiento = {
+            usuario_registra: req.query.usuario,
+            producto: req.query.producto,
+            cantidad: nueva - actual,
+            fecha: new Date(),
+            usuario_afectado: req.query.usuario,
+            almacen: req.query.almacen
+        }
+        if(actual != nueva){
+            //Primero registramos el movimiento
+            await registrar_en_bitacora_almacen(movimiento).catch(error=>{
+                throw('Ha ocurrido un error al registrar el movimiento en la bitacora: ', error)
+            })
+            await editar_cantidad_almacen(nueva, registro).catch(error=>{
+                throw('Ha ocurrido un error al editar la cantidad en el almacen: ', error)
+            })
+        }
+
+        res.redirect(`/almacenes/gestionar_almacen?almacen=${movimiento.almacen}`)
+        return next()
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const moverInventario = async(req, res, next) =>{
+    try {
+        const data = {
             producto: req.body.producto,
             cantidad: req.body.cantidad,
             unidades: req.body.unidades,
             almacen: req.body.almacen
         }
 
-        let isExists = await validar_existencias(data.producto, data.almacen);
+        let isExists = false
+
+        await validar_existencias_almacen(data.producto, data.almacen).then(resultado=>{
+            isExists = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al validar las existencias en el almacen: ', error)
+        })
+
 
         if(!isExists){
-            await add_2_storage(data);
+            await registrar_en_almacen(data).catch(error=>{
+                throw('Ha ocurrido un error al registrar en el almacen: ', error)
+            })
         }else{
             data.cantidad += isExists;
-            update_cant(data)
+            await actualizar_cantidad_almacen(data).catch(error=>{
+                throw('Ha ocurrido un error al actualizar las existencias: ', error)
+            })
         }
 
         //Ahora registramos el movimiento
@@ -215,22 +202,23 @@ exports.moverInventario = async(req, res, next) =>{
             usuario_afectado: req.body.usuario,
             almacen: data.almacen
         }
-        await add_2_bitacora(valores);
-        res.redirect(`/almacenes/gestionar_almacen?almacen=${data.almacen}`);
-        return next()
-             
+
+        await registrar_en_bitacora_almacen(valores).then(_=>{
+            res.redirect(`/almacenes/gestionar_almacen?almacen=${data.almacen}`);
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al registrar el movimiento en la bitacora: ', error)
+        })   
     } catch (error) {
         console.log(error)
         return next()
     }
 }
-
-exports.deleteFrom = async (req, res, next)=>{
+const deleteDeAlmacen = async (req, res, next)=>{
     try {
-        
-        let registro = req.query.registro
+        const registro = req.query.registro
 
-        let movimiento = {
+        const movimiento = {
             usuario_registra: req.query.usuario,
             producto: req.query.producto,
             cantidad: -1 * req.query.cantidad,
@@ -239,8 +227,12 @@ exports.deleteFrom = async (req, res, next)=>{
             almacen: req.query.almacen
         }
 
-        await add_2_bitacora(movimiento);
-        await delete_from_storage(registro);
+        await registrar_en_bitacora_almacen(movimiento).catch(error=>{
+            throw('Ha ocurrido un error al registrar el movmiento en la bitacora: ', error)
+        })
+        await eliminar_del_almacen(registro).catch(error=>{
+            throw('Ha ocurrido un error al eliminar el registro del almacen: ', error)
+        })
 
         res.redirect(`/almacenes/gestionar_almacen?almacen=${movimiento.almacen}`);
         return next()
@@ -251,87 +243,16 @@ exports.deleteFrom = async (req, res, next)=>{
     }
 }
 
-exports.editFrom = async(req, res, next)=>{
-    try {
-        //Calculamos el movimiento
-        let registro = req.query.registro
-        let actual = req.query.cantidadActual
-        let nueva = req.query.nuevaCantidad
-        //Recibimos los datos
-        let movimiento = {
-            usuario_registra: req.query.usuario,
-            producto: req.query.producto,
-            cantidad: nueva - actual,
-            fecha: new Date(),
-            usuario_afectado: req.query.usuario,
-            almacen: req.query.almacen
-        }
-        if(actual != nueva){
-            //Primero registramos el movimiento
-            await add_2_bitacora(movimiento);
-            //Hacemos el update en el inventario
-            await update_cant_by_folio(nueva, registro)
-        }
 
-        res.redirect(`/almacenes/gestionar_almacen?almacen=${movimiento.almacen}`)
-        return next()
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-
-exports.getMovimientosUsuario = async(req, res, next)=>{
-    try {
-        const almacen = req.query.almacen
-        if(req.query.inicio && req.query.termino){
-            conexion.query("SELECT * FROM movimientos_invent_view001 WHERE (fecha BETWEEN ? AND ?) AND folio_almacen = ? ORDER BY fecha DESC", [req.query.inicio, req.query.termino, almacen], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    req.movimientos_usuario = fila
-                    return next()
-                }
-            })
-        }else{
-            conexion.query("SELECT * FROM movimientos_invent_view001 WHERE folio_almacen = ?", almacen, (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    req.movimientos_usuario = fila
-                    return next()
-                }
-            })
-        }
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.getMovimientosProyecto = async(req, res, next)=>{
-    try {
-        const almacen = req.query.almacen
-        if(req.query.inicio && req.query.termino){
-            conexion.query("SELECT * FROM movs_invent_proys_view001 WHERE (fecha BETWEEN ? AND ?) AND folio_almacen = ? ORDER BY fecha DESC", [req.query.inicio, req.query.termino, almacen], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    req.movimientos_proyecto = fila
-                    return next()
-                }
-            })
-        }else{
-            conexion.query("SELECT * FROM movs_invent_proys_view001 WHERE folio_almacen = ?", almacen, (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    req.movimientos_proyecto = fila
-                    return next()
-                }
-            })
-        }
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
+export {
+    getAlmacenes,
+    getAlmacen,
+    getMovimientosUsuario,
+    getMovimientosProyecto,
+    setAlmacen,
+    updateNombreAlmacen,
+    updateUbicacionAlmacen,
+    updateCantidadAlmacen,
+    moverInventario,
+    deleteDeAlmacen
 }

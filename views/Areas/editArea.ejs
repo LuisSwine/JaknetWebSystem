@@ -19,11 +19,7 @@
                         <div class="page-title">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-                                <% if(flag == 1){%>
-                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&cliente=<%= clienteSelected %>&flag=<%= flag %>">Ubicacion</a></li>
-                                <%}else if(flag == 0){%>
-                                    <li class="breadcrumb-item"><a href="/perfilUbicacion?ubicacion=<%= ubicacion %>&flag=<%= flag %>">Ubicacion</a></li>
-                                <%} %> 
+                                <li class="breadcrumb-item"><a href="/ubicaciones/perfil?ubicacion=<%= ubicacion %>&cliente=<%= clienteSelected %>">Ubicacion</a></li>
                                 <li class="breadcrumb-item active">Editar Area</li>
                             </ol>
                         </div>
@@ -39,7 +35,7 @@
                         </div>
                         <div class="card-body">
                             <div class="basic-elements">
-                                <form action="/areas/editar" method="post">
+                                <form action="editar" method="post">
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
@@ -59,7 +55,6 @@
                                         <div class="col-lg-12">
                                             <input type="number" class="form-control" value="<%= area[0].folio %>" id="folio" name="folio" hidden>
                                             <input type="number" class="form-control" value="<%= clienteSelected %>" id="cliente" name="cliente" hidden>
-                                            <input type="number" class="form-control" value="<%= flag %>" id="flag" name="flag" hidden>
                                             <input type="text" class="form-control" value="<%= area[0].planta %>" id="planta" name="planta" hidden>
                                             <button type="submit" class="btn btn-primary m-b-10">EDITAR AREA</button>
                                         </div>

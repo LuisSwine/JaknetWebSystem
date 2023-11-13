@@ -1,48 +1,56 @@
 //Llamamos tambien al modulo de express
-const express = require('express')
-
+import express from 'express'
 const router = express.Router()
-const { authorized } = require('../database/db')
 
-const User       = require('./usuarios')
-const Almacen    = require('./almacenes')
-const Cliente    = require('./clientes')
-const Ubicacion  = require('./ubicaciones')
-const Contacto   = require('./contactos')
-const Proyecto   = require('./proyectos')
-const Area       = require('./areas')
-const Etapa      = require('./etapas')
-const Tarea      = require('./tareas')
-const Rol        = require('./roles')
-const Viatico    = require('./viaticos')
-const Asistencia = require('./asistencias')
-const Proveedor  = require('./proveedores')
-const Producto   = require('./productos')
-const Unidad     = require('./unidades')
-const Inventario = require('./inventario')
-const Factura    = require('./facturas')
+import User       from './usuarios.js'
+import Cliente    from './clientes.js'
+import Ubicacion  from './ubicaciones.js'
+import Area       from './areas.js'
+import Contacto   from './contactos.js'
+import Proyecto   from './proyectos.js'
+import Etapa      from './etapas.js'
+import Tarea      from './tareas.js'
+import Rol        from './roles.js'
+import Proveedor  from './proveedores.js'
+import Producto   from './productos.js'
+import Almacen    from './almacenes.js'
+import Inventario from './inventario.js'
+import Unidad     from './unidades.js'
+import Viatico    from './viaticos.js'
+
+
+/* 
+import Ubicacion  from './ubicaciones.js'
+import Asistencia from './asistencias.js'
+import Factura    from './facturas.js' 
+*/
 
 router.use('/usuarios', User)
-router.use('/almacenes', Almacen)
 router.use('/clientes', Cliente)
 router.use('/ubicaciones', Ubicacion)
+router.use('/areas', Area)
 router.use('/contactos', Contacto)
 router.use('/proyectos', Proyecto)
-router.use('/areas', Area)
 router.use('/etapas', Etapa)
 router.use('/tareas', Tarea)
 router.use('/roles', Rol)
-router.use('/viaticos', Viatico)
-router.use('/asistencias', Asistencia)
 router.use('/proveedores', Proveedor)
 router.use('/productos', Producto)
-router.use('/unidades', Unidad)
+router.use ('/almacenes', Almacen)
 router.use('/inventario', Inventario)
-router.use('/facturas', Factura)
+router.use('/unidades', Unidad)
+router.use('/viaticos', Viatico)
+/* 
+router.use('/asistencias', Asistencia)
+router.use('/facturas', Factura) 
+*/
 
-//INSTANCIACION A NUESTROS CONTROLADORES
-const authController         = require('../controllers/authController')
-const clientController       = require('../controllers/clientController')
+ //INSTANCIACION A NUESTROS CONTROLADORES
+import {login, isAuthenticated, logout} from '../controllers/authController.js'
+import { selectLastMoves } from '../controllers/viaticosController.js'
+import { proyectosAsistencia } from '../controllers/usuarioController.js'
+import { selectInfoTareasUserDashboard, obtenerReportes} from '../controllers/tareasController.js'
+/*const clientController       = require('../controllers/clientController')
 const ubicacionesController  = require('../controllers/ubicacionesController') 
 const proveedoresController  = require('../controllers/proveedoresControllers')
 const marcasController       = require('../controllers/marcasController')
@@ -53,18 +61,18 @@ const areasController        = require('../controllers/areasController')
 const tareasController       = require('../controllers/tareasController')
 const cotizacionesController = require('../controllers/cotizacionesController')
 const proyectosController    = require('../controllers/proyectosController')
-const usuarioController      = require('../controllers/usuarioController')
+const usuarioController      = require('../controllers/usuarioController') */
 
 router.get('/login', (req, res)=>{
     res.render('login', {alert: false})
 })
-router.post('/login', authController.login)
-router.get('/logout', authController.logout)
+router.post('/login', login)
+router.get('/logout', logout)
 //DASHBOARD DEL USUARIO
-router.get('/', authController.isAuthenticated, authController.selectLatsMoves, usuarioController.proyectosAsistencia, tareasController.selectInfoTareasUserDashboard, tareasController.obtenerReportes, (req, res)=>{
+router.get('/', isAuthenticated, selectLastMoves, proyectosAsistencia, selectInfoTareasUserDashboard, obtenerReportes, (req, res)=>{
     res.render('superadminindex', {userName: req.user, depositos: req.depositos, proyectosAsist: req.proyectosAsist, tareas: req.tareas, reportes: req.reportes})
 })
-
+/* 
 //FUNCIONES OBSOLETAS PENDIENTES DE REVISION PARA ELIMINARLAS
 router.get('/deleteUbi/:folio', ubicacionesController.deleteUbicacion)
 router.get('/createTipo/:nombre', productosController.createTipoProducto)
@@ -189,6 +197,6 @@ router.get('/adminProject/:folio', authController.isAuthenticated, authControlle
 })
 router.get('/selectUsers', authController.selectUsers)
 router.get('/selectUser/:folio', authController.selectUser)
-router.get('/deleteCoti', cotizacionesController.deleteCotizacion)
+router.get('/deleteCoti', cotizacionesController.deleteCotizacion) */
 
-module.exports = router
+export default router

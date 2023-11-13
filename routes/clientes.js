@@ -1,35 +1,37 @@
-const express = require('express')
+import express from 'express'
+
+import { isAuthenticated } from '../controllers/authController.js'
+import { getClientes, getCliente, getServicios, createClient, getTiposCliente, updateTipo, updateServicio, updateNombre } from '../controllers/clientController.js';
+import { getUbicaciones } from '../controllers/ubicacionesController.js';
+import { getContactos } from '../controllers/contactsController.js';
+import { getProyectos } from '../controllers/proyectosController.js';
+
 
 const router = express.Router()
-const { authorized } = require('../database/db')
 
-
-const authController = require('../controllers/authController')
-const clientController = require('../controllers/clientController')
-const ubicacionesController = require('../controllers/ubicacionesController')
-const contactosController = require('../controllers/contactsController')
-const cotizacionesController = require('../controllers/cotizacionesController')
-const proyectosController = require('../controllers/proyectosController')
-
-router.get('/gestionar', authController.isAuthenticated, clientController.selectClients, (req, res)=>{
+router.get('/gestionar', isAuthenticated, getClientes, (req, res)=>{
     res.render('Clientes/clientsAdmin', {user: req.user, clientes: req.clientes})
 });
-router.get('/agregar', authController.isAuthenticated, clientController.selectTipoServicios, (req, res)=>{
+router.get('/agregar', isAuthenticated, getServicios, (req, res)=>{
     res.render('Clientes/formCreateClient', {user: req.user, servicios: req.servicios})
 });
-router.post('/agregar', clientController.createClient);
-router.get('/administrar', authController.isAuthenticated, clientController.selectClient, ubicacionesController.selectUbicaciones, contactosController.selectContacts, authController.selectProyectos, cotizacionesController.selectCotizacionesCliente, clientController.selectTipoClientes, clientController.selectTipoServicios, (req, res)=>{
-    res.render('Clientes/perfilCliente', {user: req.user, cliente: req.cliente, ubicaciones: req.ubicaciones, contactos: req. contactosCliente, proyectos: req.proyectos, cotizaciones: req.cotizaciones, tiposCliente: req.tipos, tiposServicios: req.servicios})
+router.post('/agregar', createClient);
+router.get('/administrar', isAuthenticated, getCliente, getUbicaciones, getContactos, getProyectos, getTiposCliente, getServicios, (req, res)=>{
+    res.render('Clientes/perfilCliente', {user: req.user, cliente: req.cliente, ubicaciones: req.ubicaciones, contactos: req.contactos, proyectos: req.proyectos, tiposCliente: req.tipos, tiposServicios: req.servicios})
 });
+router.get('/editar_tipo', updateTipo)
+router.get('/editar_servicio', updateServicio)
+router.get('/cambiar_nombre', updateNombre)
+
+
+
+/* 
 router.get('/eliminar/:folio', clientController.deleteClient)
-router.get('/cambiar_nombre', clientController.editarNombre)
-router.get('/editar_servicio', clientController.editarServicio)
-router.get('/editar_tipo', clientController.editarTipo)
 
 //UBICACIONES
 router.get('/eliminar_ubicacion', clientController.deleteUbicacionCliente)
 
 //PROYECTOS
-router.get('/eliminar_proyecto', proyectosController.deleteProyectoClient)
+router.get('/eliminar_proyecto', proyectosController.deleteProyectoClient) */
 
-module.exports = router
+export default router

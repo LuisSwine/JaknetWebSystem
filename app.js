@@ -1,18 +1,15 @@
-//Invocamos los modulos a utilizar
-//Primero invocamos express
-const express = require('express')
-//Despues invocamos a env
-const dotenv = require('dotenv')
-//Despues invocamos a cookie-parser
-const cookieParser = require('cookie-parser')
+import express from 'express'
+import dotenv from 'dotenv'
+import cookieParser from 'cookie-parser'
+
+import router from './routes/router.js'
 
 //Invocamos la clase de express
 const app = express()
 
 //Inicializamos el motor de plantillas
 app.set('view engine', 'ejs')
-app.set('views', __dirname + '/views')
-
+app.set('views', './views')
 
 //Inicializamos la carpeta public para los archivos estaticos
 app.use(express.static('public'))
@@ -28,7 +25,7 @@ dotenv.config({path: './env/.env'})
 app.use(cookieParser())
 
 //Llamamos al enrutador
-app.use('/', require('./routes/router'))
+app.use('/', router)
 
 //Fragmento de codigo para eliminar el cache
 app.use(function(req, res, next){

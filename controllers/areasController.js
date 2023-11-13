@@ -1,4 +1,116 @@
-const conexion = require('../database/db')
+
+import { seleccionar_areas, seleccionar_area, crear_area, editar_area } from "../models/Areas.js";
+import { seleccionar_ubicacion_proyecto } from "../models/Proyecto.js";
+
+const getAreas = async(req, _, next) =>{
+    try {
+        await seleccionar_areas(req.query.ubicacion).then(resultado =>{
+            req.areas = resultado
+            return next()
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al obtener las areas de la ubicacion: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getAreasProyecto = async(req, _, next)=>{
+    try {
+        const proyecto = req.query.proyecto
+        let ubicacion = ''
+        await seleccionar_ubicacion_proyecto(proyecto).then(resultado=>{
+            ubicacion = resultado[0].ubicacion
+        })
+        .catch(error=>{
+            throw('Ha ocurrido un error determinando la ubicacion del proyecto: ', error)
+        })
+
+        await seleccionar_areas(ubicacion).then(resultado=>{
+            req.areas = resultado
+            return next()
+        })
+        .catch(error=>{
+            throw('Ocurrió un error al obtener las areas de la ubicacion del proyecto: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getArea = async(req, res, next) =>{
+    try {
+        const area = req.query.area
+        await seleccionar_area(area).then(resultado =>{
+            req.area = resultado
+            return next()
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al obtener el area especificada: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const createArea = async(req, res, next) =>{
+    try {
+        let area = {
+            nombre:        req.body.nombre,
+            documentacion: req.body.documentacion,
+            planta:        req.body.planta
+        }
+
+        let ruta = `/ubicaciones/perfil?ubicacion=${area.planta}&cliente=${req.body.cliente}`
+
+        await crear_area(area).then(_=>{
+            res.redirect(ruta)
+            return next()
+        })
+        .catch(error=>{
+            throw('Error al registrar la nueva la area: ', error)
+        })  
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const editArea = async(req, res, next) =>{
+    try {
+        const folio         = req.body.folio
+        const nombre        = req.body.nombre
+        const documentacion = req.body.documentacion
+        const planta        = req.body.planta
+
+        let ruta = `/ubicaciones/perfil?ubicacion=${planta}&cliente=${req.body.cliente}`
+
+        await editar_area(nombre, documentacion, folio).then(_ =>{
+            res.redirect(ruta)
+            return next() 
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al editar el area especificada: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+
+export {
+    getArea,
+    getAreas,
+    getAreasProyecto,
+    createArea,
+    editArea
+}
+
+
+/* const conexion = require('../database/db')
 const {promisify} = require('util')
 const { query } = require('../database/db')
 const { nextTick } = require('process')
@@ -16,37 +128,7 @@ function showError(res, titulo, mensaje, ruta){
     })
 }
 
-//CRUD PARA LA GESTION DE AREAS
-exports.selectAreas = async(req, res, next) =>{
-    try {
-        conexion.query("SELECT * FROM areas_view001 WHERE folio_planta = ?", [req.query.ubicacion], (error, filas)=>{
-            if(error){
-                throw error;
-            }else{
-                req.areas = filas
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.selectArea = async(req, res, next) =>{
-    try {
-        conexion.query("SELECT * FROM cat008_areas WHERE folio = ?", [req.query.area], (error, fila)=>{
-            if(error){
-                throw error;
-            }else{
-                req.area = fila
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
+
 exports.editArea = async(req, res, next) =>{
     try {
         let folio         = req.body.folio
@@ -73,32 +155,7 @@ exports.editArea = async(req, res, next) =>{
         return next()
     }
 }
-exports.createArea = async(req, res, next) =>{
-    try {
-        let data = {
-            nombre:        req.body.nombre,
-            documentacion: req.body.documentacion,
-            planta:        req.body.planta
-        }
 
-        let ruta = ''
-        if(req.body.flag == 1){ruta = `/ubicaciones/perfil?ubicacion=${data.planta}&cliente=${req.body.cliente}&flag=${req.body.flag}`}
-        else if(req.body.flag == 0){ruta = `/ubicaciones/perfil?ubicacion=${data.planta}&flag=${req.body.flag}`}
-
-        let insert = "INSERT INTO cat008_areas SET ?"
-        conexion.query(insert, data, function(error, results){
-            if(error){
-                throw error
-            }else{
-                res.redirect(ruta)
-                return next() 
-            }
-        })    
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
 exports.deleteArea = async(req, res, next) =>{
     try {
         //Primero validamos que no haya una etapa que la utilice
@@ -130,4 +187,4 @@ exports.deleteArea = async(req, res, next) =>{
         return next()
     }
 }
-//FIN DEL CRUD DE GESTION DE AREAS
+//FIN DEL CRUD DE GESTION DE AREAS */

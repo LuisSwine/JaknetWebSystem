@@ -19,11 +19,7 @@
                         <div class="page-title">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-                                <% if(flag == 1){%>
-                                    <li class="breadcrumb-item"><a href="/clientes/gestionar?cliente=<%= clienteSelected %>">Cliente</a></li>
-                                <%}else{%>
-                                    <li class="breadcrumb-item"><a href="/adminubicaciones">Lista</a></li>
-                                <%} %>
+                                <li class="breadcrumb-item"><a href="/clientes/administrar?cliente=<%= clienteSelected %>">Cliente</a></li>
                                 <li class="breadcrumb-item active">Registrar Ubicacion</li>
                             </ol>
                         </div>
@@ -39,21 +35,8 @@
                         </div>
                         <div class="card-body">
                             <div class="basic-elements">
-                                <form action="/ubicaciones/nueva_ubicacion" method="post">
+                                <form action="nueva_ubicacion" method="post">
                                     <div class="row">
-                                        <% if(flag != 1){%>
-                                            <div class="col-lg-12">
-                                                <div class="form-group">
-                                                    <label>CLIENTE</label>
-                                                    <select class="form-control" name="cliente" id="cliente">
-                                                        <option disabled selected>--Seleccione--</option>
-                                                        <% clientes.forEach((cliente)=>{ %>
-                                                        <option value="<%= cliente.folio %>"><%= cliente.nombre %></option>
-                                                        <% }) %> 
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        <%} %>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label>NOMBRE</label>
@@ -70,10 +53,7 @@
                                             </div>
                                         </div>
                                         <div class="col-lg-12">
-                                            <% if(flag == 1){%>
-                                                <input type="number" class="form-control" value="<%= clienteSelected %>" id="cliente" name="cliente" hidden>
-                                            <%}%>
-                                            <input type="number" class="form-control" value="<% if(flag == 1){%>1<%}else{%>2<%} %>" id="back" name="back" hidden>
+                                            <input type="number" class="form-control" value="<%= clienteSelected %>" id="cliente" name="cliente" hidden>
                                             <button type="submit" class="btn btn-primary m-b-10">REGISTRAR UBICACION</button>
                                         </div>
                                     </div>

@@ -24,7 +24,8 @@
                                 <%}else if(flag == 3 || flag == 2){%>
                                     <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<%= proyecto[0].folio %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>"><%= proyecto[0].nombre %></a></li>
                                 <%}else if(flag == 0){%>
-                                    <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<%= proyecto[0].folio %>&flag=<%= flag %>"><%= proyecto[0].nombre %></a></li>
+                                    <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<%= proyecto[0].folio %>&cliente=<%= cliente %>&flag=<%= flag %>"><%= proyecto[0].nombre %></a></li>
+                                    <!-- <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<1%= proyecto[0].folio %>&flag=<1%= flag %>"><1%= proyecto[0].nombre %></a></li> -->
                                 <%}else if(flag == 4){%>
                                     <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<%= proyecto[0].folio %>&flag=<%= flag %>&permisos=<%= permisos %>"><%= proyecto[0].nombre %></a></li>
                                 <%} %>
@@ -39,11 +40,11 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-title">
-                            <h4>ASIGNAR A UN USUARIO UN ROL</h4>
+                            <h4>Asignar un rol en el proyecto a un usuario</h4>
                         </div>
                         <div class="card-body">
                             <div class="basic-elements">
-                                <form action="/roles/asignar" method="post">
+                                <form action="asignar" method="post">
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">

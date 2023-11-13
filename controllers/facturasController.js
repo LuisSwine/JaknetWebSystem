@@ -1,4 +1,29 @@
-const conexion = require('../database/db')
+import { seleccionar_facturas_proyecto } from "../models/Factura.js"
+
+
+const getFacturasProyecto = async(req, _, next) => {
+    try {
+        const proyecto = req.query.proyecto
+
+        await seleccionar_facturas_proyecto(proyecto).then(resultado=>{
+            req.facturas = resultado
+            return next()
+        })
+        .catch(error=>{
+            throw('Ha ocurrido un error al obtener las facturas del proyecto: ', error)
+        })
+
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+
+export {
+    getFacturasProyecto
+}
+
+/* const conexion = require('../database/db')
 const {promisify} = require('util')
 const { query } = require('../database/db')
 const { nextTick } = require('process');
@@ -192,22 +217,7 @@ exports.getCostoProyecto = async(req, res, next)=>{
         return next;
     }
 }
-exports.getFacturasProyecto = async(req, res, next) => {
-    try {
-        const proyecto = req.query.proyecto
-        conexion.query('SELECT * FROM facturas_view001 WHERE folio_proyecto = ?', proyecto, (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                req.facturas = fila
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
+
 exports.getDetallesFactura = async(req, res, next)=>{
     try {
         const factura = req.query.factura
@@ -358,3 +368,4 @@ exports.insertProducto = async(req, res, next)=>{
 }
 
 
+ */

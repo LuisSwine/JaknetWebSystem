@@ -1,15 +1,13 @@
-const conexion = require('../database/db')
-const nodemailer = require('nodemailer')
-const {promisify} = require('util')
-const { query } = require('../database/db')
-const { nextTick } = require('process')
+import conexion from "../database/db.js";
+import { seleccionar_usuarios_asignados } from "../models/Rol.js";
+import { actualizar_asignacion, actualizar_estatus_tarea, asignar_estatus_tarea, asignar_tarea, crear_tarea, editar_tarea, eliminar_asignacion, eliminar_tarea, obtener_detalles_tarea, seleccionar_asignacion_tarea, seleccionar_tarea, seleccionar_tareas_etapa, seleccionar_tipos_tarea, validar_asignacion } from "../models/Tarea.js";
 
 function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
     let ruta = '';
     switch(parseInt(flag)){
-        case 0: ruta = `tareas/etapa?etapa=${etapa}&proyecto=${proyecto}&flag=0`; break;
-        case 1: ruta = `tareas/etapa?etapa=${etapa}&proyecto=${proyecto}&cliente=${cliente}&flag=1`; break;
-        case 2: ruta = `tareas/etapa?etapa=${etapa}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`;break;
+        case 0: ruta = `tareas/etapa?etapa=${etapa}&proyecto=${proyecto}&cliente=${cliente}&flag=0`;/* `tareas/etapa?etapa=${etapa}&proyecto=${proyecto}&flag=0`; */ break;
+        case 2: ruta = `tareas/etapa?etapa=${etapa}&proyecto=${proyecto}&cliente=${cliente}&flag=1`; break;
+        case 1: ruta = `tareas/etapa?etapa=${etapa}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`;break;
         case 3: ruta = `tareas/etapa?etapa=${etapa}&proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`;break;
         case 4: ruta = `tareas/etapa?etapa=${etapa}&proyecto=${proyecto}&flag=${flag}&permisos=${permisos}`; break;
         //case 5: ruta = `tareasetapa?etapa=${etapa}&ubicacion=${ubicacion}&cliente=${cliente}&flag=5`; break;
@@ -19,62 +17,345 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
     return ruta;
 }
 
-//TAREAS
-    exports.selectTareasEtapa = async(req, res, next) =>{
-        try {
-            conexion.query("SELECT * FROM tareas_view001 WHERE folio_etapa = ?", [req.query.etapa], (error, fila)=>{
-                if(error){
-                    throw error;
-                }else{
-                    req.tareas = fila
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
+const selectTareasEtapa = async(req, _, next)=>{
+    try {
+        await seleccionar_tareas_etapa(req.query.etapa).then(resultado=>{
+            req.tareas = resultado
             return next()
-        }
+        })
+        .catch(error=>{
+            throw('Ha ocurrido un error al obtener las tareas de la etapa: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
     }
-    exports.selectTiposTarea = async(req, res, next) =>{
-        try {
-            conexion.query("SELECT * FROM cat010_tipo_tareas", (error, fila)=>{
-                if(error){
-                    throw error;
-                }else{
-                    req.tipos = fila
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
+}
+const selectTiposTarea = async(req, _, next)=>{
+    try {
+        await seleccionar_tipos_tarea().then(resultado=>{
+            req.tipos = resultado
             return next()
-        }
+        })
+        .catch(error=>{
+            throw("Error al obtener los tipos de tarea: ", error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
     }
-    exports.createTarea = async(req, res, next)=>{
-        try {
-            let data = {
-                descripcion: req.body.descripcion,
-                etapa: req.body.etapa,
-                fecha_entrega: req.body.fecha_entrega,
-                estatus: req.body.estatus,
-                tipo: req.body.tipo
-            }
-            let ruta = calculateRuta(req.body.flag, data.etapa, req.body.proyecto, req.body.ubicacion, req.body.cliente, req.body.permisos)
+}
+const selectTarea = async(req, _, next)=>{
+    try {
+        await seleccionar_tarea(req.query.tarea).then(resultado=>{
+            req.tarea = resultado
+            return next()
+        })
+        .catch(error=>{
+            throw('Ha ocurrido un error al obtener la informacion de la tarea: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const createTarea = async(req, res, next)=>{
+    try {
+        let tarea = {
+            descripcion: req.body.descripcion,
+            etapa: req.body.etapa,
+            fecha_entrega: req.body.fecha_entrega,
+            estatus: req.body.estatus,
+            tipo: req.body.tipo
+        }
+        let ruta = calculateRuta(req.body.flag, tarea.etapa, req.body.proyecto, req.body.ubicacion, req.body.cliente, req.body.permisos)
 
-            conexion.query("INSERT INTO op003_tareas SET ?", data, (error, results)=>{
-                if(error){
-                    throw error
-                }else{
-                    res.redirect(`/${ruta}`)
-                    return next()    
-                }
-            })    
-        } catch (error) {
-            console.log(error)
+        await crear_tarea(tarea).then(_=>{
+            res.redirect(`/${ruta}`)
+            return next()
+        })
+        .catch(error=>{
+            throw('Ha ocurrido un error al registrar la tarea: ', error)
+        })  
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const selectInfoTareasUserDashboard = async(req, _, next)=>{
+    try {
+        const usuario = req.query.folio
+        conexion.query("SELECT * FROM asignacion_usuario_view001 WHERE folio_usuario = ? ORDER BY folio_asignacion DESC LIMIT 10", usuario, (error, fila)=>{
+            if(error){
+                throw error
+            }else{
+                req.tareas = fila
+                return next()
+            }
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const obtenerReportes = async(req, _, next)=>{
+    try {
+        const usuario = req.query.folio
+        conexion.query("SELECT * FROM op004_reporte WHERE usuario = ?", usuario, (error,fila)=>{
+            if(error){
+                throw error
+            }else{
+                req.reportes = fila
+                return next()
+            }
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const updateTarea = async(req, res, next)=>{
+    try {
+        const folio         = req.body.tarea
+        const descripcion   = req.body.descripcion
+        const etapa         = req.body.etapa
+        const fecha_entrega = req.body.fecha_entrega
+        const tipo          = req.body.tipo
+        const ruta = calculateRuta(req.body.flag, etapa, req.body.proyecto, req.body.ubicacion, req.body.cliente, req.body.permisos)
+
+        await editar_tarea(descripcion, fecha_entrega, tipo, folio).then(_=>{
+            res.redirect(`/${ruta}`)
+            return next()
+        })
+        .catch(error=>{
+            throw('Ha ocurrido un error al actualizar la tarea: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const updateAsignacion = async(req, res, next)=>{
+    try {
+        const usuario = req.body.usuario
+        const prev = req.body.previo
+        const tarea = req.body.tarea
+        const asignacion = req.body.asignacion
+        const etapa = req.body.etapa
+
+        const ruta = calculateRuta(req.body.flag, etapa, req.body.proyecto, req.body.ubicacion, req.body.cliente, req.body.permisos)
+
+        if(usuario == prev){
+            res.redirect(`/${ruta}`)
+            return next()
+        }else if(usuario == 0){
+
+            await eliminar_asignacion(asignacion).catch(error=>{
+                throw('Ha ocurrido un error al elimnar la asiganción de la tarea: ', error)
+            })
+            await asignar_estatus_tarea(tarea).then(_=>{
+                res.render('Error/showInfo', {
+                    title: 'Tarea sin Asignar',
+                    alert: true,
+                    alertTitle: 'INFORMACION',
+                    alertMessage: `Se ha eliminado la asignacion de la tarea ${tarea}`,
+                    alertIcon: 'info',
+                    showConfirmButton: true,
+                    timer: 8000,
+                    ruta: `${ruta}` 
+                })
+                return next()
+            }).catch(error=>{
+                throw('Ha ocurrido un error al actualizar el estatus de la tarea: ', error)
+            })
+        }else{
+            await actualizar_asignacion(usuario, asignacion).then(_=>{
+                res.redirect(`/${ruta}`)
+                return next()  
+            }).catch(error=>{
+                throw('Ha ocurrido un error al editar la asignación: ', error)
+            })
+        }
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const validateTarea = async(req, res, next)=>{
+    try {
+        const tarea = req.query.tarea
+        let asignacion_validada = false
+
+        await validar_asignacion(tarea).then(resultado=>{
+            asignacion_validada = resultado
+        })
+        .catch(error=>{
+            throw('Ha ocurrido un error al validar la asignación de la tarea: ', error)
+        })
+
+        if(!asignacion_validada){
+            await seleccionar_tarea(tarea).then(resultado=>{
+                req.tarea = resultado
+                return next()
+            })
+            .catch(error=>{
+                throw('Ha ocurrido un error al buscar la información de la tarea: ', error)
+            })
+        }else{
+            res.render('Error/redirect', {
+                alert: true,
+                alertTitle: 'ERROR',
+                alertMessage: 'Esta tarea ya esta asignada',
+                alertIcon: 'error',
+                showConfirmButton: true,
+                timer: 8000,
+                ruta: `tareasetapa/${result[0].folio_etapa}` 
+            })
             return next()
         }
+    } catch (error) {
+        console.log(error)
+        return next()
     }
-    exports.createTareaAdmin = async(req, res, next)=>{
+}
+const getUsuariosAsignados = async(req, _, next)=>{
+    try {
+        await seleccionar_usuarios_asignados(req.query.proyecto).then(resultado=>{
+            req.usuarios = resultado
+            return next()
+        })
+        .catch(error=>{
+            throw(`Ha ocurrido un error al obtener los usuarios asignados a este proyecto ${req.query.proyecto}: `, error);
+        })         
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getTareaAsignada = async(req, _, next)=>{
+    try {
+        await seleccionar_asignacion_tarea(req.query.tarea).then(resultado=>{
+            req.asignacion = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener la asignación de la tarea: ', error)
+        })
+        return next()
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const assignTarea = async(req, res, next)=>{
+    try {
+        let data ={
+            usuario: req.body.usuario,
+            tarea: req.body.tarea
+        }
+        let ruta = calculateRuta(req.body.flag, req.body.etapa, req.body.proyecto, req.body.ubicacion, req.body.cliente, req.body.permisos)
+        
+        await asignar_tarea(data).catch(error=>{
+            throw('Ha ocurrido un error al asignar la tarea al usuario: ', error)
+        })
+        
+        await actualizar_estatus_tarea(1, data.tarea).then(_=>{
+            res.redirect(`/${ruta}`)
+            return next() 
+        })
+        .catch(error=>{
+            throw('Ha ocurrido un error al actualizar el estatus de la tarea: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const showDetailsTarea = async(req, res, next)=>{
+    try {
+        const ruta = calculateRuta(req.query.flag, req.query.etapa, req.query.proyecto, req.query.ubicacion, req.query.cliente, req.query.permisos)
+        await obtener_detalles_tarea(req.query.tarea).then(resultado=>{
+            res.render('Error/showInfo', {
+                title: 'Usuario Asignado',
+                alert: true,
+                alertTitle: 'INFORMACION',
+                alertMessage: `Tarea ${resultado.folio_tarea} esta asignada a ${resultado.nombres} ${resultado.apellidos} que en el proyecto tiene el cargo de ${resultado.rol_usuario}`,
+                alertIcon: 'info',
+                showConfirmButton: true,
+                timer: 8000,
+                ruta: `${ruta}` 
+            })
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener los detalles de la tarea: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const deleteTarea = async(req, res, next)=>{
+    try {
+        const tarea = req.query.tarea
+        const ruta = calculateRuta(req.query.flag, req.query.etapa, req.query.proyecto, req.query.ubicacion, req.query.cliente, req.query.permisos)
+        
+        let isAsigned = true
+
+        await validar_asignacion(tarea).then(resultado=>{
+            isAsigned = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener los datos de la tarea: ', error)
+        })
+        
+        if(isAsigned){
+            res.render('Error/showInfo', {
+                title: 'Tarea Asignada',
+                alert: true,
+                alertTitle: 'INFORMACION',
+                alertMessage: `La tarea ${tarea} se encuentra asignada, debe eliminar la asignacion antes de eliminar la tarea`,
+                alertIcon: 'info',
+                showConfirmButton: true,
+                timer: 8000,
+                ruta: `${ruta}` 
+            })
+            return next()
+        }
+
+        await eliminar_tarea(tarea).catch(error=>{
+            throw('Ha ocurrido un error al eliminar la tarea: ', error)
+        })
+
+        res.redirect(`/${ruta}`)
+        return next() 
+
+    }catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+
+export {
+    selectTareasEtapa,
+    selectInfoTareasUserDashboard,
+    selectTiposTarea,
+    selectTarea,
+    obtenerReportes,
+    createTarea,
+    updateTarea,
+    validateTarea,
+    getUsuariosAsignados,
+    getTareaAsignada,
+    assignTarea,
+    showDetailsTarea,
+    updateAsignacion,
+    deleteTarea
+}
+
+/* 
+
+//TAREAS
+   
+    
+    
+    export asyncfunction     createTareaAdmin(req, res, next){
         try {
             let data = {
                 descripcion: req.body.descripcion,
@@ -85,7 +366,7 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
             }
             let ruta = 'admintareas'
 
-            conexion.query("INSERT INTO op003_tareas SET ?", data, (error, results)=>{
+            _query("INSERT INTO op003_tareas SET ?", data, (error, results)=>{
                 if(error){
                     throw error
                 }else{
@@ -98,106 +379,13 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
             return next()
         }
     }
-    exports.validateTarea = async(req, res, next)=>{
+    
+    
+    
+    
+    export asyncfunction     selectTareasAdmin(req, res, next){
         try {
-            const tarea = req.query.tarea
-            conexion.query("SELECT * FROM op014_tarea_usuario WHERE tarea = ?", [tarea], (error, fila)=>{
-                if(error){
-                    throw error;
-                }else{
-                    conexion.query("SELECT * FROM tareas_view001 WHERE folio = ?", [tarea], (err, result)=>{
-                        if(err){
-                            throw err;
-                        }else{
-                            if(fila.length === 0){
-                                req.tarea = result
-                                return next() 
-                            }else{
-                                res.render('Error/redirect', {
-                                    alert: true,
-                                    alertTitle: 'ERROR',
-                                    alertMessage: 'Esta tarea ya esta asignada',
-                                    alertIcon: 'error',
-                                    showConfirmButton: true,
-                                    timer: 8000,
-                                    ruta: `tareasetapa/${result[0].folio_etapa}` 
-                                })
-                                return next()
-                            }
-                        }
-                    })
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    exports.usuariosAsignados = async(req, res, next)=>{
-        try {
-            conexion.query("SELECT * FROM roles_view001 WHERE proyecto = ?", [req.query.proyecto], (err, filas)=>{
-                if(err){
-                    throw err;
-                }else{
-                    req.usuarios = filas
-                    return next()
-                }
-            })          
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    exports.asignarTarea = async(req, res, next)=>{
-        try {
-            let data ={
-                usuario: req.body.usuario,
-                tarea: req.body.tarea
-            }
-            let ruta = calculateRuta(req.body.flag, req.body.etapa, req.body.proyecto, req.body.ubicacion, req.body.cliente, req.body.permisos)
-            conexion.query("INSERT INTO op014_tarea_usuario SET ?", data, function(error, results){
-                if(error){
-                    throw error
-                }else{
-                    conexion.query("UPDATE op003_tareas SET estatus = 1 WHERE folio = ?", [req.body.tarea], (miss, good)=>{
-                        if(miss){
-                            throw miss
-                        }else{
-                            conexion.query("SELECT folio_etapa FROM tareas_view002 WHERE folio = ?", [req.body.tarea], (err, result)=>{
-                                if(err){
-                                    throw err
-                                }else{   
-                                    res.redirect(`/${ruta}`)
-                                    return next() 
-                                }
-                            }) 
-                        }
-                    })  
-                }
-            }) 
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    exports.selectTarea = async(req, res, next)=>{
-        try {
-            conexion.query("SELECT * FROM tareas_view002 WHERE folio = ?", [req.query.tarea], (error, fila)=>{
-                if(error){
-                    throw error;
-                }else{
-                    req.tarea = fila
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    exports.selectTareasAdmin = async(req, res, next)=>{
-        try {
-            conexion.query("SELECT * FROM tareas_view002", (error, fila)=>{
+            _query("SELECT * FROM tareas_view002", (error, fila)=>{
                 if(error){
                     throw error;
                 }else{
@@ -210,186 +398,18 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
             return next()
         }
     }
-    exports.editarTarea = async(req, res, next)=>{
-        try {
-            let folio         = req.body.tarea
-            let descripcion   = req.body.descripcion
-            let etapa         = req.body.etapa
-            let fecha_entrega = req.body.fecha_entrega
-            let tipo          = req.body.tipo
 
-            let sql = "UPDATE op003_tareas SET descripcion = ?, fecha_entrega = ?, tipo = ? WHERE folio = ?"
-            const ruta = calculateRuta(req.body.flag, etapa, req.body.proyecto, req.body.ubicacion, req.body.cliente, req.body.permisos)
-
-            conexion.query(sql, [descripcion, fecha_entrega, tipo, folio], (error, results)=>{
-                if(error){
-                    throw error
-                }else{
-                    res.redirect(`/${ruta}`)
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    exports.showAsignTarea = async(req, res, next)=>{
-        try {
-            const ruta = calculateRuta(req.query.flag, req.query.etapa, req.query.proyecto, req.query.ubicacion, req.query.cliente, req.query.permisos)
-            conexion.query("SELECT * FROM tarea_asignada_view001 WHERE folio_tarea = ?", [req.query.tarea], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    res.render('Error/showInfo', {
-                        title: 'Usuario Asignado',
-                        alert: true,
-                        alertTitle: 'INFORMACION',
-                        alertMessage: `Tarea ${fila[0].folio_tarea} esta asignada a ${fila[0].nombres} ${fila[0].apellidos} que en el proyecto tiene el cargo de ${fila[0].rol_usuario}`,
-                        alertIcon: 'info',
-                        showConfirmButton: true,
-                        timer: 8000,
-                        ruta: `${ruta}` 
-                    })
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    exports.selectAsignTask = async(req, res, next)=>{
-        try {
-            conexion.query("SELECT * FROM tarea_asignada_view001 WHERE folio_tarea = ?", [req.query.tarea], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    req.asignacion = fila
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    exports.editarAsignacion = async(req, res, next)=>{
-        try {
-            let usuario = req.body.usuario
-            let prev = req.body.previo
-            let tarea = req.body.tarea
-            let asignacion = req.body.asignacion
-            let etapa = req.body.etapa
-
-            const ruta = calculateRuta(req.body.flag, etapa, req.body.proyecto, req.body.ubicacion, req.body.cliente, req.body.permisos)
-
-            if(usuario == prev){
-                res.redirect(`/${ruta}`)
-                return next()
-            }else if(usuario == 0){
-                conexion.query("DELETE FROM op014_tarea_usuario WHERE folio = ?", [asignacion], (err, fila)=>{
-                    if(err){
-                        throw err
-                    }else{
-                        conexion.query("UPDATE op003_tareas SET estatus = 7 WHERE folio = ?", [tarea], (err2, fila2)=>{
-                            if(err2){
-                                throw err2
-                            }else{
-                                res.render('Error/showInfo', {
-                                    title: 'Tarea sin Asignar',
-                                    alert: true,
-                                    alertTitle: 'INFORMACION',
-                                    alertMessage: `Se ha eliminado la asignacion de la tarea ${tarea}`,
-                                    alertIcon: 'info',
-                                    showConfirmButton: true,
-                                    timer: 8000,
-                                    ruta: `${ruta}` 
-                                })
-                                return next()
-                            }
-                        })
-                    }
-                })
-            }else{
-                conexion.query("UPDATE op014_tarea_usuario SET usuario = ? WHERE folio = ?", [usuario, asignacion], (err, fila)=>{
-                    if(err){
-                        throw err
-                    }else{
-                        res.redirect(`/${ruta}`)
-                        return next()   
-                    }
-                })
-            }
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    exports.deleteTarea = async(req, res, next)=>{
-        try {
-            let tarea = req.query.tarea
-            const ruta = calculateRuta(req.query.flag, req.query.etapa, req.query.proyecto, req.query.ubicacion, req.query.cliente, req.query.permisos)
-            conexion.query("SELECT * FROM op014_tarea_usuario WHERE tarea = ?", [tarea], (err, fila)=>{
-                if(err){
-                    throw err
-                }else{
-                    conexion.query("SELECT etapa FROM op003_tareas WHERE folio = ?", [tarea], (err3, result)=>{
-                        if(err3){
-                            throw err3
-                        }else{
-                            if(fila.length === 0){
-                                conexion.query("DELETE FROM op003_tareas WHERE folio = ?", [tarea], (err2, fila2)=>{
-                                    if(err2){
-                                        throw err2
-                                    }else{ 
-                                        res.redirect(`/${ruta}`)
-                                        return next()  
-                                    }
-                                })
-                            }else{
-                                res.render('Error/showInfo', {
-                                    title: 'Tarea Asignada',
-                                    alert: true,
-                                    alertTitle: 'INFORMACION',
-                                    alertMessage: `La tarea ${tarea} se encuentra asignada, debe eliminar la asignacion antes de eliminar la tarea`,
-                                    alertIcon: 'info',
-                                    showConfirmButton: true,
-                                    timer: 8000,
-                                    ruta: `${ruta}` 
-                                })
-                                return next()
-                            }
-                        }
-                    })
-                }
-            })
-        }catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
+    
+    
+    
+    
     //FIN DE TAREAS
 
 //DASHBOARD DE PERFIL
-    exports.selectInfoTareasUserDashboard = async(req, res, next)=>{
+    
+    export asyncfunction     obtenerReportesAdmin(req, res, next){
         try {
-            conexion.query("SELECT * FROM asignacion_usuario_view001 WHERE folio_usuario = ? ORDER BY folio_asignacion DESC LIMIT 10", [req.query.folio], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    req.tareas = fila
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    exports.obtenerReportes = async(req, res, next)=>{
-        try {
-            conexion.query("SELECT * FROM op004_reporte WHERE usuario = ?", [req.query.folio], (error,fila)=>{
+            _query("SELECT * FROM op004_reporte", (error,fila)=>{
                 if(error){
                     throw error
                 }else{
@@ -402,32 +422,17 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
             return next()
         }
     }
-    exports.obtenerReportesAdmin = async(req, res, next)=>{
-        try {
-            conexion.query("SELECT * FROM op004_reporte", (error,fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    req.reportes = fila
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    exports.asignarTareaAdmin = async(req, res, next)=>{
+    export asyncfunction     asignarTareaAdmin(req, res, next){
         try {
             let data ={
                 usuario: req.body.usuario,
                 tarea: req.body.tarea
             }
-            conexion.query("INSERT INTO op014_tarea_usuario SET ?", data, function(error, results){
+            _query("INSERT INTO op014_tarea_usuario SET ?", data, function(error, results){
                 if(error){
                     throw error
                 }else{
-                    conexion.query("UPDATE op003_tareas SET estatus = 1 WHERE folio = ?", [data.tarea], (miss, good)=>{
+                    _query("UPDATE op003_tareas SET estatus = 1 WHERE folio = ?", [data.tarea], (miss, good)=>{
                         if(miss){
                             throw miss
                         }else{
@@ -444,9 +449,9 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
     }
 
 //SECCION DE "MIS TAREAS"
-    exports.selectInfoTareasUser = async(req, res, next)=>{
+    export asyncfunction     selectInfoTareasUser(req, res, next){
         try {
-            conexion.query("SELECT * FROM asignacion_usuario_view001 WHERE folio_usuario = ? ORDER BY folio_asignacion DESC", [req.query.folio], (error, fila)=>{
+            _query("SELECT * FROM asignacion_usuario_view001 WHERE folio_usuario = ? ORDER BY folio_asignacion DESC", [req.query.folio], (error, fila)=>{
                 if(error){
                     throw error
                 }else{
@@ -461,7 +466,7 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
     }
 
 //FUNCIONES GENERALES "MIS TAREAS" & DASHBOARD DE PERFIL
-    exports.entregarTarea = async(req, res, next)=>{
+    export asyncfunction     entregarTarea(req, res, next){
         try {
             let ruta = ''
             if(req.query.flag == 1){
@@ -469,7 +474,7 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
             }else if(req.query.flag == 0){
                 ruta = `/?folio=${req.query.usuario}`
             }
-            conexion.query('UPDATE op003_tareas SET estatus = 2 WHERE folio = ?', [req.query.tarea], (error2, fila2)=>{
+            _query('UPDATE op003_tareas SET estatus = 2 WHERE folio = ?', [req.query.tarea], (error2, fila2)=>{
                 if(error2){
                     throw error2
                 }else{
@@ -482,7 +487,7 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
             return next()
         }
     }
-    exports.subirReporteTarea = async(req, res, next)=>{
+    export asyncfunction     subirReporteTarea(req, res, next){
         try {
             let data = {
                 enlace: req.query.url,
@@ -499,17 +504,17 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
             }
 
             //Validamos si ya existe un reporte
-            conexion.query("SELECT * FROM op004_reporte WHERE tarea = ? AND usuario = ?", [data.tarea, data.usuario], (err, fil)=>{
+            _query("SELECT * FROM op004_reporte WHERE tarea = ? AND usuario = ?", [data.tarea, data.usuario], (err, fil)=>{
                 if(err){
                     throw err
                 }else{
                     if(fil.length === 0){
                         //No existe, simplemente agregamos
-                        conexion.query('INSERT INTO op004_reporte SET ?', data, (error, fila)=>{
+                        _query('INSERT INTO op004_reporte SET ?', data, (error, fila)=>{
                             if(error){
                                 throw error
                             }else{
-                                conexion.query('UPDATE op003_tareas SET estatus = 2 WHERE folio = ?', [data.tarea], (error2, fila2)=>{
+                                _query('UPDATE op003_tareas SET estatus = 2 WHERE folio = ?', [data.tarea], (error2, fila2)=>{
                                     if(error2){
                                         throw error2
                                     }else{
@@ -522,11 +527,11 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
                     }else{
                         //Hacemos un update primero
                         let folio = fil[0].folio
-                        conexion.query("UPDATE op004_reporte SET enlace = ?, fecha = ?, hora = ? WHERE folio = ?", [data.enlace, data.fecha, data.hora, folio], (error3, fila3)=>{
+                        _query("UPDATE op004_reporte SET enlace = ?, fecha = ?, hora = ? WHERE folio = ?", [data.enlace, data.fecha, data.hora, folio], (error3, fila3)=>{
                             if(error3){
                                 throw error3
                             }else{
-                                conexion.query('UPDATE op003_tareas SET estatus = 2 WHERE folio = ?', [data.tarea], (error2, fila2)=>{
+                                _query('UPDATE op003_tareas SET estatus = 2 WHERE folio = ?', [data.tarea], (error2, fila2)=>{
                                     if(error2){
                                         throw error2
                                     }else{
@@ -547,16 +552,16 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
         }
     }
 //ADMINISTRADOR
-    exports.declineReportAdmin = async(req, res, next)=>{
+    export asyncfunction     declineReportAdmin(req, res, next){
         try {
             let tarea = req.query.tarea
 
             //Primero eliminamos el reporte
-            conexion.query("DELETE FROM op004_reporte WHERE tarea = ?", [tarea], (error1, fila1)=>{
+            _query("DELETE FROM op004_reporte WHERE tarea = ?", [tarea], (error1, fila1)=>{
                 if(error1){
                     throw error1
                 }else{
-                    conexion.query("UPDATE op003_tareas SET estatus = 6 WHERE folio = ?", [tarea], (error2, fila2)=>{
+                    _query("UPDATE op003_tareas SET estatus = 6 WHERE folio = ?", [tarea], (error2, fila2)=>{
                         if(error2){
                             throw error2
                         }else{
@@ -571,11 +576,11 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
             return next()
         }
     }
-    exports.checkAsIncAdmin = async(req, res, next)=>{
+    export asyncfunction     checkAsIncAdmin(req, res, next){
         try {
             let tarea = req.query.tarea
 
-            conexion.query("UPDATE op003_tareas SET estatus = 5 WHERE folio = ?", [tarea], (error2, fila2)=>{
+            _query("UPDATE op003_tareas SET estatus = 5 WHERE folio = ?", [tarea], (error2, fila2)=>{
                 if(error2){
                     throw error2
                 }else{
@@ -588,22 +593,22 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
             return next()
         }
     }
-    exports.deleteTareaAdmin = async(req, res, next)=>{
+    export asyncfunction     deleteTareaAdmin(req, res, next){
         try {
             let tarea = req.query.tarea
 
             //Primero validamos y eliminamos el reporte
-            conexion.query("DELETE FROM op004_reporte WHERE tarea = ?", [tarea], (error1, fila1)=>{
+            _query("DELETE FROM op004_reporte WHERE tarea = ?", [tarea], (error1, fila1)=>{
                 if(error1){
                     throw error1
                 }else{
                     //Eliminamos la Asignacion 
-                    conexion.query("DELETE FROM op014_tarea_usuario WHERE tarea = ?", [tarea], (error2, fila2)=>{
+                    _query("DELETE FROM op014_tarea_usuario WHERE tarea = ?", [tarea], (error2, fila2)=>{
                         if(error2){
                             throw error2
                         }else{
                             //Eliminamos la tarea
-                            conexion.query("DELETE FROM op003_tareas WHERE folio = ?", [tarea], (error3, fila3)=>{
+                            _query("DELETE FROM op003_tareas WHERE folio = ?", [tarea], (error3, fila3)=>{
                                 if(error3){
                                     throw error3
                                 }else{
@@ -619,4 +624,4 @@ function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
             console.log(error)
             return next()
         }
-    }
+    } */

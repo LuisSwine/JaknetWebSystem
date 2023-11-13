@@ -1,8 +1,10 @@
 //Aqui realizamos la conexion a la base de datos
-const mysql = require('mysql2')
+import { createConnection } from 'mysql2'
+import dotenv from 'dotenv'
+dotenv.config({path: 'env/.env'})
 
 //Creamos la conexion
-const conexion = mysql.createConnection({
+const conexion = createConnection({
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     user: process.env.DB_USER,
@@ -19,4 +21,4 @@ conexion.connect((error)=>{
     console.log('CONEXION EXITOSA A BASE DE DATOS')
 })
 
-module.exports = conexion
+export default conexion

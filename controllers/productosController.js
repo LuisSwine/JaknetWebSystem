@@ -1,4 +1,237 @@
-const conexion = require('../database/db')
+import { registrar_marca, seleccionar_marca_por_nombre } from "../models/Marca.js";
+import { registrar_categoria, registrar_producto, registrar_tipo, seleccionar_categoria_por_nombre, seleccionar_categorias_productos, seleccionar_productos, seleccionar_tipo_por_nombre, seleccionar_tipos_productos, seleccionar_producto, editar_producto } from "../models/Producto.js";
+import { registrar_relacion_marca_proveedor, validar_relacion_marca_proveedor } from "../models/Proveedor.js";
+
+const selectCategoriasProductos = async(req, _, next) =>{
+    try {
+        await seleccionar_categorias_productos().then(resultado=>{
+            req.categorias = resultado;
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener las categorias: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const selectTipoProducto = async(req, _, next) =>{
+    try {
+        await seleccionar_tipos_productos().then(resultado=>{
+            req.tipos = resultado
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener los tipos de producto: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const setProductoProveedor = async(req, res, next) =>{
+    try {
+        const registro = {
+            sku: req.body.sku,
+            descripcion: req.body.descripcion,
+            categoria: req.body.categoria,
+            tipo: req.body.tipo,
+            marca: req.body.marca,
+            precio: req.body.precio,
+            enlace: req.body.enlace
+        }
+
+        const proveedor = req.body.proveedor;
+        const ruta = `/proveedores/perfil?proveedor=${proveedor}` 
+
+        if (registro.marca == 'other'){
+            const n_marca = req.body.nueva_marca
+            await registrar_marca(n_marca).catch(error=>{
+                throw('Ha ocurrido un error al registrar la marca: ', error)
+            })
+            await seleccionar_marca_por_nombre(n_marca).then(resultado => {
+                registro.marca = resultado
+            }).catch(error=>{
+                throw('Ha ocurrido un error al obtener la marca: ', error)
+            })
+        }
+
+        if (registro.tipo == 'other'){
+            const n_tipo = req.body.nuevo_tipo
+            await registrar_tipo(n_tipo).catch(error=>{
+                throw('Ha ocurrido un error al registrar el nuevo tipo: ', error)
+            })
+            await seleccionar_tipo_por_nombre(n_tipo).then(resultado => {
+                registro.tipo = resultado
+            }).catch(error=>{
+                throw('Ha ocurrido un error al obtener el tipo: ', error)
+            })
+        }
+
+        if (registro.categoria == 'other'){
+            const n_categoria = req.body.nueva_categoria
+            await registrar_categoria(n_categoria).catch(error=>{
+                throw('Ha ocurrido un error al registrar la categoria: ', error)
+            })
+            await seleccionar_categoria_por_nombre(n_categoria).then(resultado => {
+                registro.categoria = resultado
+            }).catch(error=>{
+                throw('Ha ocurrido un error al obtener la categoria: ', error)
+            })
+        }
+
+        const relacion = {
+            marca: registro.marca,
+            proveedor: proveedor
+        }
+
+        let does_match_exist = false
+        await validar_relacion_marca_proveedor(relacion.marca, relacion.proveedor).then(resultado=>{
+            does_match_exist = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al validar la relación entre la marca y el proveedor: ', error)
+        })
+        if(!does_match_exist){
+            await registrar_relacion_marca_proveedor(relacion).catch(error=>{
+                throw('Error al registrar la relación entre la marca y el proveedor: ', error)
+            })
+        }
+        
+        await registrar_producto(registro).then(_=>{
+            res.redirect(ruta)
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al registrar el nuevo producto: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const selectProductos = async(req, _, next) =>{
+    try {
+        await seleccionar_productos().then(resultado=>{
+            req.productos = resultado
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener los productos: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const selectProducto = async(req, _, next) =>{
+    try {
+        await seleccionar_producto(req.query.producto).then(resultado=>{
+            req.producto = resultado
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener el productoi: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const createProducto = async(req, res, next) =>{
+    try {
+        const producto = {
+            sku: req.body.sku,
+            descripcion: req.body.descripcion,
+            categoria: req.body.categoria,
+            tipo: req.body.tipo,
+            marca: req.body.marca,
+            precio: req.body.precio,
+            enlace: req.body.enlace
+        }
+
+        if (producto.marca == 'other'){
+            const n_marca = req.body.nueva_marca
+            await registrar_marca(n_marca).catch(error=>{
+                throw('Ha ocurrido un error al registar la marca: ', error)
+            })
+            await seleccionar_marca_por_nombre(n_marca).then(resultado=>{
+                producto.marca = resultado
+            }).catch(error=>{
+                throw('Ha ocurrido un error al obtener la marca registrada: ', error)
+            })
+            const relacion = {
+                marca: producto.marca,
+                proveedor: req.body.proveedor
+            }
+            await registrar_relacion_marca_proveedor(relacion).catch(error=>{
+                throw('Ha ocurrido un error al registrar la relación entre la marca y el proveedor: ', error)
+            })
+        }
+
+        if (producto.tipo == 'other'){
+            const n_tipo = req.body.nuevo_tipo
+            await registrar_tipo(n_tipo).catch(error=>{
+                throw('Ha ocurrido un error al registar el nuevo tipo de producto: ', error)
+            })
+            await seleccionar_tipo_por_nombre(n_tipo).then(resultado=>{
+                producto.tipo = resultado;
+            }).catch(error=>{
+                throw('Ha ocurrido un error al obtener el tipo del producto registrado: ', error);
+            })
+        }
+
+        if (producto.categoria == 'other'){
+            const n_categoria = req.body.nueva_categoria
+            await registrar_categoria(n_categoria).catch(error=>{
+                throw ('Ha ocurrido un error al registrar una nueva categoría', error)
+            })
+            await seleccionar_categoria_por_nombre(n_categoria).then(resultado=>{
+                producto.categoria = resultado
+            }).catch(error=>{
+                throw('Ha ocurrido un error al obtener la categoria registrada: ', error)
+            })
+        }
+
+        await registrar_producto(producto).then(_=>{
+            res.redirect('/productos/administrar')
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al registrar el producto: ', error)
+        })   
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const editProducto = async(req, res, next) =>{
+    try {
+        const folio       = req.body.folio
+        const descripcion = req.body.descripcion
+        const categoria   = req.body.categoria
+        const tipo        = req.body.tipo
+        const marca       = req.body.marca
+        const precio      = req.body.precio
+        const enlace      = req.body.enlace
+
+        await editar_producto(descripcion, categoria, tipo, marca, precio, enlace, folio).then(_=>{
+            res.redirect('/productos/administrar')
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al editar el producto: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+export {
+    selectCategoriasProductos,
+    selectTipoProducto,
+    setProductoProveedor,
+    selectProductos,
+    selectProducto,
+    createProducto,
+    editProducto
+}
+
+
+/* const conexion = require('../database/db')
 const {promisify} = require('util')
 const { query } = require('../database/db')
 const { nextTick } = require('process')
@@ -223,21 +456,7 @@ exports.deleteProduct = async(req, res, next) =>{
             return next()
         }
     }
-    exports.selectTipoProducto = async(req, res, next) =>{
-        try {
-            conexion.query("SELECT * FROM cat018_tipo_producto", (error, filas)=>{
-                if(error){
-                    throw error;
-                }else{
-                    req.tipos = filas
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
+    
     //Registrar una categoria de producto
     exports.createCategoriaProducto = async(req, res, next) =>{
         try {
@@ -258,163 +477,17 @@ exports.deleteProduct = async(req, res, next) =>{
             return next()
         }
     }
-    exports.selectCategoriasProduct = async(req, res, next) =>{
-        try {
-            conexion.query("SELECT * FROM cat017_categoria_producto", (error, filas)=>{
-                if(error){
-                    throw error;
-                }else{
-                    req.categorias = filas
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
+    
     //Registrar producto
-    exports.createProduct = async(req, res, next) =>{
-        try {
-            let data = {
-                sku: req.body.sku,
-                descripcion: req.body.descripcion,
-                categoria: req.body.categoria,
-                tipo: req.body.tipo,
-                marca: req.body.marca,
-                precio: req.body.precio,
-                enlace: req.body.enlace
-            }
-
-            if (data.marca == 'other'){
-                let folio = await registrar_marca(req.body.nueva_marca);
-                data.marca = folio;
-                let proveedor = req.body.proveedor
-                await crear_relacion_marca_proveedor(folio, proveedor);
-                
-            }
-
-            if (data.tipo == 'other'){
-                let folio = await registrar_tipo(req.body.nuevo_tipo);
-                data.tipo = folio;
-            }
-
-            if (data.categoria == 'other'){
-                let folio = await registrar_categoria(req.body.nueva_categoria);
-                data.categoria = folio;
-            }
-
-            await registrar_producto(data); 
-            res.redirect('/productos/administrar')
-            return next()
-               
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    exports.selectProducts = async(req, res, next) =>{
-        try {
-            conexion.query("SELECT * FROM productos_view001", (error, filas)=>{
-                if(error){
-                    throw error;
-                }else{
-                    req.productos = filas
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    exports.selectProduct = async(req, res, next) =>{
-        try {
-            conexion.query("SELECT * FROM cat016_productos WHERE folio = ?", [req.query.producto], (error, fila)=>{
-                if(error){
-                    throw error;
-                }else{
-                    req.producto = fila
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    exports.editProduct = async(req, res, next) =>{
-        try {
-            let folio       = req.body.folio
-            let descripcion = req.body.descripcion
-            let categoria   = req.body.categoria
-            let tipo        = req.body.tipo
-            let marca       = req.body.marca
-            let precio      = req.body.precio
-            let enlace      = req.body.enlace
-
-            let sql = "UPDATE cat016_productos SET descripcion = ?, categoria = ?, tipo = ?, marca = ?, precio = ?, enlace = ? WHERE folio = ?"
-
-            conexion.query(sql, [descripcion, categoria, tipo, marca, precio, enlace, folio], function(error, results){
-                if(error){
-                    throw error
-                }else{
-                    res.redirect('/productos/administrar')
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
+    
+    
+    
+    
 //FIN DEL CRUD DE PRODUCTOS
 
 //INVENTARIO PERSONAL
-    exports.selectInventarioUser = async(req, res, next)=>{
-        try {
-            conexion.query("SELECT * FROM material_usuario_view001 WHERE folio_usuario = ?", [req.query.usuario], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    req.productos = fila
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    exports.reportePersonalInvent = async(req, res, next)=>{
-        try {
-            let usuario = req.query.usuario
-            if(req.query.inicio && req.query.termino){
-                let inicio = new Date(req.query.inicio)
-                let termino = new Date(req.query.termino)
-                conexion.query("SELECT * FROM movimientos_invent_view001 WHERE folio_usuario_afectado = ? AND (fecha BETWEEN ? AND ?)", [usuario, inicio, termino], (error, filas)=>{
-                    if(error){
-                        throw error
-                    }else{
-                        req.movimientos = filas
-                        return next()
-                    }
-                })
-            }else{
-                conexion.query("SELECT * FROM movimientos_invent_view001 WHERE folio_usuario_afectado = ?", [usuario], (error, filas)=>{
-                    if(error){
-                        throw error
-                    }else{
-                        req.movimientos = filas
-                        return next()
-                    }
-                })
-            }
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
+    
+    
 
 //INVENTARIO POR PROYECTO
     exports.selectInventProyecto = async(req, res, next)=>{
@@ -431,4 +504,4 @@ exports.deleteProduct = async(req, res, next) =>{
             console.log(error)
             return next()
         }
-    }
+    } */

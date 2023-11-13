@@ -1,32 +1,42 @@
-const express = require('express')
+import express from 'express'
+
+import { isAuthenticated } from '../controllers/authController.js'
+import { getClientes } from '../controllers/clientController.js'
+import { getUbicaciones, getUbicacion, createUbicacion, updateNameUbicacion, updateDireccionUbicacion } from '../controllers/ubicacionesController.js'
+import { getAreas } from '../controllers/areasController.js'
+import { getContactosUbicacion } from '../controllers/contactsController.js'
+import { getProyectos } from '../controllers/proyectosController.js'
 
 const router = express.Router()
-const { authorized } = require('../database/db')
+
+router.get('/nueva_ubicacion', isAuthenticated, getClientes, (req, res)=>{
+    res.render('Ubicaciones/formCreateUbi', {user: req.user, clientes: req.clientes, clienteSelected: req.query.cliente, flag: req.query.flag})
+})
+router.get('/perfil', isAuthenticated, getUbicacion, getAreas, getContactosUbicacion, getProyectos, (req, res)=>{
+    res.render('Ubicaciones/perfilUbi', {user: req.user, ubicacion: req.ubicacion, areas: req.areas, contactos: req.contactos, proyectos: req.proyectos, clienteSelected: req.query.cliente, flag: req.query.flag})
+})
 
 
-const authController = require('../controllers/authController')
-const clientController = require('../controllers/clientController')
-const ubicacionesController = require('../controllers/ubicacionesController')
-const contactosController = require('../controllers/contactsController')
-const cotizacionesController = require('../controllers/cotizacionesController')
-const areasController = require('../controllers/areasController')
+router.post('/nueva_ubicacion', createUbicacion)
+router.get('/cambiar_nombre', updateNameUbicacion)
+router.get('/cambiar_direccion', updateDireccionUbicacion)
 
-router.get('/administrar', authController.isAuthenticated, ubicacionesController.selectUbicaciones, (req, res)=>{
+
+
+
+router.get('/administrar', isAuthenticated, getUbicaciones, (req, res)=>{
     res.render('Ubicaciones/ubicacionesAdmin', {user: req.user, ubicaciones: req.ubicaciones, isCliente: false})
 })
 
-router.get('/nueva_ubicacion', authController.isAuthenticated, clientController.selectClients, (req, res)=>{
-    res.render('Ubicaciones/formCreateUbi', {user: req.user, clientes: req.clientes, clienteSelected: req.query.cliente, flag: req.query.flag})
-})
-router.post('/nueva_ubicacion', ubicacionesController.createUbicacion)
+
+export default router
+
+/* 
 
 
-router.get('/perfil', authController.isAuthenticated, ubicacionesController.selectUbicacion, areasController.selectAreas, contactosController.selectContactsUbi, authController.selectProyectos, cotizacionesController.selectCotizaciones, (req, res)=>{
-    res.render('Ubicaciones/perfilUbi', {user: req.user, ubicacion: req.ubicacion, areas: req.areas, contactos: req.contactos, proyectos: req.proyectos, cotizaciones: req.cotizaciones, clienteSelected: req.query.cliente, flag: req.query.flag})
-})
+
+
 
 //EDITAR
-router.get('/cambiar_nombre', ubicacionesController.editNombreUbicacion)
-router.get('/cambiar_direccion', ubicacionesController.editDireccionUbicacion)
 
-module.exports = router
+module.exports = router */

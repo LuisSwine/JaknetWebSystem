@@ -24,7 +24,8 @@
                                 <%}else if(flag == 3 || flag == 2){%>
                                     <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<%= proyecto %>&ubicacion=<%= ubicacion %>&cliente=<%= cliente %>&flag=<%= flag %>">Proyecto</a></li>
                                 <%}else if(flag == 0){%>
-                                    <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<%= proyecto %>&flag=<%= flag %>">Proyecto</a></li>
+                                    <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<%= proyecto %>&cliente=<%= cliente %>&flag=<%= flag %>">Proyecto</a></li>
+                                    <!-- <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<1%= proyecto %>&flag=<1%= flag %>">Proyecto</a></li> -->
                                 <%}else if(flag == 4){%>
                                     <li class="breadcrumb-item"><a href="/proyectos/perfil?proyecto=<%= proyecto %>&flag=<%= flag %>&permisos=<%= permisos %>">Proyecto</a></li> 
                                 <%} %>

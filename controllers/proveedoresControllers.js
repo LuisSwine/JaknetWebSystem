@@ -1,22 +1,153 @@
-const conexion = require('../database/db')
-const {promisify} = require('util')
-const { query } = require('../database/db')
-const { nextTick } = require('process')
-const { resolve } = require('path')
+import { registrar_marca, seleccionar_marca_por_nombre } from "../models/Marca.js";
+import { editar_proveedor, registrar_proveedor, registrar_relacion_marca_proveedor, seleccionar_marcas_proveedor, seleccionar_productos_proveedor, seleccionar_proveedor, seleccionar_proveedores, validar_relacion_marca_proveedor } from "../models/Proveedor.js";
 
-//procedimiento para registrarnos
-function formatoFecha(fecha, formato) {
-    const map = {
-        ss: fecha.getSeconds(),
-        nn: fecha.getMinutes(),
-        hh: fecha.getHours(),
-        dd: fecha.getDate(),
-        mm: fecha.getMonth() + 1,
-        yy: fecha.getFullYear().toString().slice(-2),
+const getProveedores = async(req, _, next) =>{
+    try {
+        await seleccionar_proveedores().then(resultado=>{
+            req.proveedores = resultado
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener los proveedores registrados: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
     }
-
-    return formato.replace(/ss|nn|hh|dd|mm|yy|yyy/gi, matched => map[matched])
 }
+const getProveedor = async(req, _, next) =>{
+    try {
+        await seleccionar_proveedor(req.query.proveedor).then(resultado=>{
+            req.proveedor = resultado
+            return next()
+        }).catch(error=>{
+            throw(`Ha ocurrido un error al obtener la información del proveedor: `, error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getMarcasProveedor = async(req, _, next)=>{
+    try {
+        await seleccionar_marcas_proveedor(req.query.proveedor).then(resultado=>{
+            req.marcas = resultado
+            return next()
+        }).catch(error=>{
+            throw("Error al obtener las marcas del proveedor: ", error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getProductosProveedor = async(req, _, next)=>{
+    try {
+        await seleccionar_productos_proveedor(req.query.proveedor).then(resultado=>{
+            req.productos = resultado
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener los productos del proveedor: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const setProveedor = async(req, res, next) =>{
+    try {
+        const proveedor = {
+            nombre: req.body.nombre,
+            web:    req.body.web
+        }
+
+        await registrar_proveedor(proveedor).then(_=>{
+            res.redirect('/proveedores/administrar')
+            return next()  
+        }).catch(error=>{
+            throw('Ha ocurrido un error al registrar al proveedor: ', error)
+        })  
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const setMatchMarcaProveedor = async(req, res, next)=>{
+    try {
+        const registro = {
+            marca: req.body.marca,
+            proveedor: req.body.proveedor
+        }
+
+        const ruta = `/proveedores/perfil?proveedor=${registro.proveedor}` 
+
+        if(registro.marca == 'other'){
+
+            const n_marca = req.body.nueva_marca
+
+            await registrar_marca(n_marca).catch(error=>{
+                throw('Ha ocurrido un error al registrar la nueva marca: ', error)
+            })
+
+            await seleccionar_marca_por_nombre(n_marca).then(resultado=>{
+                registro.marca = resultado
+            }).catch(error=>{
+                throw('Ha ocurrido un error al obtener el folio de la marca: ', error)
+            })
+        }
+
+        let does_match_exist = false
+
+        await validar_relacion_marca_proveedor(registro.marca, registro.proveedor).then(resultado=>{
+            does_match_exist = resultado
+        }).catch(error=>{
+            throw(`Error al validar la relacion marca - proveedor: ${error}`)
+        })
+
+        if(!does_match_exist){
+            await registrar_relacion_marca_proveedor(registro).then(_=>{
+                res.redirect(ruta)
+                return next()
+            }).catch(error=>{
+                throw('Ha ocurrido un error al registrar la relacion entre la marca y el proveedor: ', error)
+            })
+        }
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const updateProveedor = async(req, res, next) =>{
+    try {
+        const folio  = req.body.folio
+        const nombre = req.body.nombre
+        const web    = req.body.web
+
+        await editar_proveedor(folio, nombre, web).then(_=>{
+            res.redirect('/proveedores/administrar')
+            return next()
+        }).catch(error=>{
+            throw('Ha ocurrido un error al actualizar la información del proveedor: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+
+export {
+    getProveedores,
+    getProveedor,
+    getMarcasProveedor,
+    getProductosProveedor,
+    setProveedor,
+    setMatchMarcaProveedor,
+    updateProveedor
+}
+
+
+
+/* 
+
 function showError(res, titulo, mensaje, ruta){
     res.render('Error/showInfo', {
         title: titulo,
@@ -29,233 +160,6 @@ function showError(res, titulo, mensaje, ruta){
         ruta: ruta
     })
 }
-
-function registrar_marca(marca){
-    return new Promise((resolve, reject)=>{
-        let brand = {
-            nombre: marca
-        };
-        const insert = "INSERT INTO cat015_marcas SET ?";
-        conexion.query(insert, brand, (error, result)=>{
-            if(error){
-                throw error;
-            }else{
-                conexion.query('SELECT folio FROM cat015_marcas WHERE nombre = ?', marca, (error2, results2)=>{
-                    if(error2){
-                        throw error2;
-                    }else{
-                        let folio = results2[0].folio;
-                        resolve(folio)
-                    }
-                }) 
-            }
-        })
-    });
-}
-function crear_relacion_marca_proveedor(data){
-    return new Promise((resolve, reject)=>{
-        conexion.query("SELECT * FROM op007_marca_proveedor WHERE proveedor = ? AND marca = ?", [data.proveedor, data.marca], (error, fila)=>{
-            if(error){
-                throw error;
-            }else{
-                if(fila.length === 0){
-                    //No hay relacion asi que registramos
-                    conexion.query("INSERT INTO op007_marca_proveedor SET ?", data, (error2, fila2)=>{if(error2) throw error2;})
-                }
-                resolve();
-            }
-        })
-    })
-}
-function registrar_tipo(tipo){
-    return new Promise((resolve, reject)=>{
-        let type = {
-            nombre: tipo
-        };
-        const insert = "INSERT INTO cat018_tipo_producto SET ?";
-        conexion.query(insert, type, (error, result)=>{
-            if(error){
-                throw error;
-            }else{
-                conexion.query('SELECT folio FROM cat018_tipo_producto WHERE nombre = ?', tipo, (error2, results2)=>{
-                    if(error2){
-                        throw error2;
-                    }else{
-                        let folio = results2[0].folio;
-                        resolve(folio)
-                    }
-                }) 
-            }
-        })
-    });
-}
-function registrar_categoria(categoria){
-    return new Promise((resolve, reject)=>{
-        let category = {
-            nombre: categoria
-        };
-        const insert = "INSERT INTO cat017_categoria_producto SET ?";
-        conexion.query(insert, category, (error, result)=>{
-            if(error){
-                throw error;
-            }else{
-                conexion.query('SELECT folio FROM cat017_categoria_producto WHERE nombre = ?', categoria, (error2, results2)=>{
-                    if(error2){
-                        throw error2;
-                    }else{
-                        let folio = results2[0].folio;
-                        resolve(folio)
-                    }
-                }) 
-            }
-        })
-    });
-}
-function registrar_producto(producto){
-    return new Promise((resolve, reject)=>{
-        let insert = "INSERT INTO cat016_productos SET ?"
-        conexion.query(insert, producto, function(error3, results3){
-            if(error3){
-                throw error3
-            }else{
-                resolve()   
-            }
-        })
-    });
-}
-
-//Registrar producto
-exports.createProductProveedor = async(req, res, next) =>{
-    try {
-        let data = {
-            sku: req.body.sku,
-            descripcion: req.body.descripcion,
-            categoria: req.body.categoria,
-            tipo: req.body.tipo,
-            marca: req.body.marca,
-            precio: req.body.precio,
-            enlace: req.body.enlace
-        }
-
-        let proveedor = req.body.proveedor;
-
-        if (data.marca == 'other'){
-            let folio = await registrar_marca(req.body.nueva_marca);
-            data.marca = folio;
-        }
-
-        if (data.tipo == 'other'){
-            let folio = await registrar_tipo(req.body.nuevo_tipo);
-            data.tipo = folio;
-        }
-
-        if (data.categoria == 'other'){
-            let folio = await registrar_categoria(req.body.nueva_categoria);
-            data.categoria = folio;
-        }
-
-        let relacion = {
-            marca: data.marca,
-            proveedor: proveedor
-        }
-
-        await crear_relacion_marca_proveedor(relacion);
-        await registrar_producto(data);
-        let ruta = `/proveedores/perfil?proveedor=${proveedor}` 
-        res.redirect(ruta)
-        return next()
-           
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-
-//CRUD PARA LA GESTION DE PROVEEDORES
-exports.selectProvs = async(req, res, next) =>{
-    try {
-        conexion.query("SELECT * FROM cat014_proveedores", (error, filas)=>{
-            if(error){
-                throw error;
-            }else{
-                req.proveedores = filas
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.selectProveedor = async(req, res, next) =>{
-    try {
-        conexion.query("SELECT * FROM cat014_proveedores WHERE folio = ?", [req.query.proveedor], (error, fila)=>{
-            if(error){
-                throw error;
-            }else{
-                req.proveedor = fila
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.selectMarcasProveedor = async(req, res, next)=>{
-    try {
-        conexion.query("SELECT * FROM marca_proveedor_view001 WHERE folio_proveedor = ?", [req.query.proveedor], (error, filas)=>{
-            if(error){
-                throw error
-            }else{
-                req.marcas = filas
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.selectProductosProveedor = async(req, res, next)=>{
-    try {
-        conexion.query("SELECT * FROM productos_proveedor_view001 WHERE folio_proveedor = ?", [req.query.proveedor], (error, fila)=>{
-            if(error){throw error}
-            else{
-                req.productos = fila
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-
-exports.relateMarcaProveedor = async(req, res, next)=>{
-    try {
-        let data = {
-            marca: req.body.marca,
-            proveedor: req.body.proveedor
-        }
-
-        if(data.marca == 'other'){
-            let folio = await registrar_marca(req.body.nueva_marca);
-            data.marca = folio;
-        }
-
-        let ruta = `/proveedores/perfil?proveedor=${data.proveedor}` 
-        
-        await crear_relacion_marca_proveedor(data);
-        res.redirect(ruta)
-        return next()
-        
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-
 exports.deleteMarcaProveedor = async(req, res, next)=>{
     try {
         let registro = req.query.registro
@@ -269,47 +173,6 @@ exports.deleteMarcaProveedor = async(req, res, next)=>{
                 return next()
             }
         })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.editProv = async(req, res, next) =>{
-    try {
-        let folio  = req.body.folio
-        let nombre = req.body.nombre
-        let web    = req.body.web
-
-        let sql = "UPDATE cat014_proveedores SET nombre = ?, web = ? WHERE folio = ?"
-
-        conexion.query(sql, [nombre, web, folio], function(error, results){
-            if(error){
-                throw error
-            }else{
-                res.redirect('/proveedores/administrar')
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.createProv = async(req, res, next) =>{
-    try {
-        let data = {
-            nombre: req.body.nombre,
-            web:    req.body.web
-        }
-        let insert = "INSERT INTO cat014_proveedores SET ?"
-        conexion.query(insert, data, function(error, results){
-            if(error){
-                throw error
-            }else{
-                res.redirect('/proveedores/administrar')
-                return next()    
-            }
-        })    
     } catch (error) {
         console.log(error)
         return next()
@@ -345,4 +208,4 @@ exports.deleteProv = async(req, res, next) =>{
         return next()
     }
 }
-//FIN DEL CRUD DE PROVEEDORES
+*/

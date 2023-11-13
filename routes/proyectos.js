@@ -1,34 +1,38 @@
-const express = require('express')
+import express from 'express'
+
+import { isAuthenticated } from '../controllers/authController.js'
+import { getCliente } from '../controllers/clientController.js'
+import { getUbicaciones } from '../controllers/ubicacionesController.js'
+import { createProyecto, getMisProyectos, getProyecto, getRolesProyecto, updateDocumentacionProyecto, updateGaleriaProyecto, updateNombreProyecto } from '../controllers/proyectosController.js'
+import { getEtapasProyecto } from '../controllers/etapasController.js'
+import { getContactosProyecto } from '../controllers/contactsController.js'
+import { getFacturasProyecto } from '../controllers/facturasController.js'
 
 const router = express.Router()
-const { authorized } = require('../database/db')
+
+router.get('/nuevo_proyecto', isAuthenticated, getCliente, getUbicaciones, (req, res)=>{
+    res.render('Proyectos/formCreateProyect', {user: req.user, cliente: req.cliente, ubicaciones: req.ubicaciones, ubicacion: req.query.ubicacion, flag: req.query.flag})
+})
+router.get('/perfil', isAuthenticated, getProyecto, getEtapasProyecto, getRolesProyecto, getContactosProyecto, getFacturasProyecto, (req, res) =>{
+    res.render('Proyectos/profileProyect', {user: req.user, proyecto: req.proyecto, etapas: req.etapas, roles: req.roles, contactos: req.contactos, facturas: req.facturas, cliente: req.query.cliente, ubicacion: req.query.ubicacion, flag: req.query.flag, permisos: req.query.permisos})
+})
+router.get('/mis_proyectos', isAuthenticated, getMisProyectos, (req, res)=>{
+    res.render('Proyectos/misProyectos', {user: req.user, proyectos: req.proyectos})
+})
+router.post('/nuevo_proyecto', createProyecto)
+router.get('/cambiar_nombre', updateNombreProyecto)
+router.get('/cambiar_documentacion', updateDocumentacionProyecto)
+router.get('/cambiar_galeria', updateGaleriaProyecto)
 
 
-const authController = require('../controllers/authController')
-const clientController = require('../controllers/clientController')
-const ubicacionesController = require('../controllers/ubicacionesController')
-const proyectosController = require('../controllers/proyectosController')
-const facturasController = require('../controllers/facturasController')
-const productosController = require('../controllers/productosController')
-const unidadesController = require('../controllers/unidadesController')
-const viaticosController = require('../controllers/viaticosController')
-const inventarioController = require('../controllers/inventarioController')
+export default router
 
 
+/*
 router.get('/administrar', authController.isAuthenticated, authController.selectProyectos, (req, res)=>{
     res.render('Proyectos/proyectosAdmin', {user: req.user, proyectos: req.proyectos, flag: req.flag})
 })
-router.get('/nuevo_proyecto', authController.isAuthenticated, clientController.selectClient, ubicacionesController.selectUbicaciones, (req, res)=>{
-    res.render('Proyectos/formCreateProyect', {user: req.user, cliente: req.cliente, ubicaciones: req.ubicaciones, ubicacion: req.query.ubicacion, flag: req.query.flag})
-})
-router.post('/nuevo_proyecto', proyectosController.createProject)
-router.get('/perfil', authController.isAuthenticated, authController.selectProyect, authController.selectEtapasProyecto, authController.selectRolesProyecto, authController.selectContactsProyect, facturasController.getFacturasProyecto, (req, res) =>{
-    res.render('Proyectos/profileProyect', {user: req.user, proyecto: req.proyecto, etapas: req.etapas, roles: req.roles, contactos: req.contactos, facturas: req.facturas, cliente: req.query.cliente, ubicacion: req.query.ubicacion, flag: req.query.flag, permisos: req.query.permisos})
-})
 
-router.get('/cambiar_nombre', proyectosController.cambiarNombreProyecto)
-router.get('/cambiar_documentacion', proyectosController.cambiarDocumentacionProyecto)
-router.get('/cambiar_galeria', proyectosController.cambiarGaleriaProyecto)
 
 //VIATICOS
 router.get('/viaticos', authController.isAuthenticated, authController.selectProyect, authController.datosViaticosProyectos, authController.selectDepositosProyecto, authController.selectComprobacionesProyecto, (req, res)=>{
@@ -60,11 +64,9 @@ router.get('/eliminar_inventario', inventarioController.returnAll2Invent)
 
 
 
-router.get('/mis_proyectos', authController.isAuthenticated, proyectosController.selectMisProyectos, (req, res)=>{
-    res.render('Proyectos/misProyectos', {user: req.user, proyectos: req.proyectos})
-})
+
 
 
 router.get('/eliminar_proyecto_ubicacion', proyectosController.deleteProyectoUbicacion)
 
-module.exports = router
+module.exports = router */

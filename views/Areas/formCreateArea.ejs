@@ -19,11 +19,7 @@
                         <div class="page-title">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-                                <% if(flag == 1){%>
-                                    <li class="breadcrumb-item"><a href="/ubicaciones/perfil?ubicacion=<%= ubicacion[0].folio %>&cliente=<%= clienteSelected %>&flag=<%= flag %>">Ubicacion</a></li>
-                                <%}else if(flag == 0){%>
-                                    <li class="breadcrumb-item"><a href="/ubicaciones/perfil?ubicacion=<%= ubicacion[0].folio %>&flag=<%= flag %>">Ubicacion</a></li>
-                                <%} %> 
+                                <li class="breadcrumb-item"><a href="/ubicaciones/perfil?ubicacion=<%= ubicacion[0].folio %>&cliente=<%= clienteSelected %>">Ubicacion</a></li>
                                 <li class="breadcrumb-item active">Registrar Area</li>
                             </ol>
                         </div>
@@ -39,7 +35,7 @@
                         </div>
                         <div class="card-body">
                             <div class="basic-elements">
-                                <form action="/areas/nueva_area" method="post">
+                                <form action="nueva_area" method="post">
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
@@ -59,7 +55,6 @@
                                         <div class="col-lg-12">
                                             <input type="number" class="form-control" value="<%= clienteSelected %>" id="cliente" name="cliente" hidden>
                                             <input type="number" class="form-control" value="<%= ubicacion[0].folio %>" id="planta" name="planta" readonly hidden>
-                                            <input type="number" class="form-control" value="<%= flag %>" id="flag" name="flag" hidden>
                                             <button type="submit" class="btn btn-primary m-b-10">REGISTRAR AREA</button>
                                         </div>
                                     </div>
