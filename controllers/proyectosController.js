@@ -124,7 +124,7 @@ const createProyecto = async(req, res, next) =>{
     try {
         const proyecto = {
             nombre: req.body.nombre,
-            ubicacion: req.body.ubicacion[0],
+            ubicacion: req.body.ubicacion,
             galeria: req.body.galeria,
             documentacion: req.body.documentacion,
             estatus: req.body.estatus
