@@ -368,7 +368,7 @@ const deleteDepositoAdministrador = async(req, res, next)=>{
 
         let saldo = 0
         await obtener_saldo_usuario(beneficiario).then(resultado=>{
-            saldo = parseFloat(resultado[0].saldo) - monto;
+            saldo = parseFloat(resultado) - monto;
         }).catch(error=>{
             throw('Ha ocurrido un error al obtener el saldo del usuario: ', error)
         })
