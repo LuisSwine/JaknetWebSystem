@@ -78,6 +78,7 @@ const updateNameUbicacion = async(req, res, next)=>{
         let ruta = ''
         if(req.query.flag == 1){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&cliente=${req.query.cliente}&flag=1`}
         else if(req.query.flag == 0){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&flag=0`}
+        else{ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&cliente=${req.query.cliente}`}
 
         await cambiar_nombre_ubicacion(req.query.nombre, req.query.ubicacion).then(_=>{
             res.redirect(ruta)
@@ -96,6 +97,7 @@ const updateDireccionUbicacion = async(req, res, next)=>{
         let ruta = ''
         if(req.query.flag == 1){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&cliente=${req.query.cliente}&flag=1`}
         else if(req.query.flag == 0){ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&flag=0`}
+        else{ruta = `/ubicaciones/perfil?ubicacion=${req.query.ubicacion}&cliente=${req.query.cliente}`}
         
         await cambiar_direccion_ubicacion(req.query.direccion, req.query.ubicacion).then(_=>{
             res.redirect(ruta)
