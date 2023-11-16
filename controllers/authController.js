@@ -391,64 +391,8 @@ function checkMovimientos(usuario){
 //FIN DE ROLES
 
 //VIATICOS PROYECTO
-    export asyncfunction     datosViaticosProyectos(req, res, next){
-        try {
-            let proyecto  = req.query.proyecto
-            let datos = {
-                gastado: 0,
-                comprobado: 0
-            }
-            _query("SELECT SUM(monto) as suma_depositos FROM viaticos_depositos_view001 WHERE proyecto = ?", [proyecto], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    datos.gastado = 0 + fila[0].suma_depositos
-                    _query("SELECT SUM(monto) as suma_comprobado FROM viaticos_comprobaciones_view001 WHERE proyecto = ?", [proyecto], (error2, fila2)=>{
-                        if(error2){
-                            throw error2
-                        }else{
-                            datos.comprobado = 0 + fila2[0].suma_comprobado
-                            req.datos = datos
-                            return next()
-                        }
-                    })
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    export asyncfunction     selectDepositosProyecto(req, res, next){
-        try {
-            _query("SELECT * FROM viaticos_depositos_view001 WHERE proyecto = ?", [req.query.proyecto], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    req.depositos = fila
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    export asyncfunction     selectComprobacionesProyecto(req, res, next){
-        try {
-            _query("SELECT * FROM viaticos_comprobaciones_view001 WHERE proyecto = ?", [req.query.proyecto], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    req.comprobaciones = fila
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
+    
+    
     
 //CLAVES DE SEGUIMIENTO
     

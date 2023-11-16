@@ -242,6 +242,17 @@ const registrar_operacion = (operacion)=>{
         })
     })
 }
+const definir_presupuesto_proyecto = (presupuesto, proyecto)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("UPDATE cat009_proyectos SET presupuesto = ? WHERE folio = ?", [presupuesto, proyecto], (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
 const actualizar_saldo = (usuario, saldo)=>{
     return new Promise ((resolve,reject)=>{
         conexion.query("UPDATE cat001_usuarios SET saldo = ? WHERE folio = ?", [saldo, usuario], (error, _)=>{
@@ -325,6 +336,7 @@ export {
     obtener_depositos_usuario_definido,
     registrar_clave,
     registrar_operacion,
+    definir_presupuesto_proyecto,
     actualizar_saldo,
     validar_comprobantes_deposito,
     eliminar_clave,

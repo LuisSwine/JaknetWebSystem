@@ -27,7 +27,8 @@ import {
     obtener_comprobantes_usuario_definido,
     obtener_comprobantes_usuario,
     obtener_claves_usuario,
-    obtener_claves_usuario_view
+    obtener_claves_usuario_view,
+    definir_presupuesto_proyecto
 } from '../models/Viatico.js'
 
 function formatoFecha(fecha, formato) {
@@ -338,6 +339,58 @@ const assignViaticos = async(req, res, next)=>{
         return next()
     }
 }
+const assignViaticosProyecto = async(req, res, next)=>{
+    try {
+        const ruta = calculateRutaProy(req.body.cliente, req.body.ubicacion, req.body.proyecto, req.body.flag, req.body.permisos)
+        const fecha = new Date()
+        const fechaHoy = formatoFecha(fecha, 'yymmddhhnnss')
+
+        const clave = {
+            proyecto: req.body.proyecto,
+            clave: `${req.body.id_bene}VIATICOS${fechaHoy}${req.body.proyecto}`,
+            monto: req.body.monto,
+            fecha: req.body.fecha,
+            usuario: req.body.id_bene,
+            uso: req.body.uso
+        }
+        const operacion = {
+            tipo_operacion: 1,
+            id_bene: req.body.id_bene,
+            beneficiario: req.body.beneficiario,
+            emisor: req.body.emisor,
+            enlace: req.body.enlace, 
+            concepto: req.body.concepto,
+            clave: 0,
+            fecha: req.body.fecha,
+            monto: req.body.monto
+        }
+
+        await registrar_clave(clave).catch(error=>{
+            throw('Ha ocurrido un error al registrar la clave para el movimiento: ', error)
+        });
+
+        await obtener_clave(clave.clave).then(resultado=>{
+            operacion.clave = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener la clave del movimiento recien registrado: ', error)
+        })
+        await registrar_operacion(operacion).catch(error=>{
+            throw('Ha ocurrido un error al registrar correctamente la operación: ', error)
+        });
+        let saldo = 0
+        await obtener_saldo_usuario(operacion.id_bene).then(resultado=>{
+            saldo = resultado + parseFloat(operacion.monto)
+        })
+        await actualizar_saldo(operacion.id_bene, saldo).catch(error=>{
+            throw('Ha ocurrido un error al actualizar el saldo del usuario: ', error)
+        });
+        res.redirect(ruta)
+        return next() 
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
 const deleteDepositoAdministrador = async(req, res, next)=>{
     try{
         const clave = req.query.clave
@@ -480,6 +533,84 @@ const deleteComprobanteClaveGrl = async(req, res, next)=>{
         return next()
     }
 }
+const deleteDepositoProyecto = async(req, res, next)=>{
+    try {
+        const clave = req.query.clave
+        const deposito = req.query.deposito
+        const beneficiario = req.query.bene
+        const monto =  parseFloat(req.query.monto)
+        const ruta = calculateRutaProy(req.query.cliente, req.query.ubicacion, req.query.proyecto, req.query.flag, req.query.permisos)
+
+        //Validamos que no existan comprobaciones del deposito
+
+        let hasComprobante = true
+
+        await validar_comprobantes_deposito(clave).then(resultado=>{
+            hasComprobante = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al validar los comprobantes del desposito: ', error)
+        })
+
+        if(hasComprobante){
+            res.redirect(ruta)
+            return next()
+        }
+
+        await eliminar_deposito(deposito).catch(error=>{
+            throw('Ha ocurrido un error al eliminar el deposito: ', error)
+        })
+
+        await eliminar_clave(clave).catch(error=>{
+            throw('Ha ocurrido un error al eliminar la clave del movimiento: ', error)
+        })
+
+        let saldo = 0
+        await obtener_saldo_usuario(beneficiario).then(resultado=>{
+            saldo = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener el saldo del usuario: ', error)
+        })
+
+        let nuevoSaldo = parseFloat(saldo) - monto;
+        if(nuevoSaldo < 0) nuevoSaldo = 0;
+
+        await actualizar_saldo(beneficiario, nuevoSaldo).catch(error=>{
+            throw('Ha ocurrido un error al actualizar el saldo del usuario: ', error)
+        })
+
+        res.redirect(ruta)
+        return next()
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const deleteComprobanteProyecto = async(req, res, next)=>{
+    try {
+        const comprobante = req.query.comprobante
+        const emisor = req.query.emisor
+        const monto =  parseFloat(req.query.monto)
+        const ruta = calculateRutaProy(req.query.cliente, req.query.ubicacion, req.query.proyecto, req.query.flag, req.query.permisos)
+
+        await eliminar_operacion(comprobante).catch(error=>{
+            throw('Ha ocurrido un error al eliminar el comprobante de las operaciones: ', error)
+        })
+        let saldo = 0
+        await obtener_saldo_usuario(emisor).then(resultado=>{
+            saldo = monto + parseFloat(resultado)
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener el saldo del usuario: ', error)
+        })
+        await actualizar_saldo(emisor, saldo).catch(error=>{
+            throw('Ha ocurrido un error al actualizar el saldo del usuario: ', error)
+        })
+        res.redirect(ruta)
+        return next()
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
 const setComprobante = async(req, res, next)=>{
     try {
         const data = {
@@ -515,6 +646,24 @@ const setComprobante = async(req, res, next)=>{
         return next()
     }
 }
+const setPresupuestoProyecto = async(req, res, next)=>{
+    try {
+        const proyecto = req.query.proyecto
+        const presupuesto = req.query.presupuesto
+
+        const ruta = calculateRutaProy(req.query.cliente, req.query.ubicacion, req.query.proyecto, req.query.flag, req.query.permisos)
+
+        await definir_presupuesto_proyecto(presupuesto, proyecto).catch(error=>{
+            throw('Ha ocurrido un error al definir el presupuesto del proyecto para los viáticos: ', error)
+        })
+
+        res.redirect(ruta)
+        return next()
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
 
 export {
     getEstadisticasViaticos,
@@ -529,12 +678,16 @@ export {
     getClavesViewUsuario,
     selectLastMoves,
     assignViaticos,
+    assignViaticosProyecto,
     deleteDepositoAdministrador,
     deleteComprobanteAdministrador,
     deleteComprobante,
     deleteComprobanteClavePer,
     deleteComprobanteClaveGrl,
-    setComprobante
+    deleteDepositoProyecto,
+    deleteComprobanteProyecto,
+    setComprobante,
+    setPresupuestoProyecto
 }
 
 
@@ -551,117 +704,9 @@ export {
 
 
 //VIATICOS A NIVEL PROYECTO
-    export asyncfunction     definirPresupuesto(req, res, next){
-        try {
-            let proyecto = req.query.proyecto
-            let presupuesto = req.query.presupuesto
-
-            let ruta = calculateRutaProy(req.query.cliente, req.query.ubicacion, req.query.proyecto, req.query.flag, req.query.permisos)
-
-            _query("UPDATE cat009_proyectos SET presupuesto = ? WHERE folio = ?", [presupuesto, proyecto], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    res.redirect(ruta)
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    export asyncfunction     deleteDepositoProyect(req, res, next){
-        try {
-            const clave = req.query.clave
-            const deposito = req.query.deposito
-            const beneficiario = req.query.bene
-            const monto =  parseFloat(req.query.monto)
-            const ruta = calculateRutaProy(req.query.cliente, req.query.ubicacion, req.query.proyecto, req.query.flag, req.query.permisos)
-
-            //Validamos que no existan comprobaciones del deposito
-            _query("SELECT folio FROM viaticos_comprobaciones_view001 WHERE folio_clave = ?", [clave], (err, fila1)=>{
-                if(err){
-                    throw err
-                }else{
-                    if(fila1.length === 0){
-                        //Si no existen comprobaciones eliminamos el deposito
-                        _query("DELETE FROM cat022_operaciones WHERE folio = ?", [deposito], (err2, fila2)=>{
-                            if(err2){
-                                throw err2
-                            }else{
-                                //Elinamos la clave de seguimiento
-                                _query("DELETE FROM cat021_claves_seguimiento WHERE folio = ?", [clave], (err5, fila5)=>{
-                                    if(err5){
-                                        throw err5
-                                    }else{
-                                        //Consultamos el saldo actual del beneficiario
-                                        _query("SELECT saldo FROM cat001_usuarios WHERE folio = ?", [beneficiario], (err3, fila3)=>{
-                                            if(err3){
-                                                throw err3
-                                            }else{
-                                                //Calculamos el nuevo saldo del beneficiario.
-                                                let nuevoSaldo = parseFloat(fila3[0].saldo) - monto;
-                                                if(nuevoSaldo < 0) nuevoSaldo = 0;
-                                                //Editamos el saldo del beneficiario
-                                                _query("UPDATE cat001_usuarios SET saldo = ? WHERE folio = ?", [nuevoSaldo, beneficiario], (err4, fila4)=>{
-                                                    if(err4){
-                                                        throw err4
-                                                    }else{
-                                                        res.redirect(ruta)
-                                                        return next()
-                                                    }
-                                                })
-                                            }
-                                        })
-                                    }
-                                }) 
-                            }
-                        })
-                    }else{
-                        res.redirect(ruta)
-                        return next()
-                    }
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    export asyncfunction     deleteComprobanteProyecto(req, res, next){
-        try {
-            const comprobante = req.query.comprobante
-            const emisor = req.query.emisor
-            const monto =  parseFloat(req.query.monto)
-            const ruta = calculateRutaProy(req.query.cliente, req.query.ubicacion, req.query.proyecto, req.query.flag, req.query.permisos)
-
-            _query("DELETE FROM cat022_operaciones WHERE folio = ?", [comprobante], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    _query("SELECT saldo FROM cat001_usuarios WHERE folio = ?", [emisor], (error2, fila2)=>{
-                        if(error2){
-                            throw error2
-                        }else{
-                            let nuevoSaldo = monto + parseFloat(fila2[0].saldo)
-                            _query("UPDATE cat001_usuarios SET saldo = ? WHERE folio = ?", [nuevoSaldo, emisor], (error3, fila3)=>{
-                                if(error3){
-                                    throw error3
-                                }else{
-                                    res.redirect(ruta)
-                                    return next()
-                                }
-                            })
-                        }
-                    })
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
+    
+   
+    
 //FIN DE VIATICOS A NIVEL PROYECTO
 
 //VIATICOS A NIVEL ADMINISTRACION
@@ -670,46 +715,7 @@ export {
 
     
 
-    const assignViaticosProyecto = async(req, res, next)=>{
-    try {
-        const ruta = calculateRutaProy(req.body.cliente, req.body.ubicacion, req.body.proyecto, req.body.flag, req.body.permisos)
-        const fecha = new Date()
-        const fechaHoy = formatoFecha(fecha, 'yymmddhhnnss')
-
-        let clave = {
-            proyecto: req.body.proyecto,
-            clave: `${req.body.id_bene}VIATICOS${fechaHoy}${req.body.proyecto}`,
-            monto: req.body.monto,
-            fecha: req.body.fecha,
-            usuario: req.body.id_bene,
-            uso: req.body.uso
-        }
-        let operacion = {
-            tipo_operacion: 1,
-            id_bene: req.body.id_bene,
-            beneficiario: req.body.beneficiario,
-            emisor: req.body.emisor,
-            enlace: req.body.enlace, 
-            concepto: req.body.concepto,
-            clave: 0,
-            fecha: req.body.fecha,
-            monto: req.body.monto
-        }
-
-        await registrar_clave(clave);
-        operacion.clave = await obtener_clave(clave.clave);
-        await registrar_operacion(operacion);
-        let saldo = await obtener_saldo_usuario(operacion.id_bene)
-        let nuevoSaldoBene = parseFloat(saldo) + parseFloat(operacion.monto)
-        await actualizar_saldo(operacion.id_bene, nuevoSaldoBene);
-        res.redirect(ruta)
-        return next() 
-
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
+    
 
     
     

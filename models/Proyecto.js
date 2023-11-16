@@ -77,6 +77,61 @@ const seleccionar_mis_proyectos = (usuario)=>{
         })
     })
 }
+const seleccionar_inversion_proyecto = (proyecto)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT SUM(monto) as suma_depositos FROM viaticos_depositos_view001 WHERE proyecto = ?", [proyecto], (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve(fila)
+            }
+        })
+    })
+}
+const seleccionar_suma_comprobada_proyecto =(proyecto)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT SUM(monto) as suma_comprobado FROM viaticos_comprobaciones_view001 WHERE proyecto = ?", [proyecto], (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve(fila)
+            }
+        })
+    })
+} 
+const seleccionar_depositos_proyecto = (proyecto)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT * FROM viaticos_depositos_view001 WHERE proyecto = ?", [proyecto], (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve(fila)
+            }
+        })
+    })
+}
+const seleccionar_comprobaciones_proyecto = (proyecto)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT * FROM viaticos_comprobaciones_view001 WHERE proyecto = ?", [proyecto], (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve(fila)
+            }
+        })
+    })
+}
+const seleccionar_inventario_proyecto = (proyecto)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT * FROM material_proyecto_view001 WHERE folio_proyecto = ?", [proyecto], (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve(fila)
+            }
+        })
+    })
+}
 const crear_proyecto = (proyecto)=>{
     return new Promise((resolve, reject)=>{
         conexion.query("INSERT INTO cat009_proyectos SET ?", proyecto, (error, _)=>{
@@ -129,6 +184,11 @@ export {
     seleccionar_roles_proyecto,
     seleccionar_ubicacion_proyecto,
     seleccionar_mis_proyectos,
+    seleccionar_inversion_proyecto,
+    seleccionar_suma_comprobada_proyecto,
+    seleccionar_depositos_proyecto,
+    seleccionar_comprobaciones_proyecto,
+    seleccionar_inventario_proyecto,
     crear_proyecto,
     cambiar_nombre_proyecto,
     cambiar_documentacion_proyecto,

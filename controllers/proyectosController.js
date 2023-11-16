@@ -3,12 +3,17 @@ import {
     cambiar_galeria_proyecto,
     cambiar_nombre_proyecto, 
     crear_proyecto, 
+    seleccionar_comprobaciones_proyecto, 
+    seleccionar_depositos_proyecto, 
+    seleccionar_inventario_proyecto, 
+    seleccionar_inversion_proyecto, 
     seleccionar_mis_proyectos, 
     seleccionar_proyecto, 
     seleccionar_proyectos, 
     seleccionar_proyectos_cliente, 
     seleccionar_proyectos_ubicacion, 
-    seleccionar_roles_proyecto 
+    seleccionar_roles_proyecto, 
+    seleccionar_suma_comprobada_proyecto
 } from "../models/Proyecto.js";
 
 function calculateRuta(flag, ubicacion, cliente, proyecto, permisos){
@@ -103,7 +108,7 @@ const getRolesProyecto = async(req, _, next)=>{
         return next()
     }
 }
-const getMisProyectos = async(req, res, next)=>{
+const getMisProyectos = async(req, _, next)=>{
     try {
         const usuario = req.query.folio
 
@@ -115,6 +120,72 @@ const getMisProyectos = async(req, res, next)=>{
         })
 
         
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getDatosViaticosProyecto = async(req, _, next)=>{
+    try {
+        const proyecto  = req.query.proyecto
+        let datos = {
+            gastado: 0,
+            comprobado: 0
+        }
+
+        await seleccionar_inversion_proyecto(proyecto).then(resultado =>{
+            datos.gastado = 0 + resultado[0].suma_depositos
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener la inversion realizada en viaticos en el proyeto: ', error)
+        })
+        await seleccionar_suma_comprobada_proyecto(proyecto).then(resultado=>{
+            datos.comprobado = 0 + resultado[0].suma_comprobado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener la suma de las comprobaciones del proyecto: ', error)
+        })
+
+        req.datos = datos
+        return next()
+
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getDepositosProyecto = async(req, _, next)=>{
+    try {
+        await seleccionar_depositos_proyecto(req.query.proyecto).then(resultado=>{
+            req.depositos = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener los depositos del proyecto: ', error)
+        })
+        return next()
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getComprobacionesProyecto = async(req, _, next)=>{
+    try {
+        await seleccionar_comprobaciones_proyecto(req.query.proyecto).then(resultado=>{
+            req.comprobaciones = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener las comprobaciones de los movimientos del proyecto: ', error)
+        })
+        return next()
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const getInventarioProyecto = async(req, _, next)=>{
+    try {
+        await seleccionar_inventario_proyecto(req.query.proyecto).then(resultado=>{
+            req.inventario = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener el inventario del proyecto: ', error)
+        })
+        return next()
     } catch (error) {
         console.log(error)
         return next()
@@ -207,6 +278,10 @@ export {
     getProyecto,
     getRolesProyecto,
     getMisProyectos,
+    getDatosViaticosProyecto,
+    getDepositosProyecto,
+    getComprobacionesProyecto,
+    getInventarioProyecto,
     createProyecto,
     updateNombreProyecto,
     updateDocumentacionProyecto,
