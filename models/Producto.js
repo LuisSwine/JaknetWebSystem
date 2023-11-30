@@ -116,6 +116,62 @@ const editar_producto = (descripcion, categoria, tipo, marca, precio, enlace, fo
         })
     })
 }
+const validar_producto_inventario = (producto)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT folio FROM cat020_inventario WHERE producto = ?", producto, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                if(fila.length === 0){
+                    resolve(false)
+                }else{
+                    resolve(true)
+                }
+            }
+        })
+    })
+}
+const validar_producto_proyecto = (producto)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT folio FROM op011_material_proyecto WHERE producto = ?", producto, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                if(fila.length === 0){
+                    resolve(false)
+                }else{
+                    resolve(true)
+                }
+            }
+        })
+    })
+}
+const validar_producto_usuario = (producto)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT folio FROM op013_material_usuario WHERE producto = ?", producto, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                if(fila.length === 0){
+                    resolve(false)
+                }else{
+                    resolve(true)
+                }
+            }
+        })
+    })
+}
+const eliminar_producto = (producto)=>{
+    return new Promise((resolve,reject)=>{
+        conexion.query("DELETE FROM cat016_productos WHERE folio = ?", producto, (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
 export {
     seleccionar_categorias_productos,
     seleccionar_tipos_productos,
@@ -126,5 +182,9 @@ export {
     registrar_tipo,
     registrar_categoria,
     registrar_producto,
-    editar_producto
+    editar_producto,
+    validar_producto_inventario,
+    validar_producto_proyecto,
+    validar_producto_usuario,
+    eliminar_producto
 }

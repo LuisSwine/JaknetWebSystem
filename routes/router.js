@@ -17,11 +17,11 @@ import Almacen    from './almacenes.js'
 import Inventario from './inventario.js'
 import Unidad     from './unidades.js'
 import Viatico    from './viaticos.js'
+import Asistencia from './asistencias.js'
 
 
 /* 
 import Ubicacion  from './ubicaciones.js'
-import Asistencia from './asistencias.js'
 import Factura    from './facturas.js' 
 */
 
@@ -40,8 +40,8 @@ router.use ('/almacenes', Almacen)
 router.use('/inventario', Inventario)
 router.use('/unidades', Unidad)
 router.use('/viaticos', Viatico)
-/* 
 router.use('/asistencias', Asistencia)
+/* 
 router.use('/facturas', Factura) 
 */
 

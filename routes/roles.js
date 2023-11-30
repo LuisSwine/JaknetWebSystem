@@ -13,6 +13,4 @@ router.get('/asignar', isAuthenticated, getProyecto, getUsuarios, getRoles, (req
 router.post('/asignar', setRolProyect)
 router.get('/eliminar', deleteRol)
 
-
-
 export default router

@@ -44,10 +44,37 @@ const editar_area = (nombre, documentacion, folio)=>{
         })
     })
 }
-
+const validar_area_etapas = (area)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT * FROM op002_etapas WHERE area = ?", area, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                if(fila.length === 0){
+                    resolve(false)
+                }else{
+                    resolve(true)
+                }
+            }
+        })
+    })
+}
+const eliminar_area = (area)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("DELETE FROM cat008_areas WHERE folio = ?", area, (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
 export {
     seleccionar_areas,
     seleccionar_area,
     crear_area,
-    editar_area
+    editar_area,
+    validar_area_etapas,
+    eliminar_area
 }

@@ -1,6 +1,18 @@
-import { seleccionar_contactos_cliente, seleccionar_contactos_ubicaciones, crear_contacto, seleccionar_contacto, editar_contacto, verificar_contacto_ubicacion, asignar_contacto_a_ubicacion, eliminar_relacion_contacto_ubicacion } from "../models/Contacto.js";
+import { seleccionar_contactos_cliente, seleccionar_contactos_ubicaciones, crear_contacto, seleccionar_contacto, editar_contacto, verificar_contacto_ubicacion, asignar_contacto_a_ubicacion, eliminar_relacion_contacto_ubicacion, validar_contacto_ubicacion, eliminar_contacto } from "../models/Contacto.js";
 import { seleccionar_ubicacion_proyecto } from "../models/Proyecto.js";
 
+function showError(res, titulo, mensaje, ruta){
+    res.render('Error/showInfo', {
+        title: titulo,
+        alert: true,
+        alertTitle: 'INFORMACION',
+        alertMessage: mensaje,
+        alertIcon: 'info',
+        showConfirmButton: true,
+        timer: 8000,
+        ruta: ruta
+    })
+}
 const getContactos = async(req, _, next) =>{
     try {
         const cliente = req.query.cliente
@@ -174,6 +186,34 @@ const deleteAsignacionContacto = async(req, res, next)=>{
         return next()
     }
 }
+const deleteContacto = async(req, res, next) =>{
+    try {
+        const contacto = req.query.contacto
+        const ruta = `clientes/administrar?cliente=${req.query.cliente}`
+
+        let contact_has_ubicacion = null
+
+        await validar_contacto_ubicacion(contacto).then(resultado=>{
+            contact_has_ubicacion = resultado
+        }).catch(error=>{
+            throw (`Error al buscar si el contacto tiene una ubicación: `, error)
+        })
+
+        if(contact_has_ubicacion){
+            showError(res, 'ERROR', 'No se pudo eliminar al contacto pues es contacto de una ubicación: ', ruta)
+            return next()
+        }
+
+        await eliminar_contacto(contacto).catch(error=>{
+            throw('Error al borrar el contacto: ', error)
+        })
+        res.redirect(`/${ruta}`)
+        return next()
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
 export {
     getContactos,
     getContactosUbicacion,
@@ -182,71 +222,6 @@ export {
     createContacto,
     updateContacto,
     assign2Ubiacion,
-    deleteAsignacionContacto
+    deleteAsignacionContacto,
+    deleteContacto
 }
-
-/* 
-function showError(res, titulo, mensaje, ruta){
-    res.render('Error/showInfo', {
-        title: titulo,
-        alert: true,
-        alertTitle: 'INFORMACION',
-        alertMessage: mensaje,
-        alertIcon: 'info',
-        showConfirmButton: true,
-        timer: 8000,
-        ruta: ruta
-    })
-}
-
-
-//CRUD PARA LA GESTION DE CONTACTOS
-
-
-
-
-exports.deleteContact = async(req, res, next) =>{
-    try {
-        let contacto = req.query.contacto
-        let ruta = 'admincontactos'
-        if(req.query.flag == 1) ruta = `clientes/administrar?cliente=${req.query.cliente}`
-        //confirmamos que el contacto no este registrado en otra tabla
-        conexion.query("SELECT folio FROM cat013_cotizaciones WHERE contacto = ?", [contacto], (error, fila)=>{{
-            if(error){
-                throw error
-            }else{
-                if(fila.length === 0){
-                    conexion.query("SELECT folio FROM op015_contacto_ubicacion WHERE contacto = ?", [contacto], (error2, fila2)=>{
-                        if(error2){
-                            throw error2
-                        }else{
-                            if(fila2.length === 0){
-                                conexion.query("DELETE FROM cat006_contactos WHERE folio = ?", [contacto], function(error3, filas){
-                                    if(error3){
-                                        throw error3
-                                    }else{
-                                        res.redirect(`/${ruta}`)
-                                        return next()
-                                    }
-                                })
-                            }else{
-                                showError(res, 'ERROR', 'No se pudo eliminar al contacto pues se esta usando', ruta)
-                                return next()
-                            }
-                        }
-                    })
-                }else{
-                    showError(res, 'ERROR', 'No se pudo eliminar al contacto pues se esta usando', ruta)
-                    return next()
-                }
-            }
-        }})
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-//FIN DEL CRUD PARA LA GESTION DE CONTACTOS
-
-//RELACION CON UBICACION
- */

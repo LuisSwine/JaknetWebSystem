@@ -3,11 +3,13 @@ import express from 'express'
 import { isAuthenticated } from '../controllers/authController.js'
 import { getCliente } from '../controllers/clientController.js'
 import { getUbicaciones } from '../controllers/ubicacionesController.js'
-import { createProyecto, getComprobacionesProyecto, getDatosViaticosProyecto, getDepositosProyecto, getInventarioProyecto, getMisProyectos, getProyecto, getRolesProyecto, updateDocumentacionProyecto, updateGaleriaProyecto, updateNombreProyecto } from '../controllers/proyectosController.js'
+import { createProyecto, deleteProyectoUbicacion, getComprobacionesProyecto, getDatosViaticosProyecto, getDepositosProyecto, getInventarioProyecto, getMisProyectos, getProyecto, getRolesProyecto, updateDocumentacionProyecto, updateGaleriaProyecto, updateNombreProyecto } from '../controllers/proyectosController.js'
 import { getEtapasProyecto } from '../controllers/etapasController.js'
 import { getContactosProyecto } from '../controllers/contactsController.js'
 import { getFacturasProyecto } from '../controllers/facturasController.js'
 import { assignViaticosProyecto, deleteComprobanteProyecto, deleteDepositoProyecto, setPresupuestoProyecto } from '../controllers/viaticosController.js'
+import { getInventario, setInventarioProyecto, updateInventarioProyecto, deleteFromInventarioProyecto } from '../controllers/inventarioController.js'
+import { getUnidades } from '../controllers/unidadesController.js'
 
 const router = express.Router()
 
@@ -32,6 +34,10 @@ router.get('/exportar_datos', isAuthenticated, getDepositosProyecto, getComproba
 router.get('/inventario', isAuthenticated, getProyecto, getInventarioProyecto, (req, res)=>{
     res.render('InventarioProyectos/proyInventario', {user: req.user, proyecto: req.proyecto, inventario: req.inventario, flag: req.query.flag, ubicacion: req.query.ubicacion, cliente: req.query.cliente, permisos: req.query.permisos})
 })
+router.get('/mover_inventario', isAuthenticated, getProyecto, getInventario, getUnidades, (req,res)=>{
+    res.render('InventarioProyectos/formAddElements', {user: req.user, proyecto: req.proyecto, inventario: req.inventario, unidades: req.unidades, flag: req.query.flag, ubicacion: req.query.ubicacion, cliente: req.query.cliente, permisos: req.query.permisos})
+})
+router.post('/agregar', setInventarioProyecto)
 router.post('/asignar_viaticos', assignViaticosProyecto)
 router.post('/nuevo_proyecto', createProyecto)
 router.get('/cambiar_nombre', updateNombreProyecto)
@@ -40,24 +46,9 @@ router.get('/cambiar_galeria', updateGaleriaProyecto)
 router.get('/definir_presupuesto', setPresupuestoProyecto)
 router.get('/eliminar_deposito', deleteDepositoProyecto)
 router.get('/eliminar_comprobante', deleteComprobanteProyecto)
+router.get('/eliminar_inventario', deleteFromInventarioProyecto)
+router.get('/eliminar_proyecto_ubicacion', deleteProyectoUbicacion)
+router.get('/editar_inventario', updateInventarioProyecto)
 
 export default router
 
-
-/*
-router.get('/administrar', authController.isAuthenticated, authController.selectProyectos, (req, res)=>{
-    res.render('Proyectos/proyectosAdmin', {user: req.user, proyectos: req.proyectos, flag: req.flag})
-})
-
-//INVENTARIO
-router.post('/agregar', inventarioController.addProduct2Proyecto)
-
-router.get('/mover_inventario', authController.isAuthenticated, authController.selectProyect, authController.selectInvent, unidadesController.selectUnits, (req,res)=>{
-    res.render('InventarioProyectos/formAddElements', {user: req.user, proyecto: req.proyecto, inventario: req.inventario, unidades: req.unidades, flag: req.query.flag, ubicacion: req.query.ubicacion, cliente: req.query.cliente, permisos: req.query.permisos})
-})
-router.get('/editar_inventario', inventarioController.modificarInventProy)
-router.get('/eliminar_inventario', inventarioController.returnAll2Invent)
-
-router.get('/eliminar_proyecto_ubicacion', proyectosController.deleteProyectoUbicacion)
-
-module.exports = router */

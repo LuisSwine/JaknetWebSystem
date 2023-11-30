@@ -107,6 +107,21 @@ const validar_posesion_inventario_usuario = (usuario, producto)=>{
         })
     })
 }
+const validar_cantidad_proyecto =  (producto, proyecto)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT folio, cantidad FROM op011_material_proyecto WHERE proyecto = ? AND producto = ?", [proyecto, producto], (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                if(fila.length === 0){
+                    resolve(true);
+                }else{
+                    resolve(fila)
+                }
+            }
+        });    
+    })
+}
 const registrar_producto_en_almacen = (data)=>{
     return new Promise((resolve, reject)=>{
         conexion.query('INSERT INTO cat020_inventario SET ?', data, (error, _)=>{
@@ -121,6 +136,28 @@ const registrar_producto_en_almacen = (data)=>{
 const registrar_producto_en_usuario = (registro)=>{
     return new Promise ((resolve, reject)=>{
         conexion.query("INSERT INTO op013_material_usuario SET ?", registro, (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
+const registrar_movimiento_inventario_proyecto = (bitacora)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query('INSERT INTO op018_movs_invent_proy SET ?', bitacora, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve();
+            }
+        })
+    })
+}
+const registrar_producto_proyecto = (registrar)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("INSERT INTO op011_material_proyecto SET ?", registrar, (error, _)=>{
             if(error){
                 reject(error)
             }else{
@@ -151,6 +188,17 @@ const modificar_cantidad_usuario = (cantidad, folio)=>{
         })
     })
 }
+const modificar_cantidad_proyecto = (cantidad, folio)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("UPDATE op011_material_proyecto SET cantidad = ? WHERE folio = ?", [cantidad, folio], (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve();
+            }
+        })
+    })
+}
 const eliminar_del_inventario = (registro)=>{
     return new Promise((resolve, reject)=>{
         conexion.query('DELETE FROM cat020_inventario WHERE folio = ?', registro, (error, _)=>{
@@ -165,6 +213,17 @@ const eliminar_del_inventario = (registro)=>{
 const eliminar_del_inventario_usuario = (registro)=>{
     return new Promise((resolve,reject)=>{
         conexion.query('DELETE FROM op013_material_usuario WHERE folio = ?', registro, (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
+const eliminar_del_inventario_proyecto = (registro)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query('DELETE FROM op011_material_proyecto WHERE folio = ?', registro, (error, _)=>{
             if(error){
                 reject(error)
             }else{
@@ -217,6 +276,17 @@ const reporte_usuario_inventario = (usuario)=>{
         })
     })
 }
+const vaciar_almacen = (folio)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query('DELETE FROM cat020_inventario WHERE folio = ?', folio, (error, _)=>{
+            if(error){
+                reject(error);
+            }else{
+                resolve();
+            }
+        })
+    })
+}
 export {
     seleccionar_inventario,
     seleccionar_inventario_en_almacen,
@@ -226,15 +296,21 @@ export {
     seleccionar_primer_almacen,
     obtener_existencias_inventario,
     validar_existencia_inventario,
+    validar_cantidad_proyecto,
     validar_posesion_inventario_usuario,
     registrar_producto_en_almacen,
     registrar_producto_en_usuario,
+    registrar_movimiento_inventario_proyecto,
+    registrar_producto_proyecto,
     modificar_cantidad_almacen,
     modificar_cantidad_usuario,
+    modificar_cantidad_proyecto,
     eliminar_del_inventario,
     eliminar_del_inventario_usuario,
+    eliminar_del_inventario_proyecto,
     reporte_general_inventario_definido,
     reporte_general_inventario,
     reporte_usuario_inventario_definido,
-    reporte_usuario_inventario
+    reporte_usuario_inventario,
+    vaciar_almacen
 }

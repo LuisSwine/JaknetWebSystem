@@ -1,6 +1,6 @@
 import conexion from "../database/db.js";
 import { seleccionar_usuarios_asignados } from "../models/Rol.js";
-import { actualizar_asignacion, actualizar_estatus_tarea, asignar_estatus_tarea, asignar_tarea, crear_tarea, editar_tarea, eliminar_asignacion, eliminar_tarea, obtener_detalles_tarea, seleccionar_asignacion_tarea, seleccionar_tarea, seleccionar_tareas_etapa, seleccionar_tipos_tarea, validar_asignacion } from "../models/Tarea.js";
+import { actualizar_asignacion, actualizar_estatus_tarea, actualizar_reporte_tarea, asignar_estatus_tarea, asignar_tarea, crear_tarea, editar_tarea, eliminar_asignacion, eliminar_tarea, entregar_tarea, obtener_detalles_tarea, registrar_reporte_tarea, seleccionar_asignacion_tarea, seleccionar_asignaciones_usuario, seleccionar_asignaciones_usuario_tablero, seleccionar_tarea, seleccionar_tareas_etapa, seleccionar_tipos_tarea, validar_asignacion, validar_reportes_tarea } from "../models/Tarea.js";
 
 function calculateRuta(flag, etapa, proyecto, ubicacion, cliente, permisos){
     let ruta = '';
@@ -59,6 +59,22 @@ const selectTarea = async(req, _, next)=>{
         return next()
     }
 }
+const selectInfoTareasUsuario = async(req, res, next)=>{
+    try {
+
+        const usuario = req.query.folio
+
+        await seleccionar_asignaciones_usuario(usuario).then(resultado=>{
+            req.tareas = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener las asignaciones del usuario: ', error)
+        })
+        return next()
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
 const createTarea = async(req, res, next)=>{
     try {
         let tarea = {
@@ -85,14 +101,14 @@ const createTarea = async(req, res, next)=>{
 const selectInfoTareasUserDashboard = async(req, _, next)=>{
     try {
         const usuario = req.query.folio
-        conexion.query("SELECT * FROM asignacion_usuario_view001 WHERE folio_usuario = ? ORDER BY folio_asignacion DESC LIMIT 10", usuario, (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                req.tareas = fila
-                return next()
-            }
+
+        await seleccionar_asignaciones_usuario_tablero(usuario).then(resultado=>{
+            req.tareas = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener los registros del tablero: ', error)
         })
+
+        return next()
     } catch (error) {
         console.log(error)
         return next()
@@ -331,12 +347,74 @@ const deleteTarea = async(req, res, next)=>{
         return next()
     }
 }
+const deliverTarea = async(req, _, next)=>{
+    try {
+        let ruta = ''
+        if(req.query.flag == 1){
+            ruta = `/misTareas?folio=${req.query.usuario}`
+        }else if(req.query.flag == 0){
+            ruta = `/?folio=${req.query.usuario}`
+        }
+
+        await entregar_tarea(req.query.tarea).catch(error=>{
+            throw('Ha ocurrido un error al marcar como completada la asiganción: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const loadTareaReporte = async(req, res, next)=>{
+    try {
+        const data = {
+            enlace: req.query.url,
+            tarea: req.query.tarea,
+            usuario:  req.query.usuario,
+            fecha: new Date(),
+            hora: new Date()
+        }
+        let ruta = ''
+        if(req.query.flag == 1){
+            ruta = `/tareas/mis_tareas?folio=${data.usuario}`
+        }else if(req.query.flag == 0){
+            ruta = `/?folio=${data.usuario}`
+        }
+
+        let has_report = null
+        await validar_reportes_tarea(data.tarea, data.usuario).then(resultado=>{
+            has_report = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al validar los reportes de la tarea: ', error)
+        })
+
+        if(!has_report){
+            await registrar_reporte_tarea(data).catch(error=>{
+                throw('Ha ocurrido un error al registrar el reporte de la tarea: ', error)
+            })
+        }else{
+            let folio = has_report[0].folio
+            await actualizar_reporte_tarea(data.enlace, data.fecha, data.hora, folio).catch(error=>{
+                throw('Ha ocurrido un error al actualizar el reporte de la tarea: ', error)
+            })
+        }
+
+        await entregar_tarea(data.tarea).catch(error=>{
+            throw('Ha ocurrido un error al completar la entrega de la tarea: ', error)
+        })
+        res.redirect(ruta)
+        return next() 
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
 
 export {
     selectTareasEtapa,
     selectInfoTareasUserDashboard,
     selectTiposTarea,
     selectTarea,
+    selectInfoTareasUsuario,
     obtenerReportes,
     createTarea,
     updateTarea,
@@ -346,282 +424,7 @@ export {
     assignTarea,
     showDetailsTarea,
     updateAsignacion,
-    deleteTarea
+    deleteTarea,
+    deliverTarea,
+    loadTareaReporte
 }
-
-/* 
-
-//TAREAS
-   
-    
-    
-    export asyncfunction     createTareaAdmin(req, res, next){
-        try {
-            let data = {
-                descripcion: req.body.descripcion,
-                etapa: req.body.etapa,
-                fecha_entrega: req.body.fecha_entrega,
-                estatus: req.body.estatus,
-                tipo: req.body.tipo
-            }
-            let ruta = 'admintareas'
-
-            _query("INSERT INTO op003_tareas SET ?", data, (error, results)=>{
-                if(error){
-                    throw error
-                }else{
-                    res.redirect(`/${ruta}`)
-                    return next()    
-                }
-            })    
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    
-    
-    
-    
-    export asyncfunction     selectTareasAdmin(req, res, next){
-        try {
-            _query("SELECT * FROM tareas_view002", (error, fila)=>{
-                if(error){
-                    throw error;
-                }else{
-                    req.tareas = fila
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-
-    
-    
-    
-    
-    //FIN DE TAREAS
-
-//DASHBOARD DE PERFIL
-    
-    export asyncfunction     obtenerReportesAdmin(req, res, next){
-        try {
-            _query("SELECT * FROM op004_reporte", (error,fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    req.reportes = fila
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    export asyncfunction     asignarTareaAdmin(req, res, next){
-        try {
-            let data ={
-                usuario: req.body.usuario,
-                tarea: req.body.tarea
-            }
-            _query("INSERT INTO op014_tarea_usuario SET ?", data, function(error, results){
-                if(error){
-                    throw error
-                }else{
-                    _query("UPDATE op003_tareas SET estatus = 1 WHERE folio = ?", [data.tarea], (miss, good)=>{
-                        if(miss){
-                            throw miss
-                        }else{
-                            res.redirect('/admintareas')
-                            return next()
-                        }
-                    })  
-                }
-            }) 
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-
-//SECCION DE "MIS TAREAS"
-    export asyncfunction     selectInfoTareasUser(req, res, next){
-        try {
-            _query("SELECT * FROM asignacion_usuario_view001 WHERE folio_usuario = ? ORDER BY folio_asignacion DESC", [req.query.folio], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    req.tareas = fila
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-
-//FUNCIONES GENERALES "MIS TAREAS" & DASHBOARD DE PERFIL
-    export asyncfunction     entregarTarea(req, res, next){
-        try {
-            let ruta = ''
-            if(req.query.flag == 1){
-                ruta = `/misTareas?folio=${req.query.usuario}`
-            }else if(req.query.flag == 0){
-                ruta = `/?folio=${req.query.usuario}`
-            }
-            _query('UPDATE op003_tareas SET estatus = 2 WHERE folio = ?', [req.query.tarea], (error2, fila2)=>{
-                if(error2){
-                    throw error2
-                }else{
-                    res.redirect(ruta)
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    export asyncfunction     subirReporteTarea(req, res, next){
-        try {
-            let data = {
-                enlace: req.query.url,
-                tarea: req.query.tarea,
-                usuario:  req.query.usuario,
-                fecha: new Date(),
-                hora: new Date()
-            }
-            let ruta = ''
-            if(req.query.flag == 1){
-                ruta = `/tareas/mis_tareas?folio=${data.usuario}`
-            }else if(req.query.flag == 0){
-                ruta = `/?folio=${data.usuario}`
-            }
-
-            //Validamos si ya existe un reporte
-            _query("SELECT * FROM op004_reporte WHERE tarea = ? AND usuario = ?", [data.tarea, data.usuario], (err, fil)=>{
-                if(err){
-                    throw err
-                }else{
-                    if(fil.length === 0){
-                        //No existe, simplemente agregamos
-                        _query('INSERT INTO op004_reporte SET ?', data, (error, fila)=>{
-                            if(error){
-                                throw error
-                            }else{
-                                _query('UPDATE op003_tareas SET estatus = 2 WHERE folio = ?', [data.tarea], (error2, fila2)=>{
-                                    if(error2){
-                                        throw error2
-                                    }else{
-                                        res.redirect(ruta)
-                                        return next()
-                                    }
-                                })
-                            }
-                        })
-                    }else{
-                        //Hacemos un update primero
-                        let folio = fil[0].folio
-                        _query("UPDATE op004_reporte SET enlace = ?, fecha = ?, hora = ? WHERE folio = ?", [data.enlace, data.fecha, data.hora, folio], (error3, fila3)=>{
-                            if(error3){
-                                throw error3
-                            }else{
-                                _query('UPDATE op003_tareas SET estatus = 2 WHERE folio = ?', [data.tarea], (error2, fila2)=>{
-                                    if(error2){
-                                        throw error2
-                                    }else{
-                                        res.redirect(ruta)
-                                        return next()
-                                    }
-                                })
-                            }
-                        })
-                    }
-                }
-            })
-
-            
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-//ADMINISTRADOR
-    export asyncfunction     declineReportAdmin(req, res, next){
-        try {
-            let tarea = req.query.tarea
-
-            //Primero eliminamos el reporte
-            _query("DELETE FROM op004_reporte WHERE tarea = ?", [tarea], (error1, fila1)=>{
-                if(error1){
-                    throw error1
-                }else{
-                    _query("UPDATE op003_tareas SET estatus = 6 WHERE folio = ?", [tarea], (error2, fila2)=>{
-                        if(error2){
-                            throw error2
-                        }else{
-                            res.redirect('/admintareas')
-                            return next()
-                        }
-                    })
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    export asyncfunction     checkAsIncAdmin(req, res, next){
-        try {
-            let tarea = req.query.tarea
-
-            _query("UPDATE op003_tareas SET estatus = 5 WHERE folio = ?", [tarea], (error2, fila2)=>{
-                if(error2){
-                    throw error2
-                }else{
-                    res.redirect('/admintareas')
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    export asyncfunction     deleteTareaAdmin(req, res, next){
-        try {
-            let tarea = req.query.tarea
-
-            //Primero validamos y eliminamos el reporte
-            _query("DELETE FROM op004_reporte WHERE tarea = ?", [tarea], (error1, fila1)=>{
-                if(error1){
-                    throw error1
-                }else{
-                    //Eliminamos la Asignacion 
-                    _query("DELETE FROM op014_tarea_usuario WHERE tarea = ?", [tarea], (error2, fila2)=>{
-                        if(error2){
-                            throw error2
-                        }else{
-                            //Eliminamos la tarea
-                            _query("DELETE FROM op003_tareas WHERE folio = ?", [tarea], (error3, fila3)=>{
-                                if(error3){
-                                    throw error3
-                                }else{
-                                    res.redirect('/admintareas')
-                                    return next()
-                                }
-                            })
-                        }
-                    })
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    } */

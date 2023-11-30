@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { isAuthenticated } from '../controllers/authController.js'
-import { createProducto, editProducto, selectCategoriasProductos, selectProducto, selectProductos, selectTipoProducto } from "../controllers/productosController.js";
+import { createProducto, deleteProducto, editProducto, selectCategoriasProductos, selectProducto, selectProductos, selectTipoProducto } from "../controllers/productosController.js";
 import { getMarcas } from '../controllers/marcasController.js';
 import { getProveedores } from '../controllers/proveedoresControllers.js';
 
@@ -18,24 +18,6 @@ router.get('/editar', isAuthenticated, selectProducto, selectCategoriasProductos
 })
 router.post('/nuevo_producto', createProducto)
 router.post('/editar', editProducto)
+router.get('/eliminar', deleteProducto)
 
 export default router
-
-
-/* const express = require('express')
-
-const { authorized } = require('../database/db')
-
-
-const authController = require('../controllers/authController')
-const productosController = require('../controllers/productosController')
-const marcasController = require('../controllers/marcasController')
-const proveedoresController = require('../controllers/proveedoresControllers')
-
-
-router.get('/eliminar', productosController.deleteProduct)
-
-module.exports = router;
-
-
- */

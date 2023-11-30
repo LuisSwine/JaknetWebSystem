@@ -70,6 +70,21 @@ const verificar_contacto_ubicacion = (ubicacion, contacto)=>{
         })
     })
 }
+const validar_contacto_ubicacion = (contacto)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT folio FROM op015_contacto_ubicacion WHERE contacto = ?", contacto, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                if(fila.length === 0){
+                    resolve(false)
+                }else{
+                    resolve(true)
+                }
+            }
+        })
+    })
+}
 const asignar_contacto_a_ubicacion = (registro)=>{
     return new Promise ((resolve ,reject ) =>{
         conexion.query("INSERT INTO op015_contacto_ubicacion SET ?", registro, (error, _)=>{
@@ -92,6 +107,17 @@ const eliminar_relacion_contacto_ubicacion = (relacion)=>{
         })
     })
 }
+const eliminar_contacto = (contacto)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("DELETE FROM cat006_contactos WHERE folio = ?", contacto, (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
 
 export {
     seleccionar_contactos_cliente,
@@ -100,6 +126,8 @@ export {
     crear_contacto,
     editar_contacto,
     verificar_contacto_ubicacion,
+    validar_contacto_ubicacion,
     asignar_contacto_a_ubicacion,
-    eliminar_relacion_contacto_ubicacion
+    eliminar_relacion_contacto_ubicacion,
+    eliminar_contacto
 }

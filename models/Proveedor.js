@@ -93,7 +93,43 @@ const validar_relacion_marca_proveedor = (marca, proveedor)=>{
         })
     })
 }
-
+const validar_proveedor_marcas = (proveedor)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT folio FROM op007_marca_proveedor WHERE proveedor = ?", proveedor, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                if(fila.length === 0){
+                    resolve(false)
+                }else{
+                    resolve(true)
+                }
+            }
+        })
+    })
+}
+const eliminar_proveedor = (proveedor)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("DELETE FROM cat014_proveedores WHERE folio = ?", proveedor, (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
+const eliminar_marca_proveedor = (registro)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("DELETE FROM op007_marca_proveedor WHERE folio = ?", registro, (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
 export{
     seleccionar_proveedores,
     seleccionar_proveedor,
@@ -102,5 +138,8 @@ export{
     registrar_proveedor,
     registrar_relacion_marca_proveedor,
     editar_proveedor,
-    validar_relacion_marca_proveedor
+    validar_relacion_marca_proveedor,
+    validar_proveedor_marcas,
+    eliminar_proveedor,
+    eliminar_marca_proveedor
 }

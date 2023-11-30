@@ -2,7 +2,7 @@ import express from 'express'
 
 import { isAuthenticated } from '../controllers/authController.js'
 import { getUbicacion } from '../controllers/ubicacionesController.js'
-import { assign2Ubiacion, createContacto, deleteAsignacionContacto, getContacto, getContactos, updateContacto } from '../controllers/contactsController.js'
+import { assign2Ubiacion, createContacto, deleteAsignacionContacto, deleteContacto, getContacto, getContactos, updateContacto } from '../controllers/contactsController.js'
 import { getClientes } from '../controllers/clientController.js'
 
 const router = express.Router()
@@ -20,18 +20,6 @@ router.post('/contacto_ubicacion', assign2Ubiacion)
 router.post('/nuevo_contacto', createContacto)
 router.post('/editar', updateContacto) 
 router.get('/eliminar_de_ubicacion', deleteAsignacionContacto)
-
-
+router.get('/eliminar', deleteContacto)
 
 export default router
-
-/* 
-
-router.get('/administrar', authController.isAuthenticated, contactosController.selectContacts, (req, res)=>{
-    res.render('Contactos/contactsAdmin', {user: req.user, contactos: req.contactos, isCliente: false})
-})
-router.get('/eliminar', contactosController.deleteContact)
-
-
-//CONTACTOS EN UBICACION
-module.exports = router */

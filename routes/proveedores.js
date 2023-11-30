@@ -1,7 +1,7 @@
 import express from 'express'
 
 import { isAuthenticated } from '../controllers/authController.js'
-import { getMarcasProveedor, getProductosProveedor, getProveedor, getProveedores, setMatchMarcaProveedor, setProveedor, updateProveedor } from '../controllers/proveedoresControllers.js'
+import { deleteMarcaProveedor, deleteProveedor, getMarcasProveedor, getProductosProveedor, getProveedor, getProveedores, setMatchMarcaProveedor, setProveedor, updateProveedor } from '../controllers/proveedoresControllers.js'
 import { getMarcas } from '../controllers/marcasController.js'
 import { selectCategoriasProductos, selectTipoProducto, setProductoProveedor } from '../controllers/productosController.js'
 
@@ -29,37 +29,8 @@ router.post('/nuevo_proveedor', setProveedor)
 router.post('/editar', updateProveedor)
 router.post('/agregar_marca', setMatchMarcaProveedor)
 router.post('/agregar_producto', setProductoProveedor)
+router.get('/eliminar', deleteProveedor)
+router.get('/eliminar_marca', deleteMarcaProveedor)
 
 
 export default router
-
-/* const express = require('express')
-
-const { authorized } = require('../database/db')
-
-
-const authController = require('../controllers/authController')
-const proveedoresController = require('../controllers/proveedoresControllers')
-const marcasController = require('../controllers/marcasController')
-const productosController = require('../controllers/productosController')
-
-//LISTADO DE PROVEEDORES
-
-//NUEVO PROVEEDOR
-
-//EDITAR PROVEEDOR
-
-
-//ELIMINAR PROVEEDOR
-router.get('/eliminar', proveedoresController.deleteProv)
-
-//GESTIONAR MARCAS
-
-
-router.get('/eliminar_marca', proveedoresController.deleteMarcaProveedor)
-//GESTIONAR PRODUCTOS
-
-
-//PERFIL DEL PROVEEDOR
-
-module.exports = router; */

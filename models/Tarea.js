@@ -44,6 +44,28 @@ const seleccionar_asignacion_tarea = (tarea)=>{
         })
     })
 }
+const seleccionar_asignaciones_usuario = (usuario)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT * FROM asignacion_usuario_view001 WHERE folio_usuario = ? ORDER BY folio_asignacion DESC", usuario, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve(fila)
+            }
+        })
+    })
+}
+const seleccionar_asignaciones_usuario_tablero = (usuario)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT * FROM asignacion_usuario_view001 WHERE folio_usuario = ? ORDER BY folio_asignacion DESC LIMIT 10", usuario, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve(fila)
+            }
+        })
+    })
+}
 const validar_asignacion = (tarea)=>{
     return new Promise((resolve, reject)=>{
         conexion.query("SELECT * FROM op014_tarea_usuario WHERE tarea = ?", tarea, (error, fila)=>{
@@ -69,6 +91,21 @@ const validar_tareas_usuario = (usuario, proyecto)=>{
                     resolve(false)
                 }else{
                     resolve(true)
+                }
+            }
+        })
+    })
+}
+const validar_reportes_tarea = (tarea, usuario)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT * FROM op004_reporte WHERE tarea = ? AND usuario = ?", [tarea, usuario], (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                if(fila.length === 0){
+                    resolve(false)
+                }else{
+                    resolve(fila)
                 }
             }
         })
@@ -110,6 +147,17 @@ const asignar_tarea = (asignacion)=>{
 const actualizar_estatus_tarea = (estatus, tarea)=>{
     return new Promise((resolve, reject)=>{
         conexion.query("UPDATE op003_tareas SET estatus = ? WHERE folio = ?", [estatus, tarea], (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
+const actualizar_reporte_tarea = (enlace, fecha, hora, folio)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("UPDATE op004_reporte SET enlace = ?, fecha = ?, hora = ? WHERE folio = ?", [enlace, fecha, hora, folio], (error, _)=>{
             if(error){
                 reject(error)
             }else{
@@ -173,21 +221,49 @@ const eliminar_tarea = (tarea)=>{
         })
     })
 }
+const entregar_tarea = (tarea)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query('UPDATE op003_tareas SET estatus = 2 WHERE folio = ?', tarea, (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
+const registrar_reporte_tarea = (data)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query('INSERT INTO op004_reporte SET ?', data, (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
 
 export {
     seleccionar_tareas_etapa,
     seleccionar_tipos_tarea,
     seleccionar_tarea,
     seleccionar_asignacion_tarea,
+    seleccionar_asignaciones_usuario,
+    seleccionar_asignaciones_usuario_tablero,
     validar_asignacion,
     validar_tareas_usuario,
+    validar_reportes_tarea,
     crear_tarea,
     editar_tarea,
     asignar_tarea,
     actualizar_estatus_tarea,
+    actualizar_reporte_tarea,
     obtener_detalles_tarea,
     eliminar_asignacion,
     eliminar_tarea,
     asignar_estatus_tarea,
-    actualizar_asignacion
+    actualizar_asignacion,
+    entregar_tarea,
+    registrar_reporte_tarea
 }

@@ -1,6 +1,18 @@
 import { registrar_marca, seleccionar_marca_por_nombre } from "../models/Marca.js";
-import { editar_proveedor, registrar_proveedor, registrar_relacion_marca_proveedor, seleccionar_marcas_proveedor, seleccionar_productos_proveedor, seleccionar_proveedor, seleccionar_proveedores, validar_relacion_marca_proveedor } from "../models/Proveedor.js";
+import { editar_proveedor, eliminar_marca_proveedor, eliminar_proveedor, registrar_proveedor, registrar_relacion_marca_proveedor, seleccionar_marcas_proveedor, seleccionar_productos_proveedor, seleccionar_proveedor, seleccionar_proveedores, validar_proveedor_marcas, validar_relacion_marca_proveedor } from "../models/Proveedor.js";
 
+function showError(res, titulo, mensaje, ruta){
+    res.render('Error/showInfo', {
+        title: titulo,
+        alert: true,
+        alertTitle: 'INFORMACION',
+        alertMessage: mensaje,
+        alertIcon: 'info',
+        showConfirmButton: true,
+        timer: 8000,
+        ruta: ruta
+    })
+}
 const getProveedores = async(req, _, next) =>{
     try {
         await seleccionar_proveedores().then(resultado=>{
@@ -133,6 +145,51 @@ const updateProveedor = async(req, res, next) =>{
         return next()
     }
 }
+const deleteProveedor = async(req, res, next) =>{
+    try {
+        //para realizar un delete seguro es necesario verificar primero que no tenga marcas relacionadas
+        const proveedor = req.query.folio
+
+        let has_marcas = null
+
+        await validar_proveedor_marcas(proveedor).then(resultado=>{
+            has_marcas = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al validar las marcas del proveedor: ', error)
+        })
+
+        if(has_marcas){
+            showError(res, 'No se puede eliminar al proveedor', 'Este proveedor provee algunas marcas que se encuentran registradas, edite esta información antes de eliminar al proveedor', 'proveedores/administrar')
+            return next()
+        }
+
+        await eliminar_proveedor(proveedor).catch(error=>{
+            throw('Ha ocurrido un error al eliminar al proveedor: ', error)
+        })
+        res.redirect('/proveedores/administrar')
+        return next()
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const deleteMarcaProveedor = async(req, res, next)=>{
+    try {
+        const registro = req.query.registro
+        const proveedor = req.query.proveedor
+        const ruta = `/proveedores/perfil?proveedor=${proveedor}`
+
+        await eliminar_marca_proveedor(registro).catch(error=>{
+            throw('Ha ocurrido un error al eliminar la marca del proveedor: ', error)
+        })
+
+        res.redirect(ruta)
+        return next()
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
 
 export {
     getProveedores,
@@ -141,71 +198,7 @@ export {
     getProductosProveedor,
     setProveedor,
     setMatchMarcaProveedor,
-    updateProveedor
+    updateProveedor,
+    deleteProveedor,
+    deleteMarcaProveedor
 }
-
-
-
-/* 
-
-function showError(res, titulo, mensaje, ruta){
-    res.render('Error/showInfo', {
-        title: titulo,
-        alert: true,
-        alertTitle: 'INFORMACION',
-        alertMessage: mensaje,
-        alertIcon: 'info',
-        showConfirmButton: true,
-        timer: 8000,
-        ruta: ruta
-    })
-}
-exports.deleteMarcaProveedor = async(req, res, next)=>{
-    try {
-        let registro = req.query.registro
-        let proveedor = req.query.proveedor
-
-        conexion.query("DELETE FROM op007_marca_proveedor WHERE folio = ?", [registro], (error, fila)=>{
-            if(error){throw error;}
-            else{
-                let ruta = `/proveedores/perfil?proveedor=${proveedor}`
-                res.redirect(ruta)
-                return next()
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.deleteProv = async(req, res, next) =>{
-    try {
-        //para realizar un delete seguro es necesario verificar primero que no tenga marcas relacionadas
-        let proveedor = req.query.folio
-
-        conexion.query("SELECT folio FROM op007_marca_proveedor WHERE proveedor = ?", [proveedor], (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                if(fila.length === 0){
-                    //Podemos eliminar de manera segura
-                    conexion.query("DELETE FROM cat014_proveedores WHERE folio = ?", [proveedor], function(error2, filas){
-                        if(error2){
-                            throw error2
-                        }else{
-                            res.redirect('/proveedores/administrar')
-                            return next()
-                        }
-                    })
-                }else{
-                    showError(res, 'No se puede eliminar al proveedor', 'Este proveedor provee algunas marcas que se encuentran registradas, edite esta información antes de eliminar al proveedor', 'proveedores/administrar')
-                    return next()
-                }
-            }
-        })
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-*/

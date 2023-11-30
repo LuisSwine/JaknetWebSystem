@@ -3,7 +3,7 @@ import express from 'express'
 import { isAuthenticated } from '../controllers/authController.js'
 import { deleteFromInventario, deleteFromInventarioPersonal, getInventario, getInventarioUsuario, getReporteGeneral, getReporteUsuario, setInventario, setInventarioUsuario, updateInventario, updateInventarioPersonal } from '../controllers/inventarioController.js'
 import { selectProductos } from '../controllers/productosController.js'
-import { getUnidad, getUnidades } from '../controllers/unidadesController.js'
+import { getUnidades } from '../controllers/unidadesController.js'
 import { getAlmacenes } from '../controllers/almacenesController.js'
 import { getUsuario } from '../controllers/usuarioController.js'
 

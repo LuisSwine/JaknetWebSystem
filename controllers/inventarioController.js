@@ -1,5 +1,17 @@
 import { eliminar_del_almacen, registrar_en_bitacora_almacen } from "../models/Almacen.js";
-import { eliminar_del_inventario, eliminar_del_inventario_usuario, modificar_cantidad_almacen, modificar_cantidad_usuario, obtener_existencias_inventario, registrar_producto_en_almacen, registrar_producto_en_usuario, reporte_general_inventario, reporte_general_inventario_definido, reporte_usuario_inventario, reporte_usuario_inventario_definido, seleccionar_inventario, seleccionar_inventario_en_almacen, seleccionar_inventario_usuario, seleccionar_primer_almacen, seleccionar_producto_usuario, seleccionar_registros_inventario, validar_existencia_inventario, validar_posesion_inventario_usuario } from "../models/Inventario.js";
+import { eliminar_del_inventario, eliminar_del_inventario_proyecto, eliminar_del_inventario_usuario, modificar_cantidad_almacen, modificar_cantidad_proyecto, modificar_cantidad_usuario, obtener_existencias_inventario, registrar_movimiento_inventario_proyecto, registrar_producto_en_almacen, registrar_producto_en_usuario, registrar_producto_proyecto, reporte_general_inventario, reporte_general_inventario_definido, reporte_usuario_inventario, reporte_usuario_inventario_definido, seleccionar_inventario, seleccionar_inventario_en_almacen, seleccionar_inventario_usuario, seleccionar_primer_almacen, seleccionar_producto_usuario, seleccionar_registros_inventario, vaciar_almacen, validar_cantidad_proyecto, validar_existencia_inventario, validar_posesion_inventario_usuario } from "../models/Inventario.js";
+
+function calculateRutaProy(cliente, ubicacion, proyecto, flag, permisos){
+    let ruta = '';
+    switch(parseInt(flag)){
+        case 0: ruta = `/proyectos/inventario?proyecto=${proyecto}&flag=0`; break;
+        case 1: ruta = `/proyectos/inventario?proyecto=${proyecto}&cliente=${cliente}&flag=1`; break;
+        case 2: ruta = `/proyectos/inventario?proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`; break;
+        case 3: ruta = `/proyectos/inventario?proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`; break;
+        case 4: ruta = `/proyectos/inventario?proyecto=${proyecto}&flag=4&permisos=${permisos}`; break;
+    }
+    return ruta;
+}
 
 const getInventario = async(req, _, next)=>{
     try {
@@ -232,6 +244,86 @@ const setInventarioUsuario = async(req, res, next) => {
         return next()
     }
 }
+const setInventarioProyecto = async(req, res, next)=>{
+    try {
+        const data = {
+            producto: req.body.producto,
+            proyecto: req.body.proyecto,
+            cantidad: req.body.cantidad,
+            unidades: req.body.unidad
+        }
+        const bitacora = {
+            usuario_registra: req.body.usuario,
+            producto: data.producto,
+            cantidad: (-1) * parseFloat(data.cantidad),
+            fecha: new Date(), 
+            proyecto: data.proyecto,
+            almacen: req.body.almacen
+        }
+
+        //Definimos la ruta
+        const ruta = calculateRutaProy(req.body.cliente, req.body.ubicacion, data.proyecto, req.body.flag, req.body.permisos)
+
+        //Obtenemos la cantidad total del producto en el inventario
+        let cantidad_total_en_inventario = 0
+        await obtener_existencias_inventario(data.producto).then(resultado=>{
+            cantidad_total_en_inventario = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener las existencias del producto en el inventario: ', error)
+        })
+
+        //Primero validamos la cantidad
+        const cantidad_existente = req.body.cantidad_existente
+        const folioInvent = req.body.folioInvent
+
+        if(parseInt(data.cantidad) > parseInt(cantidad_existente)){
+            showError(res, 'Error al mover el material', 'No hay suficientes existencias en el inventario', ruta)
+            return next();
+        }
+
+        //Primero registramos el movimiento en la bitacora
+        await registrar_movimiento_inventario_proyecto(bitacora).catch(error=>{
+            throw('Ha ocurrido un error al registrar el movimiento en la bitacora: ', error)
+        })
+
+        //Modificamos la cantidad en el inventario
+        if(data.cantidad == cantidad_existente){
+            await eliminar_del_almacen(folioInvent).catch(error=>{
+                throw('Ha ocurrido un error al eliminar el registro del almacen: ', error)
+            })
+        }else{
+            let cantidad_inventario = parseInt(cantidad_existente) - parseInt(data.cantidad);
+            await modificar_cantidad_almacen(cantidad_inventario, folioInvent).catch(error=>{
+                throw('Ha ocurrido un error al modificar la cantidad del almacen: ', error)
+            });
+        }
+
+        let proyecto_has = null
+        await validar_cantidad_proyecto(data.producto, data.proyecto).then(resultado=>{
+            proyecto_has = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al verificar si hay una relacion entre el producto y el proyecto: ', error)
+        })
+
+        if(proyecto_has){
+            await registrar_producto_proyecto(data).catch(error=>{
+                throw('Ha ocurrido un error al registrar el producto y su relacion con el proyecto: ', error)
+            })
+        }else{
+            let nuevaCantidad = parseInt(data.cantidad) + parseInt(proyecto_has[0].cantidad);
+            await modificar_cantidad_proyecto(nuevaCantidad, proyecto_has[0].folio).catch(error=>{
+                throw('Ha ocurrido un error al actualizar la cantidad de este producto en este proyecto: ', error)
+            })
+        }
+
+        res.redirect(ruta)
+        return next
+        
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
 const updateInventario = async(req, res, next)=>{
     try {
         //RECIBIMOS LA INFORMACION POR GET 
@@ -422,6 +514,162 @@ const updateInventarioPersonal = async(req, res, next)=>{
         return next()
     }
 }
+const updateInventarioProyecto = async(req, res, next)=>{
+    try {
+        const cantidadActual = parseInt(req.query.cantidadActual)
+        const nuevaCantidad  = parseInt(req.query.nuevaCantidad)
+        const producto       = req.query.producto
+        const usuario        = req.query.usuario
+        const registro       = req.query.registro
+        const unidades       = req.query.unidades
+        const proyecto       = req.query.proyecto
+
+        const ruta = calculateRutaProy(req.query.cliente, req.query.ubicacion, proyecto, req.query.flag, req.query.permisos)
+
+        if(cantidadActual === nuevaCantidad){
+            //No hacemos nada
+            res.redirect(ruta)
+            return next()
+        }
+
+        const bitacora = {
+            usuario_registra: usuario,
+            producto: producto,
+            cantidad: 0,
+            fecha: new Date(),
+            proyecto: proyecto,
+            almacen: 0
+        }
+
+        //Primero analizamos si es aumento o drecremento
+        if(cantidadActual < nuevaCantidad){
+            //En caso de un aumento
+            //Calculamos la diferencia
+            const diferencia = parseFloat(nuevaCantidad) - parseFloat(cantidadActual)
+
+            //Validamos que exista suficientes existencias en el inventario
+
+            let existencias_inventario = 0
+            await obtener_existencias_inventario(producto).then(resultado=>{
+                existencias_inventario = resultado
+            }).catch(error=>{
+                throw('Ha ocurrido un error al obtener las existencias del inventario: ', error)
+            })
+
+            //En caso de que no haya suficientes existencias en el inventario, no hacemos el movimiento
+            if(existencias_inventario < diferencia){
+                res.redirect(ruta)
+                return next()
+            }
+            
+            //Ahora obtenemos las existencias
+            let existencias = null
+            await seleccionar_registros_inventario(producto).then(resultado=>{
+                existencias = resultado
+            }).catch(error=>{
+                throw('Ha ocurrido un error al obtener los registros del inventario: ', error)
+            })
+            
+            let unidades_trasladadas = 0
+            let i = 0
+            let restante = diferencia
+
+            while(unidades_trasladadas < diferencia){
+                if(existencias[i].cantidad <= restante){
+                    //Si la cantidad en esa ubicacion es menor entonces trasladamos todo
+                    //Primero actualizamos los datos para la bitacora
+                    bitacora.cantidad = (-1) * parseFloat(existencias[i].cantidad)
+                    bitacora.almacen = existencias[i].almacen
+                    //Segundo eliminamos el registro del inventario
+                    await vaciar_almacen(existencias[i].folio).catch(error=>{
+                        throw('Ha ocurrido un error al vaciar el almacen: ', error)
+                    })
+                    //Registramos las unidades
+                    unidades_trasladadas += parseFloat(existencias[i].cantidad)
+                }
+                if(existencias[i].cantidad > restante){
+                    //Si hay mas en inventario que solo necesario solo trasladamos una parte
+                    //Primero actualizamos los datos para la bitacora
+                    bitacora.cantidad = (-1) * parseFloat(restante)
+                    bitacora.almacen = existencias[i].almacen
+                    //Retiramos la cantidad del almacen
+                    let nCantidad = parseFloat(existencias[i].cantidad) - parseFloat(restante)
+                    await modificar_cantidad_almacen(nCantidad, existencias[i].folio).catch(error=>{
+                        throw('Ha ocurrido un error al actualizar el almacen: ', error)
+                    })
+                    unidades_trasladadas += restante
+                }
+                await registrar_movimiento_inventario_proyecto(bitacora).catch(error=>{
+                    throw('Ha ocurrido un error al registrar el movimiento del inventario: ', error)
+                })
+                restante = parseFloat(diferencia) - parseFloat(unidades_trasladadas)
+                i += 1
+            }
+        }
+        
+        if(cantidadActual > nuevaCantidad){
+            //Primero determinamos la cantidad a devolver
+            let cant_2_return = parseFloat(cantidadActual) - parseFloat(nuevaCantidad)
+            //Quiere decir que es un decremento
+            //Primero definimos a que almacen enviaremos todo
+            let does_exists = null
+            await seleccionar_registros_inventario(producto).then(resultado=>{
+                does_exists = resultado
+            }).catch(error=>{
+                throw('Error al buscar el producto: ', error)
+            })
+
+            if(does_exists.length === 0){
+                //Esto quiere decir que no existe en ninguna ubicación del inventario
+                let almacen = null
+                await seleccionar_primer_almacen().then(resultado=>{
+                    almacen = resultado
+                }).catch(error=>{
+                    throw('Error al obtener el primer almacén: ', error)
+                })
+                //Añadimos las existencias al primer almacen
+                const data = {
+                    producto: producto,
+                    cantidad: cant_2_return,
+                    unidades: unidades,
+                    almacen: almacen
+                    
+                }
+                await registrar_producto_en_almacen(data).catch(error=>{
+                    throw('Error al agregar el producto al inventario: ', error)
+                })
+                //Registramos el movimiento en la bitacora
+                bitacora.almacen = almacen
+                
+            }else{
+                let almacen = does_exists[0].almacen
+                //Modificamos la cantidad en esa ubicacion
+                let new_cant_almacen = parseFloat(does_exists[0].cantidad) + parseFloat(cant_2_return)
+                await modificar_cantidad_almacen(new_cant_almacen, does_exists[0].folio).catch(error=>{
+                    throw('Error al actualizar la cantidad del producto en el inventario: ', error)
+                })
+                //Registramos el movimiento en la bitacora
+                bitacora.almacen = almacen
+            }
+            bitacora.cantidad = cant_2_return
+            await registrar_movimiento_inventario_proyecto(bitacora).catch(error=>{
+                throw('Ha ocurrido un error al registrar el movimiento en la bitacora: ', error)
+            })
+        }
+
+        //Modificamos la cantidad en el proyecto
+        await modificar_cantidad_proyecto(nuevaCantidad, registro).catch(error=>{
+            throw('Error al actualizar la cantidad del producto en el proyecto: ', error)
+        })
+
+        res.redirect(ruta)
+        return next()
+
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
 const deleteFromInventario = async(req, res, next)=>{
     try {
         //Calculamos el movimiento
@@ -529,6 +777,81 @@ const deleteFromInventarioPersonal = async(req, res, next)=>{
         return next()
     }
 }
+const deleteFromInventarioProyecto = async(req, res, next)=>{
+    try {
+        const registro = req.query.registro //op011_material_proyecto.folio
+        const producto = req.query.producto //folio_producto
+        const cantidad = req.query.cantidad //cantidad
+        const proyecto = req.query.proyecto //proyecto
+        const unidades = req.query.unidades //unidades
+        const usuario  = req.query.usuario  //usuario
+
+        const ruta = calculateRutaProy(req.query.cliente, req.query.ubicacion, proyecto, req.query.flag, req.query.permisos)
+
+        const bitacora = {
+            usuario_registra: usuario,
+            producto: producto,
+            cantidad: cantidad,
+            fecha: new Date(), 
+            proyecto: proyecto,
+            almacen: 0
+        }
+
+        //Primero eliminamos el registro
+        await eliminar_del_inventario_proyecto(registro).catch(error=>{
+            throw('Error al eliminar del inventario de proyectos:', error)
+        })
+
+        //Determinamos a que almacen enviaremos las existencias
+        let does_exists = null
+        await seleccionar_registros_inventario(producto).then(resultado=>{
+            does_exists= resultado
+        }).catch(error=>{
+            throw('Error al buscar los materiales del inventario:', error)
+        })
+
+        if(does_exists.length === 0){
+            //Esto quiere decir que no existe en ninguna ubicación del inventario
+            let almacen = null
+            await seleccionar_primer_almacen().then(resultado=>{
+                almacen = resultado
+            }).catch(error=>{
+                throw('Ha ocurrido un error al obtener el primer almacen: ', error)
+            })
+            //Añadimos las existencias al primer almacen
+            const data = {
+                producto: producto,
+                cantidad: cantidad,
+                unidades: unidades,
+                almacen: almacen
+            }
+            await registrar_producto_en_almacen(data).catch(error=>{
+                throw ('Error al agregar la existencia al almacén: ', error)
+            })
+            //Registramos el movimiento en la bitacora
+            bitacora.almacen = almacen
+            
+        }else{
+            let almacen = does_exists[0].almacen
+            //Modificamos la cantidad en esa ubicacion
+            let new_cant_almacen = parseFloat(does_exists[0].cantidad) + parseFloat(cantidad)
+            await modificar_cantidad_almacen(new_cant_almacen, does_exists[0].folio).catch(error=>{
+                throw('Error al actualizar la cantidad del almacen: ', error)
+            })
+            //Registramos el movimiento en la bitacora
+            bitacora.almacen = almacen
+        }
+        await registrar_movimiento_inventario_proyecto(bitacora).catch(error=>{
+            throw('Error al guardar el movimiento del inventario: ', error)
+        })
+
+        res.redirect(ruta)
+        return next()
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
 export {
     getInventario,
     getInventarioOn,
@@ -537,10 +860,13 @@ export {
     getReporteUsuario,
     setInventario,
     setInventarioUsuario,
+    setInventarioProyecto,
     updateInventario,
     updateInventarioPersonal,
+    updateInventarioProyecto,
     deleteFromInventario,
-    deleteFromInventarioPersonal
+    deleteFromInventarioPersonal,
+    deleteFromInventarioProyecto
 }
 
 
@@ -551,17 +877,7 @@ const {promisify} = require('util')
 const { query } = require('../database/db')
 const { nextTick } = require('process');
 
-function calculateRutaProy(cliente, ubicacion, proyecto, flag, permisos){
-    let ruta = '';
-    switch(parseInt(flag)){
-        case 0: ruta = `/proyectos/inventario?proyecto=${proyecto}&flag=0`; break;
-        case 1: ruta = `/proyectos/inventario?proyecto=${proyecto}&cliente=${cliente}&flag=1`; break;
-        case 2: ruta = `/proyectos/inventario?proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`; break;
-        case 3: ruta = `/proyectos/inventario?proyecto=${proyecto}&ubicacion=${ubicacion}&cliente=${cliente}&flag=${flag}`; break;
-        case 4: ruta = `/proyectos/inventario?proyecto=${proyecto}&flag=4&permisos=${permisos}`; break;
-    }
-    return ruta;
-}
+
 function formatoFecha(fecha, formato) {
     const map = {
         ss: fecha.getSeconds(),
@@ -586,71 +902,16 @@ function showError(res, titulo, mensaje, ruta){
         ruta: ruta
     })
 }
-function registrar_movimiento_proyecto(bitacora){
-    return new Promise((resolve, reject)=>{
-        conexion.query('INSERT INTO op018_movs_invent_proy SET ?', bitacora, (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                resolve();
-            }
-        })
-    })
-}
-
-function vaciar_almacen(folio){
-    return new Promise((resolve, reject)=>{
-        conexion.query('DELETE FROM cat020_inventario WHERE folio = ?', folio, (error, fila)=>{
-            if(error){
-                throw error;
-            }else{
-                resolve();
-            }
-        })
-    })
-}
-
-function validar_cantidad_proyecto(producto, proyecto){
-    return new Promise((resolve, reject)=>{
-        conexion.query("SELECT folio, cantidad FROM op011_material_proyecto WHERE proyecto = ? AND producto = ?", [proyecto, producto], (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                if(fila.length === 0){
-                    resolve(true);
-                }else{
-                    resolve(fila)
-                }
-            }
-        });    
-    })
-}
-function modificar_cantidad_proyecto(folio, cantidad){
-    return new Promise((resolve, reject)=>{
-        conexion.query("UPDATE op011_material_proyecto SET cantidad = ? WHERE folio = ?", [cantidad, folio], (error, fila)=>{
-            if(error){
-                throw error;
-            }else{
-                resolve();
-            }
-        })
-    })
-}
 
 
 
 
-function delete_from_project(registro){
-    return new Promise((resolve, reject)=>{
-        conexion.query('DELETE FROM op011_material_proyecto WHERE folio = ?', registro, (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                resolve()
-            }
-        })
-    })
-}
+
+
+
+
+
+
 
 
 function modificar_cantidad_usuario(folio, cantidad){
@@ -664,268 +925,6 @@ function modificar_cantidad_usuario(folio, cantidad){
         })
     })
 }
-
-
-//INVENTARIO GENERAL
-
-
-
-
-
-
-//INVENTARIO PROYECTOS
-exports.addProduct2Proyecto = async(req, res, next)=>{
-    try {
-        let data = {
-            producto: req.body.producto,
-            proyecto: req.body.proyecto,
-            cantidad: req.body.cantidad,
-            unidades: req.body.unidad
-        }
-        let bitacora = {
-            usuario_registra: req.body.usuario,
-            producto: data.producto,
-            cantidad: (-1) * parseFloat(data.cantidad),
-            fecha: new Date(), 
-            proyecto: data.proyecto,
-            almacen: req.body.almacen
-        }
-
-        //Definimos la ruta
-        const ruta = calculateRutaProy(req.body.cliente, req.body.ubicacion, data.proyecto, req.body.flag, req.body.permisos)
-
-        //Obtenemos la cantidad total del producto en el inventario
-        let cantidad_total_en_inventario = 0
-        conexion.query('SELECT SUM(cantidad) as suma FROM cat020_inventario WHERE producto = ?', data.producto, (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                cantidad_total_en_inventario = fila[0].suma
-            }
-        })
-
-        //Primero validamos la cantidad
-        const cantidad_existente = req.body.cantidad_existente
-        const folioInvent = req.body.folioInvent
-
-        if(parseInt(data.cantidad) > parseInt(cantidad_existente)){
-            showError(res, 'Error al mover el material', 'No hay suficientes existencias en el inventario', ruta)
-            return next();
-        }
-
-        //Primero registramos el movimiento en la bitacora
-        await registrar_movimiento_proyecto(bitacora);
-
-        //Modificamos la cantidad en el inventario
-        if(data.cantidad == cantidad_existente){
-            await vaciar_almacen(folioInvent);
-        }else{
-            let cantidad_inventario = parseInt(cantidad_existente) - parseInt(data.cantidad);
-            await modificar_cantidad_almacen(cantidad_inventario);
-        }
-
-        let proyecto_has = await validar_cantidad_proyecto(data.producto, data.proyecto);
-
-        if(proyecto_has){
-            conexion.query("INSERT INTO op011_material_proyecto SET ?", data, (error, fila)=>{
-                if(error){
-                    throw error
-                }
-            })
-        }else{
-            let nuevaCantidad = parseInt(data.cantidad) + parseInt(proyecto_has[0].cantidad);
-            await modificar_cantidad_proyecto(proyecto_has[0].folio, nuevaCantidad);
-        }
-
-        res.redirect(ruta)
-        return next
-        
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.returnAll2Invent = async(req, res, next)=>{
-    try {
-        const registro = req.query.registro //op011_material_proyecto.folio
-        const producto = req.query.producto //folio_producto
-        const cantidad = req.query.cantidad //cantidad
-        const proyecto = req.query.proyecto //proyecto
-        const unidades = req.query.unidades //unidades
-        const usuario  = req.query.usuario  //usuario
-
-        const ruta = calculateRutaProy(req.query.cliente, req.query.ubicacion, proyecto, req.query.flag, req.query.permisos)
-
-        let bitacora = {
-            usuario_registra: usuario,
-            producto: producto,
-            cantidad: cantidad,
-            fecha: new Date(), 
-            proyecto: proyecto,
-            almacen: 0
-        }
-
-        //Primero eliminamos el registro
-        await delete_from_project(registro)
-
-        //Determinamos a que almacen enviaremos las existencias
-        let does_exists = await get_registros_inventario(producto)
-        if(does_exists.length === 0){
-            //Esto quiere decir que no existe en ninguna ubicación del inventario
-            let almacen = await get_primer_almacen()
-            //Añadimos las existencias al primer almacen
-            let data = {
-                producto: producto,
-                cantidad: cantidad,
-                unidades: unidades,
-                almacen: almacen
-            }
-            await put_product_almacen(data)
-            //Registramos el movimiento en la bitacora
-            bitacora.almacen = almacen
-            
-        }else{
-            let almacen = does_exists[0].almacen
-            //Modificamos la cantidad en esa ubicacion
-            let new_cant_almacen = parseFloat(does_exists[0].cantidad) + parseFloat(cantidad)
-            await modificar_cantidad_almacen(new_cant_almacen, does_exists[0].folio)
-            //Registramos el movimiento en la bitacora
-            bitacora.almacen = almacen
-        }
-        await registrar_movimiento_proyecto(bitacora)
-
-        res.redirect(ruta)
-        return next()
-
-        
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-exports.modificarInventProy = async(req, res, next)=>{
-    try {
-        const cantidadActual = parseInt(req.query.cantidadActual)
-        const nuevaCantidad  = parseInt(req.query.nuevaCantidad)
-        const producto       = req.query.producto
-        const usuario        = req.query.usuario
-        const registro       = req.query.registro
-        const unidades       = req.query.unidades
-        const proyecto       = req.query.proyecto
-
-        const ruta = calculateRutaProy(req.query.cliente, req.query.ubicacion, proyecto, req.query.flag, req.query.permisos)
-
-        if(cantidadActual === nuevaCantidad){
-            //No hacemos nada
-            res.redirect(ruta)
-            return next()
-        }
-
-        let bitacora = {
-            usuario_registra: usuario,
-            producto: producto,
-            cantidad: 0,
-            fecha: new Date(),
-            proyecto: proyecto,
-            almacen: 0
-        }
-
-        //Primero analizamos si es aumento o drecremento
-        if(cantidadActual < nuevaCantidad){
-            //En caso de un aumento
-            //Calculamos la diferencia
-            let diferencia = parseFloat(nuevaCantidad) - parseFloat(cantidadActual)
-
-            //Validamos que exista suficientes existencias en el inventario
-            let existencias_inventario = await get_existencias_inventario(producto)
-            if(existencias_inventario < diferencia){
-                res.redirect(ruta)
-                return next()
-            }
-            
-            //Ahora obtenemos las existencias
-            let existencias = await get_registros_inventario(producto)
-            let unidades_trasladadas = 0
-            let i = 0
-            let restante = diferencia
-
-            while(unidades_trasladadas < diferencia){
-                if(existencias[i].cantidad <= restante){
-                    //Si la cantidad en esa ubicacion es menor entonces trasladamos todo
-                    //Primero registramos en la bitacora
-                    bitacora.cantidad = (-1) * parseFloat(existencias[i].cantidad)
-                    bitacora.almacen = existencias[i].almacen
-                    //Segundo eliminamos el registro del inventario
-                    await vaciar_almacen(existencias[i].folio)
-                    //Registramos las unidades
-                    unidades_trasladadas += parseFloat(existencias[i].cantidad)
-                }
-                if(existencias[i].cantidad > restante){
-                    //Si hay mas en inventario que solo necesario solo trasladamos una parte
-                    //Primero registramos en la bitacora
-                    bitacora.cantidad = (-1) * parseFloat(restante)
-                    bitacora.almacen = existencias[i].almacen
-                    //Retiramos la cantidad del almacen
-                    let nCantidad = parseFloat(existencias[i].cantidad) - parseFloat(restante)
-                    await modificar_cantidad_almacen(nCantidad, existencias[i].folio)
-                    unidades_trasladadas += restante
-                }
-                await registrar_movimiento_proyecto(bitacora)
-                restante = parseFloat(diferencia) - parseFloat(unidades_trasladadas)
-                i += 1
-            }
-        }
-        
-        if(cantidadActual > nuevaCantidad){
-            //Primero determinamos la cantidad a devolver
-            let cant_2_return =parseFloat(cantidadActual) -parseFloat(nuevaCantidad)
-            //Quiere decir que es un decremento
-            //Primero definimos a que almacen enviaremos todo
-            let does_exists = await get_registros_inventario(producto)
-            if(does_exists.length === 0){
-                //Esto quiere decir que no existe en ninguna ubicación del inventario
-                let almacen = await get_primer_almacen()
-                //Añadimos las existencias al primer almacen
-                let data = {
-                    producto: producto,
-                    cantidad: cant_2_return,
-                    unidades: unidades,
-                    almacen: almacen
-                    
-                }
-                await put_product_almacen(data)
-                //Registramos el movimiento en la bitacora
-                bitacora.almacen = almacen
-                
-            }else{
-                let almacen = does_exists[0].almacen
-                //Modificamos la cantidad en esa ubicacion
-                let new_cant_almacen = parseFloat(does_exists[0].cantidad) + parseFloat(cant_2_return)
-                await modificar_cantidad_almacen(new_cant_almacen, does_exists[0].folio)
-                //Registramos el movimiento en la bitacora
-                bitacora.almacen = almacen
-            }
-            bitacora.cantidad = cant_2_return
-            await registrar_movimiento_proyecto(bitacora)
-        }
-
-        //Modificamos la cantidad en el proyecto
-        await modificar_cantidad_proyecto(registro, nuevaCantidad)
-
-        res.redirect(ruta)
-        return next()
-
-    } catch (error) {
-        console.log(error)
-        return next()
-    }
-}
-
-//INVENTARIO CON USUARIO
-
-
-
-
 
 
 

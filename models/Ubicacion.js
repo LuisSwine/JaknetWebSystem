@@ -67,12 +67,71 @@ const cambiar_direccion_ubicacion = (direccion, ubicacion)=>{
         })
     })
 }
-
+const validar_areas_ubicacion = (ubicacion)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query('SELECT folio FROM cat008_areas WHERE planta = ?', ubicacion, (error, fila)=>{
+            if(error){
+                reject(error);
+            }else{
+                if(fila.length === 0){
+                    resolve(false);
+                }else{
+                    resolve(true);
+                }
+            }
+        });
+    })
+}
+const validar_proyectos_ubicacion = (ubicacion)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT folio FROM cat009_proyectos WHERE ubicacion = ?", ubicacion, (error, fila)=>{
+            if(error){
+                reject(error);
+            }else{
+                if(fila.length === 0){
+                    resolve(false);
+                }else{
+                    resolve(true);
+                }
+            }
+        });
+    })
+}
+const validar_contactos_ubicacion = (ubicacion)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT folio FROM op015_contacto_ubicacion WHERE ubicacion = ?", ubicacion, (error, fila)=>{
+            if(error){
+                reject(error);
+            }else{
+                if(fila.length === 0){
+                    resolve(false);
+                }else{
+                    resolve(true);
+                }
+            }
+        });
+    })
+}
+const eliminar_ubicacion = (ubicacion)=>{
+    return new Promise((resolve,reject) => {
+        conexion.query("DELETE FROM cat007_ubicaciones WHERE folio = ?", ubicacion, (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
 export {
     seleccionar_ubicaciones,
     seleccionar_ubicacion,
     seleccionar_ubicaciones_cliente,
     crear_ubicacion,
     cambiar_nombre_ubicacion,
-    cambiar_direccion_ubicacion
+    cambiar_direccion_ubicacion,
+    validar_areas_ubicacion,
+    validar_contactos_ubicacion,
+    validar_proyectos_ubicacion,
+    eliminar_ubicacion
 }

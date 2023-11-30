@@ -88,6 +88,47 @@ const actualizar_nombre = (nombre, cliente)=>{
         })
     })
 }
+const validar_contactos_cliente = (cliente)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT folio FROM cat006_contactos WHERE cliente = ?", cliente, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                if(fila.length === 0){
+                    resolve(false)
+                }else{
+                    resolve(true)
+                }
+            }
+        })
+    })
+}
+const validar_ubicaciones_cliente = (cliente)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT folio FROM cat007_ubicaciones WHERE cliente = ?", cliente, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                if(fila.length === 0){
+                    resolve(false)
+                }else{
+                    resolve(true)
+                }
+            }
+        })
+    })
+}
+const eliminar_cliente = (cliente)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("DELETE FROM cat003_clientes WHERE folio = ?", cliente, (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
 
 
 export {
@@ -98,5 +139,8 @@ export {
     crear_cliente,
     actualizar_tipo,
     actualizar_servicio,
-    actualizar_nombre
+    actualizar_nombre,
+    validar_contactos_cliente,
+    validar_ubicaciones_cliente,
+    eliminar_cliente
 }

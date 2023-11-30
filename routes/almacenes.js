@@ -31,21 +31,9 @@ router.get('/exportar_proyectos', isAuthenticated, getAlmacen, getMovimientosPro
 })
 router.get('/cambiarNombre', updateNombreAlmacen);
 router.get('/cambiarUbicacion', updateUbicacionAlmacen);
-router.get('/editFrom', updateCantidadAlmacen);
 router.get('/deleteFrom', deleteDeAlmacen);
-
+router.get('/editFrom', updateCantidadAlmacen);
 router.post('/agregar_producto', moverInventario);
 router.post('/nuevo_almacen', setAlmacen)
 
-
 export default router
-
-
-
-
-
-
-
-
-
-

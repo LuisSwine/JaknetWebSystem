@@ -92,7 +92,7 @@
             confirmButtonText: 'Elimiar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/clientes/eliminar/${folio}`
+                const ruta = `/clientes/eliminar?cliente=${folio}`
                 window.location = ruta
             }
         })

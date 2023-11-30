@@ -15,28 +15,12 @@ router.get('/nueva_ubicacion', isAuthenticated, getClientes, (req, res)=>{
 router.get('/perfil', isAuthenticated, getUbicacion, getAreas, getContactosUbicacion, getProyectos, (req, res)=>{
     res.render('Ubicaciones/perfilUbi', {user: req.user, ubicacion: req.ubicacion, areas: req.areas, contactos: req.contactos, proyectos: req.proyectos, clienteSelected: req.query.cliente, flag: req.query.flag})
 })
-
+router.get('/administrar', isAuthenticated, getUbicaciones, (req, res)=>{
+    res.render('Ubicaciones/ubicacionesAdmin', {user: req.user, ubicaciones: req.ubicaciones, isCliente: false})
+})
 
 router.post('/nueva_ubicacion', createUbicacion)
 router.get('/cambiar_nombre', updateNameUbicacion)
 router.get('/cambiar_direccion', updateDireccionUbicacion)
 
-
-
-
-router.get('/administrar', isAuthenticated, getUbicaciones, (req, res)=>{
-    res.render('Ubicaciones/ubicacionesAdmin', {user: req.user, ubicaciones: req.ubicaciones, isCliente: false})
-})
-
-
 export default router
-
-/* 
-
-
-
-
-
-//EDITAR
-
-module.exports = router */

@@ -1,4 +1,3 @@
-import conexion from '../database/db.js'
 import { 
     seleccionar_clientes, 
     seleccionar_cliente, 
@@ -7,9 +6,26 @@ import {
     crear_cliente,
     actualizar_tipo,
     actualizar_servicio,
-    actualizar_nombre 
+    actualizar_nombre, 
+    validar_contactos_cliente,
+    validar_ubicaciones_cliente,
+    eliminar_cliente
 } from '../models/Cliente.js';
+import { eliminar_proyecto, validar_asistencia_proyecto, validar_claves_proyecto, validar_etapas_proyecto, validar_material_proyecto, validar_presupuesto_proyecto, validar_roles_proyecto } from '../models/Proyecto.js';
+import { eliminar_ubicacion, validar_areas_ubicacion, validar_contactos_ubicacion, validar_proyectos_ubicacion } from '../models/Ubicacion.js';
 
+function showError(res, titulo, mensaje, ruta){
+    res.render('Error/showInfo', {
+        title: titulo,
+        alert: true,
+        alertTitle: 'INFORMACION',
+        alertMessage: mensaje,
+        alertIcon: 'info',
+        showConfirmButton: true,
+        timer: 8000,
+        ruta: ruta
+    })
+}
 
 const getClientes = async(req, _, next) =>{
     try {
@@ -137,6 +153,126 @@ const updateNombre = async(req, res, next)=>{
         return next
     }
 }
+const deleteCliente = async(req, res, next) =>{
+    try {
+        const cliente = req.query.cliente
+        let validar_contactos, validar_ubicaciones = null
+        await validar_contactos_cliente(cliente).then(resultado=>{
+            validar_contactos = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al validar los contactos del cliente: ', error)
+        })
+        await validar_ubicaciones_cliente(cliente).then(resultado=>{
+            validar_ubicaciones = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al validar las ubicaciones del cliente: ', error)
+        })
+
+        if(!validar_contactos && !validar_ubicaciones){
+            await eliminar_cliente(cliente).catch(error=>{
+                throw('Ha ocurrido un error al eliminar el cliente: ', error)
+            })
+            res.redirect('/clientes/gestionar')
+        }else{
+            showError(res, 'ERROR Eliminando al Cliente', `No se ha podido eliminar al cliente ${cliente}, porque tiene ubicaciones o contactos registrados`, 'clientes/gestionar')             
+        }
+        return next()
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const deleteUbicacionCliente = async(req, res, next)=>{
+    try {
+        const ubicacion = req.query.ubicacion
+        const ruta = `clientes/administrar?cliente=${req.query.cliente}`
+        let ubi_has_areas, ubi_has_proys, ubi_has_contacts = null
+        
+        await validar_areas_ubicacion(ubicacion).then(resultado=>{
+            ubi_has_areas = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al validar las areas asociadas a la ubicación: ', error)
+        })
+        await validar_proyectos_ubicacion(ubicacion).then(resultado=>{
+            ubi_has_proys = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al validar los proyectos asociados a la ubicación: ', error)
+        })
+        await validar_contactos_ubicacion(ubicacion).then(resultado=>{
+            ubi_has_contacts = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al validar los contactos asociados a la ubicación: ', error)
+        })
+
+        if(ubi_has_areas || ubi_has_proys || ubi_has_contacts){
+            showError(res, 'No se ha podido eliminar la ubicacion', `La ubicacion ${ubicacion} tiene areas, proyectos o contactos registrados`, ruta)
+            return next()
+        }
+
+        await eliminar_ubicacion(ubicacion).catch(error=>{
+            throw('Ha ocurrido un error al eliminar la ubicación: ', error)
+        })
+        res.redirect(`/${ruta}`)
+        return next()
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
+const deleteProyectoCliente = async(req, res, next)=>{
+    try {
+        const proyecto = req.query.proyecto
+        const ruta = `clientes/administrar?cliente=${req.query.cliente}`
+
+        let proy_has_claves, proy_has_etapas, proy_has_roles, proy_has_asistencias, proy_has_material, proy_has_presupuesto = null
+
+        await validar_claves_proyecto(proyecto).then(resultado=>{
+            proy_has_claves = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al validar las claves del proyecto: ', error)
+        })
+        await validar_etapas_proyecto(proyecto).then(resultado=>{
+            proy_has_etapas = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al validar las etapas del proyecto: ', error)
+        })
+        await validar_roles_proyecto(proyecto).then(resultado=>{
+            proy_has_roles = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al validar los roles del proyecto: ', error)
+        })
+        await validar_asistencia_proyecto(proyecto).then(resultado=>{
+            proy_has_asistencias = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al validar las asistencias del proyecto: ', error)
+        })
+        await validar_material_proyecto(proyecto).then(resultado=>{
+            proy_has_material = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al validar los materiales del proyecto: ', error)
+        })
+        await validar_presupuesto_proyecto(proyecto).then(resultado=>{
+            proy_has_presupuesto = resultado
+        }).catch(error=>{
+            throw('Ha ocurrido un error al validar el presupuesto del proyecto: ', error)
+        })
+
+        if(proy_has_asistencias || proy_has_claves || proy_has_etapas || proy_has_material || proy_has_presupuesto || proy_has_roles){
+            showError(res, 'Error eliminando proyecto', `El proyecto ${proyecto} no se pudo eliminar pues ya ha comenzado a trabajarse, verifique el presupuesto, los roles, las etapas, las asistencias, el maetiral o los viaticos de este proyecto`, ruta)
+            return next()
+        }
+
+        await eliminar_proyecto(proyecto).catch(error=>{
+            throw ('Error al borrar el proyecto', error)
+        })
+
+        res.redirect(`/${ruta}`)
+        return next()
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
 export {
     getClientes,
     getServicios,
@@ -145,259 +281,8 @@ export {
     getTiposCliente,
     updateTipo,
     updateServicio,
-    updateNombre
+    updateNombre,
+    deleteCliente,
+    deleteUbicacionCliente,
+    deleteProyectoCliente
 }
-
-
-/* 
-function showError(res, titulo, mensaje, ruta){
-    res.render('Error/showInfo', {
-        title: titulo,
-        alert: true,
-        alertTitle: 'INFORMACION',
-        alertMessage: mensaje,
-        alertIcon: 'info',
-        showConfirmButton: true,
-        timer: 8000,
-        ruta: ruta
-    })
-}
-
-
-
-    //EDITAR DATOS DEL CLIENTE
-    exports.editarNombre = async(req, res, next)=>{
-        try {
-            conexion.query("UPDATE cat003_clientes SET nombre = ? WHERE folio = ?", [req.query.nombre, req.query.cliente], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    res.redirect(`/clientes/administrar?cliente=${req.query.cliente}`)
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next
-        }
-    }
-
-    //Eliminar un cliente
-    exports.deleteClient = async(req, res, next) =>{
-        try {
-            const cliente = req.params.folio
-
-            //Validamos los contactos
-            conexion.query("SELECT folio FROM cat006_contactos WHERE cliente = ?", [cliente], (error, fila)=>{
-                if(error){
-                    throw error
-                }else{
-                    if(fila.length === 0){
-                        //Validamos las ubicaciones
-                        conexion.query("SELECT folio FROM cat007_ubicaciones WHERE cliente = ?", [cliente], (error2, fila2)=>{
-                            if(error2){
-                                throw error2
-                            }else{
-                                if(fila2.length === 0){
-                                    //Eliminamos
-                                    conexion.query("DELETE FROM cat003_clientes WHERE folio = ?", [cliente], (error3, fila3)=>{
-                                        if(error3){
-                                            throw error3
-                                        }else{
-                                            res.redirect('/clientes/gestionar')
-                                            return next()
-                                        }
-                                    })
-                                }else{
-                                    showError(res, 'ERROR Eliminando al Cliente', `No se ha podido eliminar al cliente ${cliente}, porque tiene ubicaciones registradas`, 'adminclients')
-                                    return next()
-                                }
-                            }
-                        })
-                    }else{
-                        showError(res, 'ERROR Eliminando al Cliente', `No se ha podido eliminar al cliente ${cliente}, porque tiene contactos registradas`, 'adminclients')
-                        return next()
-                    }
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-//FIN DEL CRUD PARA LA GESTION DE CLIENTES
-
-function validate_areas_ubi(ubicacion){
-    return new Promise((resolve, reject)=>{
-        conexion.query('SELECT folio FROM cat008_areas WHERE planta = ?', ubicacion, (error, fila)=>{
-            if(error){
-                throw error;
-            }else{
-                if(fila.length === 0){
-                    resolve(false);
-                }else{
-                    resolve(true);
-                }
-            }
-        });
-    });
-}
-function validate_proyectos_ubi(ubicacion){
-    return new Promise((resolve,reject)=>{
-        conexion.query("SELECT folio FROM cat009_proyectos WHERE ubicacion = ?", ubicacion, (error, fila)=>{
-            if(error){
-                throw error;
-            }else{
-                if(fila.length === 0){
-                    resolve(false)
-                }else{
-                    resolve(true)
-                }
-            }
-        })
-    })
-}
-function validate_contacts_ubi(ubicacion){
-    return new Promise((resolve,reject)=>{
-        conexion.query("SELECT folio FROM op015_contacto_ubicacion WHERE ubicacion = ?", ubicacion, (error, fila)=>{
-            if(error){
-                throw error;
-            }else{
-                if(fila.length === 0){
-                    resolve(false)
-                }else{
-                    resolve(true)
-                }
-            }
-        })
-    })
-}
-
-//Ubicaciones a Nivel Cliente
-    exports.deleteUbicacionCliente = async(req, res, next)=>{
-        try {
-            let ubicacion = req.query.ubicacion
-            const ruta = `clientes/gestionar?cliente=${req.query.cliente}`
-
-            let ubi_has_areas = await validate_areas_ubi(ubicacion)
-            if(ubi_has_areas){
-                showError(res, 'No se ha podido eliminar la ubicacion', `La ubicacion ${ubicacion} tiene areas creadas`, ruta)
-                return next()
-            }
-
-            let ubi_has_proys = await validate_proyectos_ubi(ubicacion)
-            if(ubi_has_proys){
-                showError(res, 'No se ha podido eliminar la ubicacion', `La ubicacion ${ubicacion} tiene proyectos en curso`, ruta)
-                return next()
-            }
-            
-            let ubi_has_contacts = await validate_contacts_ubi(ubicacion)
-            if(ubi_has_contacts){
-                showError(res, 'No se ha podido eliminar la ubicacion', `La ubicacion ${ubicacion} tiene contactos asignados`, ruta)
-                return next()
-            }
-
-            conexion.query("DELETE FROM cat007_ubicaciones WHERE folio = ?", ubicacion, (error4, fila4)=>{
-                if(error4){
-                    throw error4
-                }else{
-                    res.redirect(`/${ruta}`)
-                    return next()
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-
-//Cotizaciones a nivel cliente
-    exports.addCotClient = async(req, res, next)=>{
-        try {
-            let proyecto = req.body.proyecto
-            let cliente = req.body.cliente
-            conexion.query("SELECT folio FROM cat006_contactos WHERE cliente = ? LIMIT 1", [cliente], (error2, fila)=>{
-                if(error2){
-                    throw error2
-                }else{
-                    let data = {
-                        proyecto: proyecto,
-                        contacto: fila[0].folio 
-                    }
-                    let insert = "INSERT INTO cat013_cotizaciones SET ?"
-                    conexion.query(insert, data, (error3, fila2)=>{
-                        if(error3){
-                            throw error3
-                        }else{
-                            res.redirect(`/perfilCliente?cliente=${cliente}`)
-                            return next()  
-                        }
-                    })
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            return next()
-        }
-    }
-    exports.deleteCotizacion = async(req, res, next)=>{
-        try {
-            let cotizacion = req.query.folio
-            let ruta = `/perfilCliente?cliente=${req.query.cliente}`
-    
-            //Validamos que no haya productos
-            conexion.query("SELECT * FROM op008_lista_productos WHERE cotizacion = ?", [cotizacion], (err, fila)=>{
-                if(err){
-                    throw err
-                }else{
-                    if(fila.length === 0){
-                        //Validamos que no haya servicios
-                        conexion.query("SELECT * FROM op009_lista_servicios WHERE cotizacion = ?", [cotizacion], (error2, fila2)=>{
-                            if(error2){
-                                throw error2
-                            }else{
-                                if(fila2.length === 0){
-                                    //Eliminamos
-                                    conexion.query("DELETE FROM cat013_cotizaciones WHERE folio = ?", [cotizacion], (error3, fila3)=>{
-                                        if(error3){
-                                            throw error3
-                                        }else{
-                                            res.redirect(ruta)
-                                            return next()  
-                                        }
-                                    })
-                                }else{
-                                    res.render('Error/showInfo', {
-                                        title: 'Servicio(s) Cotizado(s)',
-                                        alert: true,
-                                        alertTitle: 'INFORMACION',
-                                        alertMessage: `La cotizacion ${cotizacion} tiene almenos un servicio cotizado y no puede eliminarse`,
-                                        alertIcon: 'info',
-                                        showConfirmButton: true,
-                                        timer: 8000,
-                                        ruta: `${ruta.replace('/', '')}` 
-                                    })
-                                    return next()
-                                }
-                            }
-                        })
-                    }else{
-                        res.render('Error/showInfo', {
-                            title: 'Producto(s) Cotizado(s)',
-                            alert: true,
-                            alertTitle: 'INFORMACION',
-                            alertMessage: `La cotizacion ${cotizacion} tiene almenos un producto cotizado y no puede eliminarse`,
-                            alertIcon: 'info',
-                            showConfirmButton: true,
-                            timer: 8000,
-                            ruta: `${ruta.replace('/', '')}` 
-                        })
-                        return next()
-                    }
-                }
-            })
-        }catch (error) {
-            console.log(error)
-            return next()
-        }
-    } */
