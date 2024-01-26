@@ -78,8 +78,15 @@
                                                                 ruta = `/tareas/editar_asignacion?tarea=${tarea.folio}&etapa=${etapa[0].folip}&proyecto=${proyecto}&cliente=${cliente}&ubicacion=${ubicacion}&flag=${flag}&permisos=${permisos}`
                                                             }
                                                             %>
+                                                            <% if(tarea.folio_estatus == 2){%>
+                                                                <% if(tarea.folio_tipo == 1){ %>
+                                                                    <button class="btn btn-success btn-sm" onclick="watchReport('<%= tarea.folio %>')" title="Revisar entrega"><i class="ti-file"></i></button>
+                                                                <% } %>
+                                                                <button class="btn btn-warning btn-sm" onclick="returnAsigment('<%= tarea.folio %>', '<%= user.folio %>', '<%= etapa[0].folio %>', '<%= proyecto %>', '<%= cliente %>', '<%= ubicacion %>', '<%= flag %>', '<%= permisos %>')" title="Regresar trabajo"><i class="ti-close"></i></button>
+                                                            <%}else{%>
                                                             <a class="btn btn-warning btn-sm" href="<%= ruta %>" title="ASIGNAR TAREA"><i class="ti-write"></i></a>
                                                             <a class="btn btn-success btn-sm" href="/tareas/editar?tarea=<%= tarea.folio %>&etapa=<%= etapa[0].folio %>&proyecto=<%= proyecto %>&cliente=<%= cliente %>&ubicacion=<%= ubicacion %>&flag=<%= flag %>&permisos=<%= permisos %>"><i class="ti-pencil-alt"></i></a>
+                                                            <% } %>
                                                             <button class="btn btn-danger btn-sm" onclick="confirmDelete('<%= tarea.folio %>', '<%= etapa[0].folio %>', '<%= proyecto %>', '<%= cliente %>', '<%= ubicacion %>', '<%= flag %>', '<%= permisos %>')"><i class="ti-trash"></i></button>
                                                         </div>
                                                     </div>
@@ -125,7 +132,29 @@
             }
         })
     }
-    
+    function watchReport(tarea){
+        const ruta = `/tareas/ver_reporte?tarea=${tarea}`
+        window.open(ruta, "_blank")
+    }
+    function returnAsigment(tarea, admin, etapa, proyecto, cliente, ubicacion, flag, permisos){
+        Swal.fire({
+            input: "textarea",
+            inputLabel: "Descripción de motivos",
+            inputPlaceholder: "Por favor especifique las razones por las que esta devolviendo la asignación",
+            inputAttributes: {
+              "aria-label": "Por favor especifique las razones por las que esta devolviendo la asignación"
+            },
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tiene que escribir algo'
+                }else{
+                    let ruta = `/tareas/devolver_tarea?tarea=${tarea}&admin=${admin}&texto=${value}&etapa=${etapa}&proyecto=${proyecto}&cliente=${cliente}&ubicacion=${ubicacion}&flag=${flag}&permisos=${permisos}`
+                    window.location = ruta
+                }
+            }
+          })
+    }
 </script>
 
 <%- include('../../partials/scriptsNav.ejs') %> 

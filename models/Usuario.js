@@ -22,11 +22,44 @@ const seleccionar_usuario = (usuario)=>{
         })
     })
 }
+const seleccionar_usuario_by_user = (usuario)=>{
+    return new Promise ((resolve , reject ) => {
+        conexion.query("SELECT * FROM cat001_usuarios WHERE usuario = ?", usuario, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve(fila)
+            }
+        })
+    })
+}
 const crear_usuario = (usuario)=>{
     return new Promise((resolve,reject)=>{
         conexion.query("INSERT INTO cat001_usuarios SET ?", usuario, (error, _)=>{
             if(error){
                 reject(error);
+            }else{
+                resolve()
+            }
+        })
+    })
+}
+const registrar_inicio_sesion = (registro)=>{
+    return new Promise((resolve,reject)=> {
+        conexion.query("INSERT INTO op001_registro_login SET ?", registro, (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
+const registrar_cierre_sesion = (registro)=>{
+    return new Promise((resolve,reject)=> {
+        conexion.query("INSERT INTO op021_registro_logout SET ?", registro, (error, _)=>{
+            if(error){
+                reject(error)
             }else{
                 resolve()
             }
@@ -230,10 +263,35 @@ const checkMovimientos = (usuario) => {
         })
     })    
 }
+const bloquearUsuario = (folio_usuario) => {
+    return new Promise((resolve,reject)=> {
+        conexion.query('UPDATE cat001_usuarios SET estatus = 1 WHERE folio = ?', folio_usuario, (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
+const desbloquearUsuario = (folio_usuario) => {
+    return new Promise((resolve,reject)=> {
+        conexion.query('UPDATE cat001_usuarios SET estatus = 0 WHERE folio = ?', folio_usuario, (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
 export {
     seleccionar_usuarios,
     seleccionar_usuario,
+    seleccionar_usuario_by_user,
     crear_usuario,
+    registrar_inicio_sesion,
+    registrar_cierre_sesion,
     cambiar_nombre,
     cambiar_telefono,
     cambiar_email,
@@ -248,7 +306,9 @@ export {
     checkReportes,
     checkRoles,
     checkTareas,
-    checkViaticos
+    checkViaticos,
+    bloquearUsuario,
+    desbloquearUsuario
 }
 
 

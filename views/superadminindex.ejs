@@ -145,7 +145,29 @@
 
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+
+        let latitud
+        let longitud
+        
+        function obtenerUbicacion() {
+            if (navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition(mostrarUbicacion, mostrarError);
+            } else {
+              alert('Geolocalización no es soportada en este navegador.');
+            }
+        }
+      
+        function mostrarUbicacion(posicion) {
+            latitud = posicion.coords.latitude
+            longitud  = posicion.coords.longitude;
+            //alert(`Ubicación encontrada:\nLatitud: ${latitude}\nLongitud: ${longitude}`);
+        }
+      
+        function mostrarError(error) {
+            alert(`Error al obtener la ubicación: ${error.message}`);
+        }
         function pasarAsistencia(usuario, objeto){
+            obtenerUbicacion()
             let proyectos = JSON.parse(decodeURIComponent(objeto))
             let opciones = ''
             proyectos.forEach((proyecto)=>{
@@ -167,7 +189,7 @@
                     const valorSeleccionado = document.getElementById('proyecto').value
                     if(valorSeleccionado === '--Seleccione--'){alert('Debes seleccionar un proyecto');}
                     else{
-                        let ruta = `/asistencias/registrar?usuario=${usuario}&proyecto=${valorSeleccionado}`
+                        let ruta = `/asistencias/registrar?usuario=${usuario}&proyecto=${valorSeleccionado}&latitud=${latitud}&longitud=${longitud}`
                         window.location = ruta
                     }
                 }
@@ -217,7 +239,7 @@
             confirmButtonText: 'Entregar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/entregarTarea?tarea=${tarea}&usuario=${usuario}&flag=0`
+                const ruta = `/tareas/entregar?tarea=${tarea}&usuario=${usuario}&flag=0`
                 window.location = ruta
             }
         })

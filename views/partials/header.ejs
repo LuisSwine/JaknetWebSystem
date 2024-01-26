@@ -1,8 +1,5 @@
 </head>
 
-<% 
-let ruta = `/?folio=${user.folio}`
-%>
 <body>
 
     <div class="sidebar sidebar-hide-to-small sidebar-shrink sidebar-gestures">
@@ -15,7 +12,7 @@ let ruta = `/?folio=${user.folio}`
                         </a>
                     </div>
                     <li class="label">ERP</li>
-                    <li><a href="<%= ruta %> "><i class="ti-home"></i> Dashboard</a></li>
+                    <li><a href="/"><i class="ti-home"></i> Dashboard</a></li>
                     <% if(user.tipo_usuario != 2){%> 
                     <li class="label">PRINCIPAL</li>
                     <li><a href="/usuarios/adminusers"><i class="ti-user"></i>Usuarios</a></li>
@@ -64,7 +61,7 @@ let ruta = `/?folio=${user.folio}`
                     <li><a href="/asistencias/mis_asistencias?usuario=<%= user.folio %>"><i class="ti-calendar"></i> Mis Asistencias</a></li>
                     <li><a href="/inventario/mi_inventario?usuario=<%= user.folio %>"><i class="ti-truck"></i> Mi Inventario</a></li>
                     
-                    <li><a href="../../logout"><i class="ti-close"></i> Logout</a></li>
+                    <li><a href="../../logout?usuario=<%= user.folio %>"><i class="ti-close"></i> Logout</a></li>
                 </ul>
             </div>
         </div>

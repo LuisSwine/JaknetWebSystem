@@ -2,7 +2,7 @@ import express from 'express'
 const router = express.Router()
 
 import {login, isAuthenticated, logout} from '../controllers/authController.js'
-import { getUsuarios, createUser, updateNombreUsuario, updateTelefonoUsuario, updateEmailUsuario, updatePassUsuario, getUsuario, updateUsuario, updateContraUsuarioAdmin, deleteUsuario } from '../controllers/usuarioController.js'
+import { getUsuarios, createUser, updateNombreUsuario, updateTelefonoUsuario, updateEmailUsuario, updatePassUsuario, getUsuario, updateUsuario, updateContraUsuarioAdmin, deleteUsuario, notifyRecoverPass, unlockUser } from '../controllers/usuarioController.js'
 import { reporteGeneralAsistencia } from '../controllers/asistenciasController.js'
 
 //GESTION DE USUARIOS
@@ -30,5 +30,7 @@ router.get('/cambiar_email_per', updateEmailUsuario)
 router.get('/cambiar_contra_per', updatePassUsuario)
 router.get('/cambiar_contra_admin', updateContraUsuarioAdmin)
 router.get('/eliminar', deleteUsuario)
+router.get('/recuperar_contra', notifyRecoverPass)
+router.get('/desbloquear_usuario', unlockUser)
 
 export default router

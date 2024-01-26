@@ -157,7 +157,7 @@
             confirmButtonText: 'Entregar'
             }).then((result) => {
             if (result.isConfirmed) {
-                const ruta = `/entregarTarea?tarea=${tarea}&usuario=${usuario}&flag=1`
+                const ruta = `entregar?tarea=${tarea}&usuario=${usuario}&flag=1`
                 window.location = ruta
             }
         })

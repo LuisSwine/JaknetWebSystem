@@ -100,8 +100,7 @@
                                                                 <option disabled selected>--Seleccione--</option>
                                                                 <% proyectos.forEach((proyecto)=>{%>
                                                                     <option value="<%= proyecto.folio %>">
-                                                                        <%= proyecto.ubicacion %> - <%= proyecto.nombre
-                                                                                %>
+                                                                        <%= proyecto.ubicacion %> - <%= proyecto.nombre %>
                                                                     </option>
                                                                     <% }) %>
                                                             </select>
@@ -110,6 +109,7 @@
                                                     <div class="col-lg-12">
                                                         <button type="submit" class="btn btn-primary m-b-10">ASIGNAR SALDO</button>
                                                         <input type="text" class="form-control" id="beneficiario" name="beneficiario" hidden>
+                                                        <input type="email" class="form-control" id="email" name="email" hidden>
                                                     </div>
                                                 </div>
                                             </form>
@@ -127,12 +127,15 @@
                     let valor = JSON.parse(decodeURIComponent(objeto))
                     let selected = document.getElementById('id_bene').value
                     let nombre = ''
+                    let email = ''
                     valor.forEach((variable) => {
                         if (variable.folio == selected) {
                             nombre = `${variable.nombres} ${variable.apellidos}`
+                            email = `${variable.email}`
                         }
                     })
                     document.getElementById('beneficiario').value = nombre
+                    document.getElementById('email').value = email
                 }
             </script>
 

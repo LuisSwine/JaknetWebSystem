@@ -10,15 +10,15 @@ const formatear_fecha = (fecha, formato)=>{
 
     return formato.replace(/ss|nn|hh|dd|mm|yy|yyy/gi, matched => map[matched])
 }
-const mostrar_error = (res, titulo, mensaje, ruta)=>{
+const mostrar_error = (res, titulo, mensaje, ruta, icono='info', time=8000)=>{
     res.render('Error/showInfo', {
         title: titulo,
         alert: true,
         alertTitle: 'INFORMACION',
         alertMessage: mensaje,
-        alertIcon: 'info',
+        alertIcon: icono,
         showConfirmButton: true,
-        timer: 8000,
+        timer: time,
         ruta: ruta
     })
 }

@@ -66,6 +66,50 @@ const seleccionar_asignaciones_usuario_tablero = (usuario)=>{
         })
     })
 }
+const seleccionar_ultima_tarea = ()=>{
+    return new Promise ((resolve,reject)=> {
+        conexion.query("SELECT folio FROM op003_tareas ORDER BY folio DESC LIMIT 1", (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve(fila[0].folio)
+            }
+        })
+    })
+}
+const seleccionar_asignador_tarea = (tarea)=>{
+    return new Promise ((resolve,reject)=>{
+        conexion.query("SELECT * FROM cat001_usuarios WHERE folio IN (SELECT administrador FROM op023_acciones_tarea WHERE tarea = ? AND accion = 0)", tarea, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve(fila[0])
+            }
+        })
+    })
+}
+const seleccionar_encargado_tarea = (tarea)=>{
+    return new Promise ((resolve,reject)=>{
+        conexion.query("SELECT * FROM cat001_usuarios WHERE folio IN (SELECT encargado FROM op023_acciones_tarea WHERE tarea = ? AND accion = 0)", tarea, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve(fila[0])
+            }
+        })
+    })
+}
+const seleccionar_reporte_tarea = (tarea)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("SELECT * FROM op004_reporte WHERE tarea = ?", tarea, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve(fila[0])
+            }
+        })
+    })
+}
 const validar_asignacion = (tarea)=>{
     return new Promise((resolve, reject)=>{
         conexion.query("SELECT * FROM op014_tarea_usuario WHERE tarea = ?", tarea, (error, fila)=>{
@@ -243,7 +287,28 @@ const registrar_reporte_tarea = (data)=>{
         })
     })
 }
-
+const registrar_accion_tarea = (bitacora)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query("INSERT INTO op022_historial_tareas SET ?", bitacora, (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
+const registrar_suceso_tarea = (bitacora)=>{
+    return new Promise((resolve, reject)=>{    
+        conexion.query("INSERT INTO op023_acciones_tarea SET ?", bitacora, (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
 export {
     seleccionar_tareas_etapa,
     seleccionar_tipos_tarea,
@@ -251,6 +316,10 @@ export {
     seleccionar_asignacion_tarea,
     seleccionar_asignaciones_usuario,
     seleccionar_asignaciones_usuario_tablero,
+    seleccionar_ultima_tarea,
+    seleccionar_asignador_tarea,
+    seleccionar_reporte_tarea,
+    seleccionar_encargado_tarea,
     validar_asignacion,
     validar_tareas_usuario,
     validar_reportes_tarea,
@@ -265,5 +334,7 @@ export {
     asignar_estatus_tarea,
     actualizar_asignacion,
     entregar_tarea,
-    registrar_reporte_tarea
+    registrar_reporte_tarea,
+    registrar_accion_tarea,
+    registrar_suceso_tarea
 }

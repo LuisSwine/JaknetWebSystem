@@ -1,5 +1,8 @@
 import conexion from '../database/db.js'
+import { enviarCorreo } from '../helpers/emails.js';
+import { seleccionar_proyecto } from '../models/Proyecto.js';
 import { verificar_participacion } from '../models/Rol.js';
+import { mostrar_mensaje_inicio } from '../helpers/funciones_simples.js'
 import { 
     obtener_suma_depositos, 
     obtener_suma_comprobaciones, 
@@ -67,6 +70,7 @@ function calculateRutaProy(cliente, ubicacion, proyecto, flag, permisos){
     return ruta;
 }
 
+
 const getEstadisticasViaticos = async(req, _, next)=>{
     try {
         const datos = {
@@ -100,10 +104,11 @@ const getEstadisticasViaticos = async(req, _, next)=>{
         return next()
     }
 }
-const selectLastMoves = async(req, _, next)=>{
+const selectLastMoves = async(req, res, next)=>{
     try {
-        const beneficiario = req.query.folio
-        conexion.query("SELECT * FROM viaticos_depositos_view001 WHERE id_bene = ? ORDER BY FOLIO DESC LIMIT 5", beneficiario, (error, fila)=>{
+        const usuario = req.user
+
+        conexion.query("SELECT * FROM viaticos_depositos_view001 WHERE id_bene = ? ORDER BY FOLIO DESC LIMIT 5", usuario.folio, (error, fila)=>{
             if(error){
                 throw error
             }else{
@@ -275,6 +280,7 @@ const getComprobacionesUsuario = async(req, _, next)=>{
 const assignViaticos = async(req, res, next)=>{
     try {
         const fechaHoy = formatoFecha(new Date(), 'yymmddhhnnss')
+        const email = req.body.email
         let clave = {
             proyecto: req.body.proyecto,
             clave: `${req.body.id_bene}VIATICOS${fechaHoy}${req.body.proyecto}`,
@@ -330,6 +336,25 @@ const assignViaticos = async(req, res, next)=>{
         let nuevoSaldoBene = parseFloat(saldo) + parseFloat(operacion.monto)
         await actualizar_saldo(operacion.id_bene, nuevoSaldoBene).catch(error=>{
             throw('Ha ocurrido un error al actualizar el saldo del beneficiario: ', error)
+        })
+
+
+        let proyecto = undefined
+        await seleccionar_proyecto(clave.proyecto).then(resultado=>{
+            proyecto = resultado[0]
+        }).catch(error=>{
+            throw('Error al buscar el proyecto', error)
+        })
+
+        enviarCorreo({
+            email: email,
+            asunto: 'Asignación de viaticos',
+            texto: 'Asignación de viaticos',
+            cuerpo: `
+                <p>Hola ${operacion.beneficiario}, se te ha hecho una asignación de viaticos por un monto de $${operacion.monto} para el proyecto ${proyecto.nombre}
+                puedes encontrar el movimiento con la siguiente clave: ${clave.clave}.</p>
+                <p>Se anexa el comprobante del movimiento en el siguiente enlace: <a href='${operacion.enlace}'>Clic aqui para ver el comprobante.</a></p>
+            `
         })
 
         res.redirect('/viaticos/administrar')

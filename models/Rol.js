@@ -11,6 +11,17 @@ const seleccionar_usuarios_asignados = (proyecto)=>{
         })
     })
 }
+const seleccionar_rol = (folio)=>{
+    return new Promise ((resolve,reject)=> {
+        conexion.query('SELECT * FROM cat011_roles_proyecto WHERE folio = ?', folio, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve(fila)
+            }
+        })
+    })
+}
 const seleccionar_roles = ()=>{
     return new Promise ((resolve , reject)=> {
         conexion.query('SELECT * FROM cat011_roles_proyecto', (error, filas)=>{
@@ -78,6 +89,7 @@ const eliminar_rol = (rol)=>{
 export {
     seleccionar_usuarios_asignados,
     seleccionar_roles,
+    seleccionar_rol,
     asignar_rol_en_proyecto,
     validar_rol_usuario,
     verificar_participacion,

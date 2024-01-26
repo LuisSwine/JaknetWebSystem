@@ -1,5 +1,8 @@
-import { asignar_rol_en_proyecto, eliminar_rol, seleccionar_roles, validar_rol_usuario } from "../models/Rol.js";
+import { enviarCorreo } from "../helpers/emails.js";
+import { seleccionar_proyecto } from "../models/Proyecto.js";
+import { asignar_rol_en_proyecto, eliminar_rol, seleccionar_rol, seleccionar_roles, validar_rol_usuario } from "../models/Rol.js";
 import { validar_tareas_usuario } from "../models/Tarea.js";
+import { seleccionar_usuario } from "../models/Usuario.js";
 
 function calculateRuta(flag, ubicacion, cliente, proyecto, permisos){
     let ruta = '';
@@ -40,13 +43,17 @@ const getRoles = async(req, _, next)=>{
 }
 const setRolProyect = async(req, res, next) =>{
     try {
+
+        //Recibimos la información necesaria
         const registro = {
             proyecto: req.body.proyecto,
             usuario: req.body.usuario,
             rol: req.body.rol
         }
+        //Calculamos la ruta de regreso a la pantalla correspondiente
         let ruta = calculateRuta(req.body.flag, req.body.ubicacion, req.body.cliente, req.body.proyecto, req.body.permisos)
         
+        //Instanciamos una variable boolena para verificar si el usuario ya tiene un rol en el proyecto
         let is_user_in_project = false
 
         await validar_rol_usuario(registro.usuario, registro.proyecto).then(resultado=>{
@@ -62,6 +69,40 @@ const setRolProyect = async(req, res, next) =>{
             }).catch(error=>{
                 throw('Ha ocurrido un error asignando al usuario al prpoyecto: ', error)
             })
+
+            //Notificamos por correo al usuario de que fue asignado al proyecto
+            let usuario = undefined
+            let proyecto = undefined
+            let rol = undefined
+
+            await seleccionar_usuario(registro.usuario).then(resultado=>{
+                usuario = resultado[0]
+            }).catch(error=>{
+                throw('Error al buscar el usuario', error)
+            })
+            await seleccionar_proyecto(registro.proyecto).then(resultado=>{
+                proyecto = resultado[0]
+            }).catch(error=>{
+                throw('Error al buscar el proyecto', error)
+            })
+            await seleccionar_rol(registro.rol).then(resultado=>{
+                rol = resultado[0].rol
+            }).catch(error=>{
+                throw('Error al obtener el nombre del rol', error)
+            })
+
+            //En caso exitoso envíamos un email al usuario afectado para notificar el cambio de contraseña
+            enviarCorreo({
+                email: usuario.email,
+                asunto: 'Has sido asignado a un proyecto',
+                texto: 'Has sido asignado a un proyecto',
+                cuerpo: `
+                    <p>Hola ${usuario.nombres}, se te ha asignado al proyecto ${proyecto.nombre} con el rol de ${rol}
+                    puedes consultar los detalles del proyecto en la sección de 'Mis Proyectos'.</p>
+                    <p>Servicios ERP de Jaknet.</p>
+                `
+            })
+
         }else{
             res.render('Error/redirect', {
                 alert: true,

@@ -2,7 +2,7 @@ import express from 'express'
 
 import { isAuthenticated } from '../controllers/authController.js'
 import { getEtapa } from '../controllers/etapasController.js'
-import { assignTarea, createTarea, deleteTarea, deliverTarea, getTareaAsignada, getUsuariosAsignados, loadTareaReporte, obtenerReportes, selectInfoTareasUsuario, selectTarea, selectTareasEtapa, selectTiposTarea, showDetailsTarea, updateAsignacion, updateTarea, validateTarea } from '../controllers/tareasController.js'
+import { assignTarea, createTarea, deleteTarea, deliverTarea, getTareaAsignada, getUsuariosAsignados, loadTareaReporte, obtenerReportes, rejectTarea, selectInfoTareasUsuario, selectTarea, selectTareasEtapa, selectTiposTarea, showDetailsTarea, updateAsignacion, updateTarea, validateTarea, watchReporte } from '../controllers/tareasController.js'
 
 const router = express.Router()
 
@@ -28,6 +28,8 @@ router.get('/ver_detalles', showDetailsTarea)
 router.get('/eliminar', deleteTarea)
 router.get('/entregar', deliverTarea)
 router.get('/subir_reporte', loadTareaReporte)
+router.get('/ver_reporte', watchReporte)
+router.get('/devolver_tarea', rejectTarea)
 router.post('/agregar', createTarea)
 router.post('/editar', updateTarea)
 router.post('/asignar', assignTarea)
