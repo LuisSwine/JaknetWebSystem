@@ -1,6 +1,24 @@
 import express from 'express'
 import { isAuthenticated } from '../controllers/authController.js'
-import { assignViaticos, deleteComprobante, deleteComprobanteAdministrador, deleteComprobanteClaveGrl, deleteComprobanteClavePer, deleteDepositoAdministrador, getClave, getClaves, getClavesUsuario, getClavesViewUsuario, getComprobacionesUsuario, getComprobantes, getComprobantesClave, getDepositos, getDepositosUsuario, getEstadisticasViaticos, setComprobante } from '../controllers/viaticosController.js'
+import { 
+    assignViaticos, 
+    deleteComprobante, 
+    deleteComprobanteAdministrador, 
+    deleteComprobanteClaveGrl, 
+    deleteComprobanteClavePer, 
+    deleteDepositoAdministrador, 
+    getClave, 
+    getClaves, 
+    getClavesUsuario, 
+    getClavesViewUsuario, 
+    getComprobacionesUsuario, 
+    getComprobantes, 
+    getComprobantesClave, 
+    getDepositos, 
+    getDepositosUsuario, 
+    getEstadisticasViaticos, 
+    setComprobante 
+} from '../controllers/viaticosController.js'
 import { getUsuario, getUsuarios } from '../controllers/usuarioController.js'
 import { getProyectos } from '../controllers/proyectosController.js'
 
@@ -28,8 +46,8 @@ router.get('/comprobar', isAuthenticated, getClavesUsuario, (req, res)=>{
 router.get('/exportar_usuario', isAuthenticated, getDepositosUsuario, getComprobacionesUsuario, (req, res)=>{
     res.render('Viaticos/exportData', {user: req.user, depositos: req.depositos, comprobaciones: req.comprobaciones, data: req.query.data, usuario: req.query.usuario, clave: req.query.clave})
 })
-router.get('/claves_personal', isAuthenticated, getClavesViewUsuario, getClave, getComprobantesClave, (req, res)=>{
-    res.render('Viaticos/seguimientoClaves', {user: req.user, claves: req.claves, claveSelected: req.clave, rendido: req.rendido, comprobaciones: req.comprobaciones, isClave: req.query.clave})
+router.get('/claves_personal', isAuthenticated, getUsuario, getClavesViewUsuario, getClave, getComprobantesClave, (req, res)=>{
+    res.render('Viaticos/seguimientoClaves', {user: req.user, usuario: req.usuario, claves: req.claves, claveSelected: req.clave, rendido: req.rendido, comprobaciones: req.comprobaciones, isClave: req.query.clave})
 })
 router.get('/exportar_claves', isAuthenticated, getComprobantesClave, (req, res)=>{
     res.render('Viaticos/exportData', {user: req.user, comprobaciones: req.comprobaciones, data: req.query.data, usuario: req.query.usuario, clave: req.query.clave})

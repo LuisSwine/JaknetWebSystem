@@ -17,7 +17,7 @@ $(document).ready(function() {
             height: '45',
             resize: true,
             sliceColors: ['#13dafe', '#6164c1', '#f1f2f7']
-        });
+        }); 
 
 
         $('#sparkline3').sparkline([5, 6, 2, 9, 4, 7, 10, 12], {

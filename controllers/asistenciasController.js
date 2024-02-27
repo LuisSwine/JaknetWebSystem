@@ -50,6 +50,8 @@ const resgistrarAsistencia =  async(req, res, next)=>{
             hora: new Date()
         }
 
+        console.log(data.usuario)
+
         if (latitud == undefined || longitud == undefined){
             console.log('latitud o longitud no definida')
         }
@@ -60,7 +62,7 @@ const resgistrarAsistencia =  async(req, res, next)=>{
 
         let data_usuario = null
         await seleccionar_usuario(data.usuario).then(result=>{
-            data_usuario= result
+            data_usuario= result[0]
         }).catch(error=>{
             throw('Ha ocurrido un error al obtener la información del usuario: ', error)
         })

@@ -18,6 +18,7 @@ import Inventario from './inventario.js'
 import Unidad     from './unidades.js'
 import Viatico    from './viaticos.js'
 import Asistencia from './asistencias.js'
+import Panoramara from './panorama.js'
 
 router.use('/usuarios', User)
 router.use('/clientes', Cliente)
@@ -35,6 +36,7 @@ router.use('/inventario', Inventario)
 router.use('/unidades', Unidad)
 router.use('/viaticos', Viatico)
 router.use('/asistencias', Asistencia)
+router.use('/panorama', Panoramara)
 
 
  //INSTANCIACION A NUESTROS CONTROLADORES

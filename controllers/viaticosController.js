@@ -209,7 +209,11 @@ const getClavesUsuario = async(req, _, next)=>{
 }
 const getClavesViewUsuario = async(req, _, next)=>{
     try {
-        await obtener_claves_usuario_view(req.query.usuario).then(resultado=>{
+
+        const usuario = req.query.usuario
+        console.log(usuario)
+
+        await obtener_claves_usuario_view(usuario).then(resultado=>{
             req.claves = resultado
             return next()
         }).catch(error=>{

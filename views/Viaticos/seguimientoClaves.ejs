@@ -9,7 +9,7 @@
                 <div class="col-lg-8 p-r-0 title-margin-right">
                     <div class="page-header">
                         <div class="page-title">
-                            <h1>Claves de <%= user.nombres %></h1>
+                            <h1>Claves de <%= usuario[0].nombres %></h1>
                         </div>
                     </div>
                 </div>
@@ -40,7 +40,7 @@
                                         <span class="caret"></span></button>
                                     <ul class="dropdown-menu">
                                         <% claves.forEach((clave)=>{%>
-                                            <li><a href="claves_personal?usuario=<%= user.folio %>&clave=<%= clave.folio %>"><%= clave.clave %></a></li>
+                                            <li><a href="claves_personal?usuario=<%= usuario[0].folio %>&clave=<%= clave.folio %>"><%= clave.clave %></a></li>
                                             <%}) %>
                                     </ul>
                                 </div>
