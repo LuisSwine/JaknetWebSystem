@@ -1,8 +1,6 @@
-import conexion from '../database/db.js'
 import { enviarCorreo } from '../helpers/emails.js';
 import { seleccionar_proyecto } from '../models/Proyecto.js';
 import { verificar_participacion } from '../models/Rol.js';
-import { mostrar_mensaje_inicio } from '../helpers/funciones_simples.js'
 import { 
     obtener_suma_depositos, 
     obtener_suma_comprobaciones, 
@@ -31,7 +29,9 @@ import {
     obtener_comprobantes_usuario,
     obtener_claves_usuario,
     obtener_claves_usuario_view,
-    definir_presupuesto_proyecto
+    definir_presupuesto_proyecto,
+    obtener_ultimos_movimientos,
+    viaticos_comodin
 } from '../models/Viatico.js'
 
 function formatoFecha(fecha, formato) {
@@ -78,24 +78,31 @@ const getEstadisticasViaticos = async(req, _, next)=>{
             comprobado: 0
         }
 
-        if(req.query.inicio && req.query.termino){
-            const inicio = req.query.inicio
-            const termino = req.query.termino
+        //Definimos una ruta básica para los depositos
+        let query_suma_depositos = "SELECT SUM(monto) as suma_depositos FROM viaticos_depositos_view001" 
+        let query_suma_comprobantes = "SELECT SUM(monto) as suma_comprobaciones FROM viaticos_comprobaciones_view001" 
 
-            await obtener_suma_depositos_definido(inicio, termino).then(r=>{
-                datos.depositado = 0 + r
-            }).catch(error=>{throw('Ha ocurrido un error al obtener la suma de los depositos: ', error)})
-            await obtener_suma_comprobaciones_definido(inicio, termino).then(r=>{
-                datos.comprobado = 0 + r
-            }).catch(error=>{throw('Ha ocurrido un error al obtener la suma de las comprobaciones: ', error)})
-        }else{
-            await obtener_suma_depositos().then(r=>{
-                datos.depositado = 0 + r
-            }).catch(error=>{throw('Ha ocurrido un error al obtener la suma de los depositos: ', error)})
-            await obtener_suma_comprobaciones().then(r=>{
-                datos.comprobado = 0 + r
-            }).catch(error=>{throw('Ha ocurrido un error al obtener la suma de las comprobaciones: ', error)})
+        //Caso principal todos los filtros
+        if(req.query.user_selected && req.query.inicio && req.query.termino){
+            query_suma_depositos += ` WHERE id_bene = ${req.query.user_selected}`
+            query_suma_comprobantes += ` WHERE folio_emisor = ${req.query.user_selected}`
+            query_suma_depositos += ` AND (fecha BETWEEN '${req.query.inicio}' AND '${req.query.termino}')`
+            query_suma_comprobantes += ` AND (fecha BETWEEN '${req.query.inicio}' AND '${req.query.termino}')`
+        }else if(req.query.user_selected){
+            query_suma_depositos += ` WHERE id_bene = ${req.query.user_selected}`
+            query_suma_comprobantes += ` WHERE folio_emisor = ${req.query.user_selected}`
+        }else if(req.query.inicio && req.query.termino){
+            query_suma_depositos += ` WHERE (fecha BETWEEN '${req.query.inicio}' AND '${req.query.termino}')`
+            query_suma_comprobantes += ` WHERE (fecha BETWEEN '${req.query.inicio}' AND '${req.query.termino}')`
         }
+        
+        await viaticos_comodin(query_suma_depositos).then(r=>{
+            datos.depositado = 0 + r[0].suma_depositos
+        }).catch(error=>{throw('Ha ocurrido un error al obtener la suma de los depositos: ', error)})
+        
+        await viaticos_comodin(query_suma_comprobantes).then(r=>{
+            datos.comprobado = 0 + r[0].suma_comprobaciones
+        }).catch(error=>{throw('Ha ocurrido un error al obtener la suma de las comprobaciones: ', error)})
 
         req.datos = datos;
         return next()
@@ -108,34 +115,35 @@ const selectLastMoves = async(req, res, next)=>{
     try {
         const usuario = req.user
 
-        conexion.query("SELECT * FROM viaticos_depositos_view001 WHERE id_bene = ? ORDER BY FOLIO DESC LIMIT 5", usuario.folio, (error, fila)=>{
-            if(error){
-                throw error
-            }else{
-                req.depositos = fila
-                return next()
-            }
+        await obtener_ultimos_movimientos(usuario.folio).then(result=>{
+            req.depositos = result
+        }).catch(error=>{
+            throw('Ha ocurrido un error al obtener los ultimos depositos del usuario: ', error)
         })
+
     } catch (error) {
         console.log(error)
-        return next()
     }
+    return next()
 }
 const getDepositos = async(req, _, next)=>{
     try {
-        if(req.query.inicio && req.query.termino){
-            await obtener_depositos_definido(req.query.inicio, req.query.termino).then(resultado=>{
-                req.depositos = resultado
-                return next()
-            }).catch(error=>{throw('Ha ocurrido un error al obtener los depositos en el periodo definido: ', error)})
-        }else{
-            await obtener_depositos().then(resultado=>{
-                req.depositos = resultado
-                return next()
-            }).catch(error=>{
-                throw('Ha ocurrido un error al obtener los depositos: ', error)
-            })
+
+        //Definimos la ruta base
+        let query = "SELECT * FROM viaticos_depositos_view001"
+
+        if(req.query.user_selected && req.query.inicio && req.query.termino){
+            query += ` WHERE id_bene = ${req.query.user_selected} AND (fecha BETWEEN '${req.query.inicio}' AND '${req.query.termino}')`
+        }else if(req.query.user_selected){
+            query += ` WHERE id_bene = ${req.query.user_selected}`
+        }else if(req.query.inicio && req.query.termino){
+            query += ` WHERE (fecha BETWEEN '${req.query.inicio}' AND '${req.query.termino}')`
         }
+
+        await viaticos_comodin(query).then(r=>{
+            req.depositos = r
+            return next()
+        }).catch(error=>{throw('Ha ocurrido un error al obtener los depositos: ', error)})
     } catch (error) {
         console.log(error)
         return next()
@@ -143,7 +151,24 @@ const getDepositos = async(req, _, next)=>{
 }
 const getComprobantes = async(req, _, next)=>{
     try {
-        if(req.query.inicio && req.query.termino){
+
+        //Definimos la ruta base
+        let query = "SELECT * FROM viaticos_comprobaciones_view001"
+        
+        if(req.query.user_selected && req.query.inicio && req.query.termino){
+            query += ` WHERE folio_emisor = ${req.query.user_selected} AND (fecha BETWEEN '${req.query.inicio}' AND '${req.query.termino}')`
+        }else if(req.query.user_selected){
+            query += ` WHERE folio_emisor = ${req.query.user_selected}`
+        }else if(req.query.inicio && req.query.termino){
+            query += ` WHERE (fecha BETWEEN '${req.query.inicio}' AND '${req.query.termino}')`
+        }
+
+        await viaticos_comodin(query).then(r=>{
+            req.comprobaciones = r
+            return next()
+        }).catch(error=>{throw('Ha ocurrido un error al obtener las comprobaciones: ', error)})
+
+        /* if(req.query.inicio && req.query.termino){
             await obtener_comprobantes_definido(req.query.inicio, req.query.termino).then(resultado=>{
                 req.comprobaciones = resultado
                 return next()
@@ -155,7 +180,7 @@ const getComprobantes = async(req, _, next)=>{
             }).catch(error=>{
                 throw('Ha ocurrido un error al obtener los comprobaciones: ', error)
             })
-        }
+        } */
     } catch (error) {
         console.log(error)
         return next()

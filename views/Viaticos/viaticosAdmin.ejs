@@ -28,7 +28,42 @@
             </div>
             <section id="main-content">
                 <div class="row">
-                    <div class="col-lg-6">
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib">
+                                    <i class="ti-user color-warning border-warning"></i>
+                                </div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">USUARIO</div>
+                                    <div class="stat-digit">
+
+                                        <% 
+                                        
+                                        let inicio_t = null
+                                        let termino_t = null
+
+                                        if(inicio && termino) {
+                                            inicio_t = inicio 
+                                            termino_t = termino
+                                        } 
+                                        
+                                        %>
+
+                                        <select name="Usuario" id="Usuario_Seleccionado" class="form-control" onchange="filtrarPorUsuario('<%= inicio_t %>', '<%= termino_t %>')">
+                                            <option value="0">TODOS LOS USUARIOS</option>
+                                            <% usuarios.forEach((u)=>{%>
+                                                <option value="<%= u.folio %>"  <% if(user_selected == u.folio){%>selected<%} %>   >
+                                                    <%= u.nombres %>  <%= u.apellidos %>
+                                                </option>
+                                            <% }) %>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
                         <div class="card">
                             <div class="stat-widget-one">
                                 <div class="stat-icon dib">
@@ -41,7 +76,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6">
+                    <div class="col-lg-4">
                         <div class="card">
                             <div class="stat-widget-one">
                                 <div class="stat-icon dib">
@@ -220,8 +255,33 @@
 </div>
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>    
+<script>
+    
+    function filtrarPorUsuario(inicio, termino){
+
+        //Obtenemos el usuario seleccionado mediante el DOM del elemento con ID 'Usuario_Seleccionado'
+        const folio_usuario = document.getElementById('Usuario_Seleccionado').value;
+
+        let ruta = "administrar";
+        
+        if (folio_usuario == 0){
+            window.location = ruta
+        }else{
+            if (folio_usuario != 0){
+                ruta += `?user_selected=${folio_usuario}`
+            }
+            if(inicio && termino){
+                ruta += `&inicio=${inicio}&termino=${termino}`
+            }
+            window.location = ruta;
+        }
+        
+    }
+
+
     function filtrarPorFecha(){
+        const user_selected = document.getElementById('Usuario_Seleccionado').value;
+        console.log(user_selected)
         Swal.fire({
             title: 'Filtrar por Fecha',
             text: 'Seleccione Fecha de Inicio y Fin de resultados',
@@ -233,7 +293,8 @@
             if(result.isConfirmed){
                 const inicio = document.getElementById('fecha_inicio').value;
                 const termino = document.getElementById('fecha_termino').value;
-                const ruta = `administrar?inicio=${inicio}&termino=${termino}`
+                let ruta = `administrar?inicio=${inicio}&termino=${termino}`
+                if(user_selected && user_selected != 0) ruta += `&user_selected=${user_selected}` 
                 window.location = ruta
             }
         })

@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 
-import conexion from '../database/db.js'
 import { mostrar_mensaje_inicio } from '../helpers/funciones_simples.js'
 import { bloquearUsuario, registrar_cierre_sesion, registrar_inicio_sesion, seleccionar_usuario, seleccionar_usuario_by_user } from '../models/Usuario.js'
 
@@ -106,30 +105,25 @@ const isAuthenticated = async(req, res, next)=>{
     if(req.cookies.jwt){
         try {
             const decode = jwt.verify(req.cookies.jwt, process.env.JWT_SECRETO)
-            conexion.query('SELECT * FROM cat001_usuarios WHERE folio = ?', [decode.id], (error, results)=>{
-                if(error){
-                    mostrar_mensaje_inicio(res, 'Debe iniciar sesion', 'login', 'info')
-                    return next()
-                }
-                else{    
-                    if(!results){
-                        return next()
-                    }
-                    req.user = results[0]
-                    return next()
-                }
+            await seleccionar_usuario(decode.id).then(usuario =>{
+                req.user = usuario[0]
+            }).catch(error=>{
+                mostrar_mensaje_inicio(res, 'Debe iniciar sesion', 'login', 'info')
+                throw('Ha ocurrido un error al obtener la información del usuario: ', error)
             })
+            return next()
         } catch (error) {
             if (error instanceof jwt.TokenExpiredError) {
                 // El token ha expirado
                 mostrar_mensaje_inicio(res, 'El token ha expirado, inicie sesión nuevamente', 'login', 'info');
             }else{
-                return next()
+                mostrar_mensaje_inicio(res, 'Ha ocurrido un error y debe volver a iniciar sesión', 'login', 'info');
             }
         } 
     }else{
         mostrar_mensaje_inicio(res, 'Debe iniciar sesion', 'login', 'info')
     }
+    return next()
 }
 const logout = async(req, res)=>{
 

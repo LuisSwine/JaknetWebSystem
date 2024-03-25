@@ -1,5 +1,17 @@
 import conexion from '../database/db.js'
 
+const viaticos_comodin = (query)=>{
+    return new Promise((resolve, reject)=>{
+        conexion.query(query, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve(fila)
+            }
+        })
+    })
+}
+
 const obtener_suma_depositos = ()=>{
     return new Promise((resolve, reject) => {
         conexion.query("SELECT SUM(monto) as suma_depositos FROM viaticos_depositos_view001", (error, fila)=>{
@@ -220,6 +232,18 @@ const obtener_comprobaciones_clave = (clave)=>{
         })
     })
 }
+const obtener_ultimos_movimientos = (usuario)=>{
+    return new  Promise ((resolve,reject)=> {
+        console.log(usuario)
+        conexion.query("SELECT * FROM viaticos_depositos_view001 WHERE id_bene = ? ORDER BY FOLIO DESC LIMIT 5", usuario, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve(fila)
+            }
+        })
+    })
+}
 const registrar_clave = (clave)=>{
     return new Promise((resolve, reject)=>{
         conexion.query('INSERT INTO cat021_claves_seguimiento SET ?', clave, (error, _)=>{
@@ -314,6 +338,7 @@ const eliminar_operacion = (operacion)=>{
 }
 
 export {
+    viaticos_comodin,
     obtener_suma_depositos,
     obtener_suma_comprobaciones,
     obtener_suma_depositos_definido,
@@ -334,6 +359,7 @@ export {
     obtener_comprobantes_usuario_definido,
     obtener_depositos_usuario,
     obtener_depositos_usuario_definido,
+    obtener_ultimos_movimientos,
     registrar_clave,
     registrar_operacion,
     definir_presupuesto_proyecto,

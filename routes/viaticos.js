@@ -25,8 +25,8 @@ import { getProyectos } from '../controllers/proyectosController.js'
 const router = express.Router()
 
 
-router.get('/administrar', isAuthenticated, getEstadisticasViaticos, getDepositos, getComprobantes, (req, res)=>{
-    res.render('Viaticos/viaticosAdmin', {user: req.user, datos: req.datos, depositos: req.depositos, comprobaciones: req.comprobaciones, inicio: req.query.inicio, termino: req.query.termino})
+router.get('/administrar', isAuthenticated, getUsuarios, getEstadisticasViaticos, getDepositos, getComprobantes, (req, res)=>{
+    res.render('Viaticos/viaticosAdmin', {user: req.user, user_selected: req.query.user_selected, usuarios: req.usuarios, datos: req.datos, depositos: req.depositos, comprobaciones: req.comprobaciones, inicio: req.query.inicio, termino: req.query.termino})
 })
 router.get('/asignar', isAuthenticated, getUsuarios, getProyectos, (req, res)=>{
     res.render('Viaticos/formAsignViatics', {user: req.user, usuarios: req.usuarios, proyectos: req.proyectos})
