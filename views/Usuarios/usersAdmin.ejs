@@ -85,7 +85,7 @@
                                                 <td><%= usuario.apellidos %></td>
                                                 <td><%= usuario.telefono %></td>
                                                 <td><%= usuario.email %></td>
-                                                <td>$<%= usuario.saldo.toFixed(2) %></td>
+                                                <td <% if(user.tipo_usuario == 0){%> onclick="cambiarSaldo('<%= usuario.folio %>')" style="cursor: pointer" <% } %> >$<%= usuario.saldo.toFixed(2) %></td>
                                                 <td><span class="badge badge-<%= color_status %>" <% if(usuario.estatus == 1 ){%> onclick="desbloquear('<%= usuario.folio %>', '<%= user.folio %>')" <%} %> ><%= status %></span></td>
                                                 <td>
                                                     <div class="button-list">
@@ -170,6 +170,25 @@
                 }
             })
     }
+    function cambiarSaldo(folioUser){
+        Swal.fire({
+            title: 'Cambiar saldo del usuario',
+            input: 'text',
+            icon: 'question',
+            inputValue: 0,
+            inputLabel: 'Al actualizar el saldo, no se cambiaran los historicos depositados o comprobados',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Tienes que escribir algo'
+                }else{
+                    const ruta = `cambiar_saldo?folio=${folioUser}&saldo=${value}`
+                    window.location = ruta
+                }
+            }
+        })
+    }
+
     function desbloquear(folio, folioAdmin){
         Swal.fire({
             title: 'Desbloquear usuario',

@@ -132,6 +132,17 @@ const cambiar_contra = (folio, contra)=>{
         })
     })
 }
+const cambiar_saldo = (folio, saldo)=>{
+    return new Promise ((resolve , reject)=>{
+        conexion.query("UPDATE cat001_usuarios SET saldo = ? WHERE folio = ?", [saldo, folio], (error, _)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
 const editar_usuario = (nombres, apellidos, telefono, email, documentacion, folio) =>{
     return new Promise ((resolve, reject)=>{
         conexion.query("UPDATE cat001_usuarios SET nombres = ?, apellidos = ?, telefono = ?, email = ?, documentacion = ? WHERE folio = ?", [nombres, apellidos, telefono, email, documentacion, folio], (error, _)=>{
@@ -298,6 +309,7 @@ export {
     get_password,
     eliminar_usuario,
     cambiar_contra,
+    cambiar_saldo,
     editar_usuario,
     checkAsistencias,
     checkMaterial,

@@ -21,7 +21,8 @@ import {
     checkViaticos,
     eliminar_usuario,
     seleccionar_usuario_by_user,
-    desbloquearUsuario
+    desbloquearUsuario,
+    cambiar_saldo
 } from '../models/Usuario.js'
 import { mostrar_error, mostrar_mensaje_inicio } from '../helpers/funciones_simples.js'
 import { enviarCorreo } from '../helpers/emails.js'
@@ -438,6 +439,24 @@ const updateEmailUsuario = async(req, res, next)=>{
         return next()
     }
 }
+const updateSaldoUsuario = async(req, res, next)=>{
+    try {
+        let folio = req.query.folio
+        let saldo = req.query.saldo
+
+        await cambiar_saldo(folio, saldo).then(_ =>{
+            res.redirect(`/usuarios/adminusers`)
+            return next()
+        })
+        .catch(error=>{
+            //TODO: MEJORAR LA GESTION DE LOS ERRORES
+            throw new Error('Error al editar usuario: ', error)
+        })
+    } catch (error) {
+        console.log(error)
+        return next()
+    }
+}
 const updatePassUsuario = async(req, res, next)=>{
     try {
         const folio = req.query.folio
@@ -484,6 +503,7 @@ export {
     updateTelefonoUsuario,
     unlockUser,
     updateEmailUsuario,
+    updateSaldoUsuario,
     updatePassUsuario,
     updateUsuario,
     updateContraUsuarioAdmin,
