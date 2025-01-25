@@ -56,34 +56,33 @@ const proyectosAsistencia = async(req, _, next)=>{
         return next()
     }
 }
-const getUsuarios = async(req, _, next)=>{
+const getUsuarios = async (req, _, next) => {
     try {
-        await seleccionar_usuarios().then(resultado =>{
-            req.usuarios = resultado
-            return next()
-        })
-        .catch(error=>{
-            //TODO: MEJORAR LA GESTION DE LOS ERRORES
-            throw new Error('Error al obtener los usuarios: ', error)
-        })
+        await seleccionar_usuarios().then((resultado) => {
+            req.usuarios = resultado;
+            return next();
+        }).catch((error) => {
+            throw new Error('Error al obtener los usuarios: ', error);
+        });
     } catch (error) {
-        console.log(error)
-        return next()
+        console.log(error);
+        return next();
     }
-}
-const getUsuario = async(req, _, next)=>{
+};
+
+const getUsuario = async (req, _, next) => {
     try {
-        await seleccionar_usuario(req.query.usuario).then(resultado=>{
-            req.usuario = resultado
-            return next()
-        }).catch(error=>{
-            throw('Ha ocurrido un error al obtener la información del usuario: ', error)
-        })
+        await seleccionar_usuario(req.query.usuario).then((resultado) => {
+            req.usuario = resultado;
+            return next();
+        }).catch((error) => {
+            throw new Error('Error al obtener la información del usuario: ', error);
+        });
     } catch (error) {
-        console.log(error)
-        return next()
+        console.log(error);
+        return next();
     }
-}
+};
 const createUser = async(req, res, next)=>{
     try {
         const data = {

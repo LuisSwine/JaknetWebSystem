@@ -33,6 +33,8 @@ import {
     obtener_ultimos_movimientos,
     viaticos_comodin
 } from '../models/Viatico.js'
+import { sendTelegramNotification } from './telegramBot.js';
+import { sendWhatsAppNotification } from './whatsmssg.js';
 
 function formatoFecha(fecha, formato) {
     const map = {
@@ -69,7 +71,94 @@ function calculateRutaProy(cliente, ubicacion, proyecto, flag, permisos){
     }
     return ruta;
 }
+const verificarViaticosPendientes = async () => {
+    try {
+        console.log('Ejecutando verificarViaticosPendientes...');
 
+        // Consulta todos los depósitos
+        const query = `
+            SELECT beneficiario, monto, fecha, clave 
+            FROM viaticos_depositos_view001
+        `;
+        const resultados = await viaticos_comodin(query);
+
+        if (!resultados.length) {
+            console.log('No hay viáticos para verificar.');
+            return;
+        }
+
+        // Validar comprobantes en paralelo
+        const comprobaciones = await Promise.all(
+            resultados.map(async (viatico) => {
+                const { clave } = viatico;
+                try {
+                    const comprobado = await validar_comprobantes_deposito(clave);
+                    return { ...viatico, comprobado }; // Agrega el estado de comprobación al viático
+                } catch (error) {
+                    console.error(`Error al validar comprobantes del depósito con clave ${clave}:`, error.message);
+                    return { ...viatico, comprobado: false }; // Asume no comprobado si hay un error
+                }
+            })
+        );
+
+        // Mapa para acumular montos pendientes por beneficiario
+        const pendientesPorBeneficiario = new Map();
+
+        comprobaciones.forEach(({ beneficiario, monto, fecha, comprobado }) => {
+            // Calcular días pendientes
+            const fechaDeposito = new Date(fecha);
+            const fechaActual = new Date();
+            const diasPendientes = Math.floor((fechaActual - fechaDeposito) / (1000 * 60 * 60 * 24));
+
+            // Si no está comprobado y tiene más de 7 días, acumula el monto en el mapa
+            if (!comprobado && diasPendientes > 7) {
+                if (!pendientesPorBeneficiario.has(beneficiario)) {
+                    pendientesPorBeneficiario.set(beneficiario, { totalMonto: 0, fechas: [] });
+                }
+
+                const data = pendientesPorBeneficiario.get(beneficiario);
+                data.totalMonto += monto;
+                data.fechas.push({ monto, fecha, diasPendientes });
+            }
+        });
+
+        // Enviar notificaciones para cada beneficiario
+        for (const [beneficiario, { totalMonto, fechas }] of pendientesPorBeneficiario) {
+            // Generar detalles del mensaje
+            const detallesFechas = fechas
+                .map(
+                    ({ monto, fecha, diasPendientes }) =>
+                        `Monto: $${monto.toFixed(2)}, Fecha: ${fecha}, Días sin comprobar: ${diasPendientes}`
+                )
+                .join('\n');
+
+            const mensajeTelegram = `
+                <b>Alerta de viáticos</b>
+                Usuario: ${beneficiario.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+                Monto total pendiente: $${totalMonto.toFixed(2)}
+                <i>Por favor realiza la comprobación a la brevedad.</i>
+            `;
+
+            const variablesWhatsApp = [
+                beneficiario,
+                totalMonto.toFixed(2),
+                detallesFechas,
+            ];
+
+            // Enviar notificación a Telegram
+            await sendTelegramNotification(716409629, mensajeTelegram).catch((error) => {
+                console.error('Error al enviar notificación de Telegram:', error.message);
+            });
+
+            // Enviar notificación a WhatsApp
+            //await sendWhatsAppNotification('525520773061', variablesWhatsApp).catch((error) => {
+              //  console.error('Error al enviar mensaje por WhatsApp:', error.message);
+            //});
+        }
+    } catch (error) {
+        console.error('Error al verificar viáticos pendientes:', error.message);
+    }
+};
 
 const getEstadisticasViaticos = async(req, _, next)=>{
     try {
@@ -153,7 +242,7 @@ const getComprobantes = async(req, _, next)=>{
     try {
 
         //Definimos la ruta base
-        let query = "SELECT * FROM viaticos_comprobaciones_view001"
+        let query = "SELECT * FROM viaticos_comprobaciones_view001 "
         
         if(req.query.user_selected && req.query.inicio && req.query.termino){
             query += ` WHERE folio_emisor = ${req.query.user_selected} AND (fecha BETWEEN '${req.query.inicio}' AND '${req.query.termino}')`
@@ -741,5 +830,6 @@ export {
     deleteDepositoProyecto,
     deleteComprobanteProyecto,
     setComprobante,
-    setPresupuestoProyecto
+    setPresupuestoProyecto,
+    verificarViaticosPendientes,
 }
