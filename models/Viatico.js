@@ -14,7 +14,7 @@ const viaticos_comodin = (query)=>{
 
 const obtener_suma_depositos = ()=>{
     return new Promise((resolve, reject) => {
-        conexion.query("SELECT SUM(monto) as suma_depositos FROM viaticos_depositos_view001 WHERE YEAR(fecha) >= 2025", (error, fila)=>{
+        conexion.query("SELECT SUM(monto) as suma_depositos FROM viaticos_depositos_view001", (error, fila)=>{
             if(error){
                 reject(error)
             }else{
@@ -25,7 +25,7 @@ const obtener_suma_depositos = ()=>{
 }
 const obtener_suma_comprobaciones = ()=>{
     return new Promise((resolve, reject) => {
-        conexion.query("SELECT SUM(monto) as suma_comprobaciones FROM viaticos_comprobaciones_view001 WHERE YEAR(fecha) >= 2025", (error, fila)=>{
+        conexion.query("SELECT SUM(monto) as suma_comprobaciones FROM viaticos_comprobaciones_view001", (error, fila)=>{
             if(error){
                 reject(error)
             }else{
@@ -69,7 +69,7 @@ const obtener_depositos_usuario_definido = (inicio, termino, usuario)=>{
 }
 const obtener_depositos_usuario = (usuario)=>{
     return new Promise ((resolve,reject)=> {
-        conexion.query("SELECT * FROM viaticos_depositos_view001 WHERE id_bene = ? ", usuario, (error, fila)=>{
+        conexion.query("SELECT * FROM viaticos_depositos_view001 WHERE id_bene = ?", usuario, (error, fila)=>{
             if(error){
                 reject(error)
             }else{
@@ -212,7 +212,7 @@ const obtener_claves_usuario_view = (usuario)=>{
 }
 const obtener_saldo_usuario = (usuario)=>{
     return new Promise((resolve, reject)=>{
-        conexion.query("SELECT saldo FROM cat001_usuarios WHERE folio = ? AND YEAR(fecha) >= 2025", usuario, (error, fila)=>{
+        conexion.query("SELECT saldo FROM cat001_usuarios WHERE folio = ?", usuario, (error, fila)=>{
             if(error){
                 reject(error)
             }else{
@@ -279,7 +279,7 @@ const definir_presupuesto_proyecto = (presupuesto, proyecto)=>{
 }
 const actualizar_saldo = (usuario, saldo)=>{
     return new Promise ((resolve,reject)=>{
-        conexion.query("UPDATE cat001_usuarios SET saldo = ? WHERE folio = ? YEAR(fecha) >= 2025", [saldo, usuario], (error, _)=>{
+        conexion.query("UPDATE cat001_usuarios SET saldo = ? WHERE folio = ?", [saldo, usuario], (error, _)=>{
             if(error){
                 reject(error)
             }else{

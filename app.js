@@ -1,8 +1,8 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser'
+
 import router from './routes/router.js'
-import './controllers/taskViatico.js'
 
 //Invocamos la clase de express
 const app = express()
@@ -33,7 +33,6 @@ app.use(function(req, res, next){
         res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
     next();
 })  
-
 
 //Accedemos a los metodos de express
 //Utilizamos listen para levantar el servidor

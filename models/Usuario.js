@@ -1,68 +1,27 @@
 import conexion from '../database/db.js'
 
-const seleccionar_usuarios = () => {
-    return new Promise((resolve, reject) => {
-        const query = `
-            SELECT 
-                u.folio,
-                u.nombres,
-                u.apellidos,
-                u.telefono,
-                u.email,
-                (IFNULL(SUM(d.monto), 0) - IFNULL(SUM(c.monto), 0)) AS saldo,
-                u.tipo_usuario,
-                u.estatus
-            FROM 
-                cat001_usuarios u
-            LEFT JOIN 
-                viaticos_depositos_view001 d ON u.folio = d.id_bene AND YEAR(d.fecha) >= 2025
-            LEFT JOIN 
-                viaticos_comprobaciones_view001 c ON u.folio = c.folio_emisor AND YEAR(c.fecha) >= 2025
-            GROUP BY 
-                u.folio;
-        `;
-        conexion.query(query, (error, filas) => {
-            if (error) {
+const seleccionar_usuarios = ()=>{
+    return new Promise((resolve,reject)=>{
+        conexion.query("SELECT * FROM cat001_usuarios", (error, filas)=>{
+            if(error){
                 reject(error);
-            } else {
-                resolve(filas);
+            }else{
+                resolve(filas)
             }
-        });
-    });
-};
-
-const seleccionar_usuario = (usuario) => {
-    return new Promise((resolve, reject) => {
-        const query = `
-            SELECT 
-                u.folio,
-                u.nombres,
-                u.apellidos,
-                u.telefono,
-                u.email,
-                (IFNULL(SUM(d.monto), 0) - IFNULL(SUM(c.monto), 0)) AS saldo,
-                u.tipo_usuario,
-                u.estatus
-            FROM 
-                cat001_usuarios u
-            LEFT JOIN 
-                viaticos_depositos_view001 d ON u.folio = d.id_bene AND YEAR(d.fecha) >= 2025
-            LEFT JOIN 
-                viaticos_comprobaciones_view001 c ON u.folio = c.folio_emisor AND YEAR(c.fecha) >= 2025
-            WHERE 
-                u.folio = ?
-            GROUP BY 
-                u.folio;
-        `;
-        conexion.query(query, [usuario], (error, fila) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve(fila);
+        })
+    })
+}
+const seleccionar_usuario = (usuario)=>{
+    return new Promise ((resolve , reject ) => {
+        conexion.query("SELECT * FROM cat001_usuarios WHERE folio = ?", usuario, (error, fila)=>{
+            if(error){
+                reject(error)
+            }else{
+                resolve(fila)
             }
-        });
-    });
-};
+        })
+    })
+}
 const seleccionar_usuario_by_user = (usuario)=>{
     return new Promise ((resolve , reject ) => {
         conexion.query("SELECT * FROM cat001_usuarios WHERE usuario = ?", usuario, (error, fila)=>{
